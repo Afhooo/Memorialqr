@@ -21,3 +21,14 @@ export interface QRLink {
   memorial_id: string;
   expires_at: string | null;
 }
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  role: string;
+}
+
+export interface ServerSession {
+  token: string;
+  user: AdminUser;
+}

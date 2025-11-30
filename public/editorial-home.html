@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memorial App — Inicio Editorial</title>
+    <style>
+      :root {
+        --cream: #fdf8f1;
+        --soft-gold: #f3e3cd;
+        --gold: #d2b277;
+        --text: #3b2b20;
+        --muted: #6c5543;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Cormorant Garamond", "Times New Roman", serif;
+        font-size: 20px;
+        line-height: 1.8;
+        color: var(--text);
+        background: var(--cream);
+        letter-spacing: 0.01em;
+      }
+
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 80px 32px 120px;
+      }
+
+      header {
+        margin-bottom: 96px;
+      }
+
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 24px;
+      }
+
+      h1 {
+        font-size: clamp(42px, 6vw, 72px);
+        margin: 0 0 32px;
+        font-weight: 500;
+      }
+
+      h2 {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 500;
+        margin: 0 0 28px;
+        text-transform: uppercase;
+        letter-spacing: 0.28em;
+        color: var(--muted);
+      }
+
+      p {
+        margin: 0 0 24px;
+      }
+
+      section {
+        position: relative;
+        padding-top: 48px;
+        margin-bottom: 80px;
+      }
+
+      section::before {
+        content: "";
+        display: block;
+        width: 160px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        margin-bottom: 32px;
+      }
+
+      .lead {
+        font-size: 24px;
+        color: var(--muted);
+        max-width: 640px;
+      }
+
+      .cta-row {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      .link-cta {
+        text-decoration: none;
+        color: var(--text);
+        border-bottom: 1px solid var(--gold);
+        padding-bottom: 8px;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+      }
+
+      .details p span {
+        display: block;
+        font-size: 16px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .details p {
+        margin-bottom: 32px;
+      }
+
+      blockquote {
+        margin: 32px 0;
+        padding-left: 32px;
+        border-left: 2px solid var(--gold);
+        font-style: italic;
+      }
+
+      blockquote span {
+        display: block;
+        margin-top: 16px;
+        font-size: 16px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .subtle {
+        font-size: 16px;
+        color: rgba(59, 43, 32, 0.7);
+      }
+
+      .timeline {
+        border-top: 1px solid rgba(210, 178, 119, 0.4);
+        padding-top: 32px;
+        margin-top: 40px;
+      }
+
+      .timeline-item {
+        margin-bottom: 28px;
+      }
+
+      .timeline-item strong {
+        display: block;
+        font-size: 16px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      footer {
+        border-top: 1px solid rgba(210, 178, 119, 0.35);
+        padding-top: 32px;
+        font-size: 14px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      @media (max-width: 640px) {
+        body {
+          font-size: 18px;
+        }
+
+        section {
+          margin-bottom: 64px;
+        }
+
+        blockquote {
+          padding-left: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Memorial App Studio</p>
+        <h1>Una casa editorial para honrar la memoria con calma y precisión.</h1>
+        <p class="lead">
+          Diseñamos memoriales digitales que respiran: una sola columna clara,
+          textos largos en serif y líneas doradas que sostienen cada capítulo
+          del recuerdo. Aquí no hay tarjetas ni ornamentos, solo historias que
+          fluyen con la quietud que merecen.
+        </p>
+        <div class="cta-row">
+          <a class="link-cta" href="#administrar">Administrar un memorial</a>
+          <a class="link-cta" href="#contacto">Solicitar acompañamiento</a>
+        </div>
+      </header>
+
+      <section id="administrar">
+        <h2>Administrar memoriales</h2>
+        <p>
+          Cada memorial se construye como un dossier íntimo. Las familias
+          administran cronologías vivas, suben cartas, fotografías restauradas y
+          fragmentos de audio que se ordenan con una curaduría serena. El panel
+          evita distracciones visuales; solo texto limpio, botones finos y
+          confirmaciones claras para mantener el control sin ruido.
+        </p>
+        <div class="details">
+          <p>
+            <span>Capas narrativas</span>
+            Biografías extensas, líneas del tiempo anotadas y galerías
+            impregnadas de contexto editorial para que cada elemento encuentre su
+            ritmo.
+          </p>
+          <p>
+            <span>Accesos delicados</span>
+            Invitaciones personales, permisos temporales y cierres ceremoniosos
+            con notificaciones doradas que confirman cada acción.
+          </p>
+          <p>
+            <span>Control silencioso</span>
+            Recordatorios discretos sobre aniversarios, entregas de archivos y
+            próximos hitos, siempre en lenguaje cercano.
+          </p>
+        </div>
+      </section>
+
+      <section id="condolencias">
+        <h2>Libro de condolencias curado</h2>
+        <p>
+          Las palabras que llegan se revisan antes de publicarse. Priorizamos la
+          empatía y desterramos la prisa: cada mensaje se integra como si fuera
+          una nota manuscrita en papel marfil. El resultado es un libro
+          colectivo, íntimo y seguro.
+        </p>
+        <blockquote>
+          “Encontrar este espacio fue como leer un diario antiguo. No tuve que
+          pensar en botones; las palabras fluyeron y se quedaron donde debían
+          estar.”
+          <span>— Martina, amiga de la familia Ortega</span>
+        </blockquote>
+        <p class="subtle">
+          Cada entrada pasa por un proceso curatorial que preserva la voz y el
+          tono original, pero filtra cualquier ruido para mantener la serenidad.
+        </p>
+      </section>
+
+      <section id="cronologia">
+        <h2>Cronología viva</h2>
+        <p>
+          El recorrido de la vida se presenta en una sola columna que guía al
+          lector sin saltos bruscos. Las fechas no gritan; apenas se susurran con
+          tipografía pequeña, mientras que los relatos se despliegan con ritmo
+          literario.
+        </p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <strong>1948 — Comienzo</strong>
+            Primeros años narrados con voces de la familia y fotografías
+            restauradas en tonos cálidos.
+          </div>
+          <div class="timeline-item">
+            <strong>1972 — Oficio</strong>
+            El legado profesional se mezcla con recortes de prensa digitalizados
+            y testimonios breves.
+          </div>
+          <div class="timeline-item">
+            <strong>2005 — Legado</strong>
+            Mensajes de alumnos y colaboradores trazan la influencia que sigue
+            viva.
+          </div>
+        </div>
+      </section>
+
+      <section id="servicios">
+        <h2>Servicios complementarios</h2>
+        <p>
+          Ofrecemos digitización fina, rescate de archivos físicos, sesiones de
+          audio íntimas y ediciones impresas limitadas. Todo se integra sin
+          saturar la página: notas al margen, líneas doradas y mensajes breves.
+        </p>
+        <p>
+          También coordinamos ceremonias virtuales discretas, playlists
+          comentadas y cápsulas documentales que se alojan en servidores seguros,
+          accesibles solo para quienes la familia designe.
+        </p>
+      </section>
+
+      <section id="contacto">
+        <h2>Agendar una guía personal</h2>
+        <p>
+          Trabajamos con pocas familias a la vez para sostener el ritmo humano
+          que merecen. Cuéntanos la historia y preparamos un primer manuscrito
+          digital en 72 horas.
+        </p>
+        <p class="lead">
+          <a class="link-cta" href="mailto:editorial@memorial.app"
+            >Escribir a editorial@memorial.app</a
+          >
+        </p>
+        <p class="subtle">
+          También podemos coordinar una videollamada íntima para escuchar el
+          contexto antes de iniciar la escritura oficial.
+        </p>
+      </section>
+
+      <footer>
+        Memorial App · Editorial minimalista para memorias que perduran
+      </footer>
+    </main>
+  </body>
+</html>

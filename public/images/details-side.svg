@@ -1,0 +1,23 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="0.5" cy="0.35" r="0.6">
+      <stop offset="0%" stop-color="#fff7ea" />
+      <stop offset="100%" stop-color="#f1dfc4" />
+    </radialGradient>
+    <linearGradient id="petal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7d7b8" />
+      <stop offset="100%" stop-color="#d9a977" />
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1200" fill="#fcf5ea" />
+  <circle cx="450" cy="480" r="320" fill="url(#glow)" />
+  <path d="M450 200 C500 220 560 320 540 400 C520 480 460 520 450 600 C440 520 380 480 360 400 C340 320 400 220 450 200Z" fill="url(#petal)" opacity="0.8" />
+  <path d="M450 240 C420 260 380 340 390 390 C400 440 430 470 450 520 C470 470 500 440 510 390 C520 340 480 260 450 240Z" fill="#fdf2e3" opacity="0.9" />
+  <circle cx="450" cy="520" r="26" fill="#c19052" />
+  <line x1="450" y1="546" x2="450" y2="880" stroke="#d0a16a" stroke-width="4" stroke-linecap="round" />
+  <line x1="450" y1="880" x2="360" y2="1000" stroke="#d0a16a" stroke-width="4" stroke-linecap="round" />
+  <line x1="450" y1="880" x2="540" y2="1000" stroke="#d0a16a" stroke-width="4" stroke-linecap="round" />
+  <circle cx="360" cy="1000" r="34" fill="#fce9d3" stroke="#ddb786" stroke-width="3" />
+  <circle cx="540" cy="1000" r="28" fill="#fce9d3" stroke="#ddb786" stroke-width="3" />
+  <text x="450" y="1070" text-anchor="middle" font-family="Cormorant, 'Times New Roman', serif" font-size="40" fill="#9d7a54">Detalles</text>
+</svg>
