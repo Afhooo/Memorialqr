@@ -3,7 +3,16 @@ import type { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { AUTH_TOKEN_COOKIE } from "./src/lib/constants";
 
-const PUBLIC_PATHS = ["/login", "/scan", "/api/auth/login", "/api/session", "/api/resolve-token"];
+const PUBLIC_PATHS = [
+  "/",
+  "/beneficios",
+  "/memorial",
+  "/login",
+  "/scan",
+  "/api/auth/login",
+  "/api/session",
+  "/api/resolve-token",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
