@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -82,13 +83,22 @@ export default function LoginPage() {
             </label>
             <label className="block text-xs uppercase tracking-[0.26em] text-[#7b5b3d]">
               Contraseña
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-[#e3d2b9] bg-white px-4 py-3 text-sm text-[#2f261f] outline-none transition focus:border-[#c9a36a] focus:ring-2 focus:ring-[#c9a36a]/30"
-              />
+              <div className="relative mt-2">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="mt-0 w-full rounded-2xl border border-[#e3d2b9] bg-white px-4 py-3 text-sm text-[#2f261f] outline-none transition focus:border-[#c9a36a] focus:ring-2 focus:ring-[#c9a36a]/30"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-3 flex items-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[#7b5b3d] hover:text-[#2f261f]"
+                >
+                  {showPassword ? "Ocultar" : "Ver"}
+                </button>
+              </div>
             </label>
             {error && <p className="text-xs text-[#b3261e]">{error}</p>}
             <button

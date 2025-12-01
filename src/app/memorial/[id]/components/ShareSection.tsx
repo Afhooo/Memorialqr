@@ -6,7 +6,8 @@ export function ShareSection() {
         <div className="space-y-2">
           <h3 className="text-xl font-serif text-[#2b2018]">Enlace íntimo</h3>
           <p className="text-[#3a2d22]">
-            Envía el enlace a la familia para que lean, dejen condolencias y vuelvan cuando lo necesiten.
+            Envía el enlace a la familia para que lean, dejen condolencias y vuelvan cuando lo necesiten. También pueden
+            escanear el QR o un tag NFC para llegar directo.
           </p>
         </div>
         <div className="space-y-2">

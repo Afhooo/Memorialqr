@@ -22,6 +22,9 @@ export function HeroSection({
   memoryWindow,
   lastUpdated,
 }: HeroSectionProps) {
+  const isNeruda = memorialName.trim().toLowerCase() === "pablo neruda";
+  const profileSrc = isNeruda ? "/neruda-profile.png" : null;
+
   return (
     <section className="relative -mx-4 overflow-hidden rounded-[38px] bg-gradient-to-b from-[#0c0b0a] via-[#151019] to-[#1a1410] px-4 pb-14 pt-12 text-[#f7f0e6] shadow-[0_40px_140px_rgba(0,0,0,0.45)] sm:-mx-8 sm:px-8 md:-mx-12 md:px-12">
       <HeroBackgroundVideo sources={heroVideoSources} />
@@ -40,7 +43,14 @@ export function HeroSection({
 
         <div className="space-y-7 lg:max-w-5xl">
           <div className="space-y-3">
-            <h1 className="text-4xl font-serif leading-tight text-[#f8efe0] md:text-5xl lg:text-6xl">{memorialName}</h1>
+            <div className="flex items-center gap-4">
+              {profileSrc && (
+                <div className="h-16 w-16 overflow-hidden rounded-full border border-[#f0d7b2]/50 bg-white/10 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+                  <img src={profileSrc} alt={`Foto de ${memorialName}`} className="h-full w-full object-cover" />
+                </div>
+              )}
+              <h1 className="text-4xl font-serif leading-tight text-[#f8efe0] md:text-5xl lg:text-6xl">{memorialName}</h1>
+            </div>
             <p className="text-xs uppercase tracking-[0.42em] text-[#e3c89e]">
               {formatDate(birthDate)} · {formatDate(deathDate)}
             </p>
