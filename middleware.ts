@@ -21,6 +21,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Permitir archivos estáticos (imágenes, videos, fuentes, etc.)
+  if (/\.[^/]+$/.test(pathname)) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
