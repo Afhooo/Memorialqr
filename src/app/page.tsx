@@ -142,7 +142,7 @@ export default async function HomePage() {
     const supabase = createSupabaseServerClient();
     const { data: memorials, error } = await supabase
       .from("memorials")
-      .select("id, name, birth_date, death_date, description")
+      .select("id, name, birth_date, death_date, description, owner_id")
       .eq("owner_id", session.user.id)
       .order("name", { ascending: true });
 

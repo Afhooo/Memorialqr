@@ -41,7 +41,7 @@ export default async function MemorialPage({ params }: { params: { id: string } 
     error: memoryError,
   } = await supabase
     .from("memories")
-    .select("id, title, content, media_url, created_at")
+    .select("id, memorial_id, title, content, media_url, created_at")
     .eq("memorial_id", params.id)
     .order("created_at", { ascending: false });
 

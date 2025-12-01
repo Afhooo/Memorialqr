@@ -13,6 +13,6 @@ export async function DELETE() {
   }
 
   const response = NextResponse.json({ ok: true });
-  response.cookies.delete(AUTH_TOKEN_COOKIE, { path: "/" });
+  response.cookies.delete(AUTH_TOKEN_COOKIE);
   return response;
 }

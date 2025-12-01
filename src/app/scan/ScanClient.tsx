@@ -47,7 +47,7 @@ async function resolveValue(text: string) {
 export function ScanClient() {
   const router = useRouter();
   const [state, setState] = useState<ScanState>({ status: null, error: null });
-  const lastValue = useRef<string>();
+  const lastValue = useRef<string | null>(null);
 
   const handleResult = useCallback(
     async (value: string) => {

@@ -22,8 +22,13 @@ export async function getServerSession(): Promise<ServerSession | null> {
     return null;
   }
 
+  const user = Array.isArray(data.admin_user) ? data.admin_user[0] : data.admin_user;
+  if (!user) {
+    return null;
+  }
+
   return {
     token: data.token,
-    user: data.admin_user,
+    user,
   };
 }

@@ -8,6 +8,26 @@ interface NFCReaderProps {
   onRead: (value: string) => void;
 }
 
+type WebNFCRecord = {
+  recordType: string;
+  encoding?: string;
+  data?: BufferSource | null;
+};
+
+type WebNFCReadingEvent = Event & {
+  message: {
+    records: ReadonlyArray<WebNFCRecord>;
+  };
+};
+
+type WebNFCReader = {
+  scan: () => Promise<void>;
+  onreading: ((event: WebNFCReadingEvent) => void) | null;
+  onreadingerror: (() => void) | null;
+};
+
+type WebNFCReaderConstructor = new () => WebNFCReader;
+
 const statusLabel: Record<NFCStatus, string> = {
   idle: "Listo para leer",
   unsupported: "NFC no soportado",
@@ -26,7 +46,7 @@ export function NFCReader({ onRead }: NFCReaderProps) {
     }
 
     const readerCtor = (window as typeof window & {
-      NDEFReader?: typeof window["NDEFReader"];
+      NDEFReader?: WebNFCReaderConstructor;
     }).NDEFReader;
 
     if (!readerCtor) {
@@ -42,9 +62,15 @@ export function NFCReader({ onRead }: NFCReaderProps) {
       const reader = new readerCtor();
       await reader.scan();
 
-      reader.onreading = (event: NDEFReadingEvent) => {
+      reader.onreading = (event: WebNFCReadingEvent) => {
         const record = event.message.records[0];
         if (!record) {
+          setStatus("error");
+          setMessage("El tag no contiene datos legibles.");
+          return;
+        }
+
+        if (!record.data) {
           setStatus("error");
           setMessage("El tag no contiene datos legibles.");
           return;
@@ -54,7 +80,7 @@ export function NFCReader({ onRead }: NFCReaderProps) {
         if (record.recordType === "text") {
           const decoder = new TextDecoder(record.encoding || "utf-8");
           payload = decoder.decode(record.data);
-        } else if (record.data) {
+        } else {
           payload = new TextDecoder().decode(record.data);
         }
 

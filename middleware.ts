@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
 
   if (!data) {
     const response = NextResponse.redirect(loginUrl);
-    response.cookies.delete(AUTH_TOKEN_COOKIE, { path: "/" });
+    response.cookies.delete(AUTH_TOKEN_COOKIE);
     return response;
   }
 

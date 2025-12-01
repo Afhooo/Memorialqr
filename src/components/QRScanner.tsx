@@ -9,7 +9,7 @@ interface QRScannerProps {
 }
 
 export function QRScanner({ onScan }: QRScannerProps) {
-  const lastValueRef = useRef<string>();
+  const lastValueRef = useRef<string | null>(null);
 
   const handleResult = useCallback(
     (result?: Result | null) => {
@@ -27,7 +27,7 @@ export function QRScanner({ onScan }: QRScannerProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-white/20 bg-black">
       <QrReader
-        constraints={{ video: { facingMode: "environment" } }}
+        constraints={{ facingMode: "environment" }}
         onResult={(result) => handleResult(result)}
         videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
         containerStyle={{ width: "100%", aspectRatio: "1/1" }}
