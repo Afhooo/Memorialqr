@@ -2,7 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,7 +35,9 @@ export default function LoginPage() {
       return;
     }
 
-    router.replace("/memorial/[id]");
+    const redirectTo = searchParams.get("from") || "/memorial/pablo-neruda";
+    router.replace(redirectTo);
+    router.refresh();
   };
 
   return (
