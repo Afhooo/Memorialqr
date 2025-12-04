@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { CreateDemoMemorialButton } from "@/components/CreateDemoMemorialButton";
 import { getServerSession } from "@/lib/serverSession";
 
 const profile = {
@@ -174,25 +175,21 @@ export default async function PabloNerudaMemorialPage() {
         <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-3xl border border-[#e0e0e0] bg-white/90 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.08)]">
             <p className="text-[10px] uppercase tracking-[0.35em] text-[#e87422]">Escribir</p>
-            <p className="text-sm text-[#4a4a4a]">Deja un mensaje privado. Solo la familia y admins lo verán tras moderación.</p>
-            <form className="mt-3 space-y-3">
-              <input
-                type="text"
-                placeholder="Tu nombre"
-                className="w-full rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333] outline-none focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/40"
-              />
-              <textarea
-                placeholder="Escribe un recuerdo, una frase o unas líneas de cariño..."
-                rows={4}
-                className="w-full rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333] outline-none focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/40"
-              />
-              <button
-                type="button"
-                className="w-full rounded-2xl bg-[#e87422] px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_45px_rgba(0,0,0,0.16)]"
-              >
-                Enviar (modo demo)
-              </button>
-            </form>
+            <p className="text-sm text-[#4a4a4a]">
+              Para publicar mensajes y verlos en el muro, crea tu memorial y escribe allí. Este espacio es una muestra estática.
+            </p>
+            <div className="mt-4">
+              {session ? (
+                <CreateDemoMemorialButton />
+              ) : (
+                <Link
+                  href="/login"
+                  className="inline-flex items-center rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.3em] text-[#e87422]"
+                >
+                  Iniciar sesión
+                </Link>
+              )}
+            </div>
           </div>
 
           <div className="space-y-4">

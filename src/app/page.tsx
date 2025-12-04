@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
+import { CreateDemoMemorialButton } from "@/components/CreateDemoMemorialButton";
 import type { Memorial } from "@/lib/types";
 
 const memorialHighlights = [
@@ -176,12 +177,16 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-[11px] uppercase tracking-[0.4em]">
-            <Link
-              href="/login"
-              className="rounded-full bg-[#e87422] px-6 py-3 font-semibold text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] transition hover:translate-y-[-2px]"
-            >
-              Crear memorial
-            </Link>
+            {session ? (
+              <CreateDemoMemorialButton />
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-full bg-[#e87422] px-6 py-3 font-semibold text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] transition hover:translate-y-[-2px]"
+              >
+                Crear memorial
+              </Link>
+            )}
             <Link
               href="#inventario"
               className="rounded-full border border-white/25 px-6 py-3 text-white transition hover:border-[#e87422] hover:text-[#e87422]"
@@ -312,8 +317,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="animate-fade-rise -mx-[calc((100vw-100%)/2)] w-screen bg-gradient-to-r from-white via-[#f7f7f7] to-[#eef2ef] px-6 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.06)]">
-        <div className="mx-auto max-w-7xl space-y-6 rounded-[32px] border border-[#e0e0e0] bg-white/85 p-8">
+      <section className="animate-fade-rise -mx-4 bg-gradient-to-r from-white via-[#f7f7f7] to-[#eef2ef] px-4 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.06)] sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
+        <div className="mx-auto max-w-7xl overflow-hidden space-y-6 rounded-[32px] border border-[#e0e0e0] bg-white/85 p-6 sm:p-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="space-y-2">
               <p className="text-[10px] uppercase tracking-[0.45em] text-[#e87422]">Pasos guiados</p>
@@ -328,7 +333,7 @@ export default async function HomePage() {
           </div>
           <div className="relative overflow-x-auto pb-4">
             <div className="absolute left-8 right-8 top-12 hidden h-[2px] bg-gradient-to-r from-[#e87422] via-[#ff9800] to-[#4caf50] lg:block" />
-            <ol className="grid grid-flow-col auto-cols-[minmax(210px,1fr)] gap-4 pr-8">
+            <ol className="grid grid-flow-col auto-cols-[minmax(210px,1fr)] gap-4 pr-8 lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-6 lg:pr-0">
               {howItWorks.map((step, index) => (
                 <li
                   key={step.title}

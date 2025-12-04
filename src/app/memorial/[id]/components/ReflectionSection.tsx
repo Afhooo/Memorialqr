@@ -1,11 +1,14 @@
 import { formatDate } from "./dateUtils";
+import { MemoryComposer } from "./MemoryComposer";
 import type { Memory } from "@/lib/types";
 
 interface ReflectionSectionProps {
+  memorialId: string;
   memorialName: string;
   birthDate: string | null;
   deathDate: string | null;
   memories: Memory[];
+  canPost: boolean;
 }
 
 const nextAnniversary = (date: string | null) => {
@@ -21,7 +24,7 @@ const nextAnniversary = (date: string | null) => {
   return candidate.toISOString();
 };
 
-export function ReflectionSection({ memorialName, birthDate, deathDate, memories }: ReflectionSectionProps) {
+export function ReflectionSection({ memorialId, memorialName, birthDate, deathDate, memories, canPost }: ReflectionSectionProps) {
   const latestLetters = memories.slice(0, 2);
   const upcomingAnniversary = nextAnniversary(deathDate);
 
@@ -32,13 +35,19 @@ export function ReflectionSection({ memorialName, birthDate, deathDate, memories
           <p className="text-[11px] uppercase tracking-[0.38em] text-[#e87422]">Espacio de la familia</p>
           <h2 className="text-2xl font-serif text-[#333333]">Cartas y notas para {memorialName}</h2>
         </div>
-        <div className="rounded-full border border-[#e87422] bg-[#e87422]/10 px-4 py-2 text-[11px] uppercase tracking-[0.32em] text-[#e87422] shadow-[0_12px_32px_rgba(0,0,0,0.06)]">
-          Pronto podrás dejar mensajes aquí
-        </div>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-4">
+          <MemoryComposer
+            memorialId={memorialId}
+            disabled={!canPost}
+            helper={
+              canPost
+                ? "Solo la familia y administradores verán los mensajes hasta que decidas publicarlos."
+                : "Inicia sesión con la cuenta de la familia para publicar y guardar mensajes."
+            }
+          />
           {latestLetters.length ? (
             latestLetters.map((memory) => (
               <article key={memory.id} className="rounded-2xl border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.06)]">

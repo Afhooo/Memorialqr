@@ -11,6 +11,8 @@ import { TimelineSection } from "./components/TimelineSection";
 import { TributeHighlightsSection } from "./components/TributeHighlightsSection";
 import { formatDate } from "./components/dateUtils";
 
+export const dynamic = "force-dynamic";
+
 type MemorialRecord = {
   id: string;
   name: string;
@@ -59,7 +61,7 @@ const DEMO_MEMORIES: Memory[] = [
   },
 ];
 
-function renderMemorial(memorial: MemorialRecord, memories: Memory[]) {
+function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: boolean) {
   const memoryList: Memory[] = memories ?? [];
   const latestMemoryDate = memoryList[0]?.created_at ?? null;
   const earliestMemoryDate = memoryList[memoryList.length - 1]?.created_at ?? null;
@@ -88,10 +90,12 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[]) {
       <TributeHighlightsSection />
 
       <ReflectionSection
+        memorialId={memorial.id}
         memorialName={memorial.name}
         birthDate={memorial.birth_date}
         deathDate={memorial.death_date}
         memories={memoryList}
+        canPost={canPost}
       />
 
       <TimelineSection
@@ -108,10 +112,17 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[]) {
   );
 }
 
-export default async function MemorialPage({ params }: { params: { id: string } }) {
+export default async function MemorialPage({
+  params,
+}: {
+  params: { id: string } | Promise<{ id: string }>;
+}) {
+  const resolvedParams = await Promise.resolve(params);
+  const memorialId = resolvedParams.id;
+
   // Demostración pública sin login
-  if (params.id === DEMO_MEMORIAL_ID) {
-    return renderMemorial(DEMO_MEMORIAL, DEMO_MEMORIES);
+  if (memorialId === DEMO_MEMORIAL_ID) {
+    return renderMemorial(DEMO_MEMORIAL, DEMO_MEMORIES, false);
   }
 
   const session = await getServerSession();
@@ -127,7 +138,7 @@ export default async function MemorialPage({ params }: { params: { id: string } 
   } = await supabase
     .from("memorials")
     .select("id, name, description, birth_date, death_date, owner_id")
-    .eq("id", params.id)
+    .eq("id", memorialId)
     .maybeSingle();
 
   if (memorialError || !memorial) {
@@ -144,12 +155,12 @@ export default async function MemorialPage({ params }: { params: { id: string } 
   } = await supabase
     .from("memories")
     .select("id, memorial_id, title, content, media_url, created_at")
-    .eq("memorial_id", params.id)
+    .eq("memorial_id", memorialId)
     .order("created_at", { ascending: false });
 
   if (memoryError) {
     throw new Error(memoryError.message);
   }
 
-  return renderMemorial(memorial as MemorialRecord, memories ?? []);
+  return renderMemorial(memorial as MemorialRecord, memories ?? [], true);
 }
