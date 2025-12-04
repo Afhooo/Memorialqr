@@ -86,12 +86,12 @@ export default async function PabloNerudaMemorialPage() {
 
   if (!session) {
     return (
-      <div className="mx-auto max-w-4xl space-y-6 rounded-3xl border border-[#e3d2b9] bg-white/80 p-8 text-center text-[#2f261f]">
-        <h1 className="text-3xl font-serif text-[#2b2018]">Memorial privado de Pablo Neruda</h1>
+      <div className="mx-auto max-w-4xl space-y-6 rounded-3xl border border-[#e0e0e0] bg-white/80 p-8 text-center text-[#333333]">
+        <h1 className="text-3xl font-serif text-[#333333]">Memorial privado de Pablo Neruda</h1>
         <p>Inicia sesión para acceder a esta vista curada.</p>
         <Link
           href="/login"
-          className="inline-flex items-center justify-center rounded-full border border-[#c9a36a]/70 px-5 py-3 text-[11px] uppercase tracking-[0.35em] text-[#7b5b3d]"
+          className="inline-flex items-center justify-center rounded-full border border-[#e87422]/70 px-5 py-3 text-[11px] uppercase tracking-[0.35em] text-[#e87422]"
         >
           Iniciar sesión
         </Link>
@@ -100,8 +100,8 @@ export default async function PabloNerudaMemorialPage() {
   }
 
   return (
-    <div className="space-y-14 text-[#2f261f]">
-      <section className="relative overflow-hidden rounded-[40px] border border-[#e3d2b9] bg-[#0f0c0a] text-[#f7efe2] shadow-[0_40px_120px_rgba(0,0,0,0.45)]">
+    <div className="space-y-14 text-[#333333]">
+      <section className="relative overflow-hidden rounded-[40px] border border-[#e0e0e0] bg-gradient-to-b from-[#1f1f1f] via-[#2a2a2a] to-[#1a1a1a] text-white shadow-[0_40px_120px_rgba(0,0,0,0.45)]">
         <div className="relative h-[220px] sm:h-[260px]">
           <Image
             src={profile.cover}
@@ -112,52 +112,52 @@ export default async function PabloNerudaMemorialPage() {
             unoptimized
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-[#0f0c0a]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-transparent" />
         </div>
         <div className="relative px-6 pb-8 pt-4 sm:px-10">
-          <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-[#f0d7b2]/80">
-            <span className="rounded-full border border-[#f0d7b2]/40 px-4 py-1">Memorial privado</span>
-            <span className="rounded-full border border-[#f0d7b2]/40 px-4 py-1">Solo familia y admins</span>
+          <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-white/75">
+            <span className="rounded-full border border-white/25 px-4 py-1">Memorial privado</span>
+            <span className="rounded-full border border-white/25 px-4 py-1">Solo familia y admins</span>
           </div>
           <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-[#f0d7b2]/60 shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+              <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-[#e87422]/60 shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
                 <Image src={profile.avatar} alt={profile.name} fill className="object-cover" unoptimized sizes="96px" />
               </div>
               <div className="space-y-2">
-                <h1 className="text-3xl font-serif text-[#f8efe0] sm:text-4xl">{profile.name}</h1>
-                <p className="text-sm text-[#eadbc7]">{profile.tagline}</p>
+                <h1 className="text-3xl font-serif text-white sm:text-4xl">{profile.name}</h1>
+                <p className="text-sm text-white/80">{profile.tagline}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.35em]">
               <a
                 href="#muro"
-                className="rounded-full bg-[#f0d7b2] px-5 py-3 font-semibold text-[#2f261f] shadow-[0_18px_40px_rgba(0,0,0,0.3)] transition hover:-translate-y-[1px]"
+                className="rounded-full bg-[#e87422] px-5 py-3 font-semibold text-white shadow-[0_18px_40px_rgba(0,0,0,0.3)] transition hover:-translate-y-[1px]"
               >
                 Escribir mensaje
               </a>
               <Link
                 href="/login"
-                className="rounded-full border border-[#f0d7b2]/60 px-5 py-3 text-[#f7efe2] transition hover:bg-white/10"
+                className="rounded-full border border-white/25 px-5 py-3 text-white transition hover:border-[#e87422]"
               >
                 Copiar enlace
               </Link>
             </div>
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-[#f0d7b2]/35 bg-white/5 p-4 text-sm text-[#eadbc7]">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-[#e3c89e]/90">Mensajes</p>
-              <p className="text-2xl font-serif text-[#f8efe0]">328</p>
+            <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/80">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Mensajes</p>
+              <p className="text-2xl font-serif text-white">328</p>
               <p>Condolencias y recuerdos moderados.</p>
             </div>
-            <div className="rounded-2xl border border-[#f0d7b2]/35 bg-white/5 p-4 text-sm text-[#eadbc7]">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-[#e3c89e]/90">Lectores</p>
-              <p className="text-2xl font-serif text-[#f8efe0]">+12k</p>
+            <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/80">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Lectores</p>
+              <p className="text-2xl font-serif text-white">+12k</p>
               <p>Visitantes únicos del memorial.</p>
             </div>
-            <div className="rounded-2xl border border-[#f0d7b2]/35 bg-white/5 p-4 text-sm text-[#eadbc7]">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-[#e3c89e]/90">Hitos guardados</p>
-              <p className="text-2xl font-serif text-[#f8efe0]">18</p>
+            <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/80">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Hitos guardados</p>
+              <p className="text-2xl font-serif text-white">18</p>
               <p>Fechas y objetos importantes.</p>
             </div>
           </div>
@@ -165,30 +165,30 @@ export default async function PabloNerudaMemorialPage() {
       </section>
 
       <section id="muro" className="space-y-6">
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-[#a07c55]">
-          <span className="h-px w-10 bg-gradient-to-r from-transparent via-[#c9a36a] to-transparent" />
+        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-[#e87422]">
+          <span className="h-px w-10 bg-gradient-to-r from-transparent via-[#e87422] to-transparent" />
           <span>Muro de mensajes</span>
-          <span className="h-px w-10 bg-gradient-to-r from-transparent via-[#c9a36a] to-transparent" />
+          <span className="h-px w-10 bg-gradient-to-r from-transparent via-[#e87422] to-transparent" />
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="rounded-3xl border border-[#eadfcd] bg-white/90 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.08)]">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-[#a07c55]">Escribir</p>
-            <p className="text-sm text-[#3a2d22]">Deja un mensaje privado. Solo la familia y admins lo verán tras moderación.</p>
+          <div className="rounded-3xl border border-[#e0e0e0] bg-white/90 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.08)]">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-[#e87422]">Escribir</p>
+            <p className="text-sm text-[#4a4a4a]">Deja un mensaje privado. Solo la familia y admins lo verán tras moderación.</p>
             <form className="mt-3 space-y-3">
               <input
                 type="text"
                 placeholder="Tu nombre"
-                className="w-full rounded-2xl border border-[#eadfcd] bg-white px-4 py-3 text-sm text-[#2f261f] outline-none focus:border-[#c9a36a] focus:ring-2 focus:ring-[#c9a36a]/40"
+                className="w-full rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333] outline-none focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/40"
               />
               <textarea
                 placeholder="Escribe un recuerdo, una frase o unas líneas de cariño..."
                 rows={4}
-                className="w-full rounded-2xl border border-[#eadfcd] bg-white px-4 py-3 text-sm text-[#2f261f] outline-none focus:border-[#c9a36a] focus:ring-2 focus:ring-[#c9a36a]/40"
+                className="w-full rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333] outline-none focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/40"
               />
               <button
                 type="button"
-                className="w-full rounded-2xl bg-gradient-to-r from-[#f0d7b2] to-[#d7b07a] px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-[#2f261f] shadow-[0_18px_45px_rgba(0,0,0,0.1)]"
+                className="w-full rounded-2xl bg-[#e87422] px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_45px_rgba(0,0,0,0.16)]"
               >
                 Enviar (modo demo)
               </button>
@@ -199,24 +199,24 @@ export default async function PabloNerudaMemorialPage() {
             {wallPosts.map((post, index) => (
               <article
                 key={post.id}
-                className="rounded-3xl border border-[#eadfcd] bg-white/95 p-5 shadow-[0_16px_50px_rgba(0,0,0,0.06)]"
+                className="rounded-3xl border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_16px_50px_rgba(0,0,0,0.06)]"
                 style={{ animationDelay: `${0.04 * index}s` }}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f3e6d4] text-sm font-semibold text-[#5e4430]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#eef2ef] text-sm font-semibold text-[#555555]">
                     {post.author[0]}
                   </div>
                   <div className="flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-[#2b2018]">{post.author}</p>
-                      <span className="rounded-full bg-[#f0e0c8] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[#5e4430]">
+                      <p className="font-semibold text-[#333333]">{post.author}</p>
+                      <span className="rounded-full bg-[#f7f7f7] px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-[#555555]">
                         {post.relation}
                       </span>
-                      <span className="text-xs uppercase tracking-[0.25em] text-[#a07c55]">{post.date}</span>
+                      <span className="text-xs uppercase tracking-[0.25em] text-[#e87422]">{post.date}</span>
                     </div>
-                    <p className="text-[#3a2d22]">{post.message}</p>
+                    <p className="text-[#4a4a4a]">{post.message}</p>
                     {post.photo && (
-                      <div className="relative mt-3 h-48 overflow-hidden rounded-2xl border border-[#eadfcd]">
+                      <div className="relative mt-3 h-48 overflow-hidden rounded-2xl border border-[#e0e0e0]">
                         <Image
                           src={post.photo}
                           alt={post.author}
@@ -227,15 +227,15 @@ export default async function PabloNerudaMemorialPage() {
                         />
                       </div>
                     )}
-                    <div className="mt-3 flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.3em] text-[#a07c55]">
-                      <span className="rounded-full bg-[#f3e6d4] px-3 py-1 text-[#5e4430]">♥ 128</span>
-                      <span className="rounded-full bg-[#f3e6d4] px-3 py-1 text-[#5e4430]">Velas 36</span>
-                      <span className="rounded-full bg-[#f3e6d4] px-3 py-1 text-[#5e4430]">Compartido 12</span>
+                    <div className="mt-3 flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.3em] text-[#e87422]">
+                      <span className="rounded-full bg-[#eef2ef] px-3 py-1 text-[#555555]">♥ 128</span>
+                      <span className="rounded-full bg-[#eef2ef] px-3 py-1 text-[#555555]">Velas 36</span>
+                      <span className="rounded-full bg-[#eef2ef] px-3 py-1 text-[#555555]">Compartido 12</span>
                     </div>
-                    <div className="mt-3 space-y-2 rounded-2xl border border-[#eadfcd] bg-[#fbf5ed] p-3">
+                    <div className="mt-3 space-y-2 rounded-2xl border border-[#e0e0e0] bg-[#f7f7f7] p-3">
                       {post.comments.map((comment) => (
-                        <p key={comment.text} className="text-sm text-[#3a2d22]">
-                          <span className="font-semibold text-[#2b2018]">{comment.author}:</span> {comment.text}
+                        <p key={comment.text} className="text-sm text-[#4a4a4a]">
+                          <span className="font-semibold text-[#333333]">{comment.author}:</span> {comment.text}
                         </p>
                       ))}
                     </div>
@@ -248,12 +248,12 @@ export default async function PabloNerudaMemorialPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="space-y-4 rounded-[32px] border border-[#e3d2b9] bg-gradient-to-br from-white via-[#fbf5ed] to-[#f3e6d4] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
-          <p className="text-[10px] uppercase tracking-[0.42em] text-[#a07c55]">Galería íntima</p>
-          <h2 className="text-3xl font-serif text-[#2b2018]">Casas, mar y manuscritos</h2>
+        <div className="space-y-4 rounded-[32px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
+          <p className="text-[10px] uppercase tracking-[0.42em] text-[#e87422]">Galería íntima</p>
+          <h2 className="text-3xl font-serif text-[#333333]">Casas, mar y manuscritos</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {gallery.map((item) => (
-              <div key={item.src} className="relative h-40 overflow-hidden rounded-2xl border border-[#eadfcd] shadow-[0_16px_50px_rgba(0,0,0,0.05)]">
+              <div key={item.src} className="relative h-40 overflow-hidden rounded-2xl border border-[#e0e0e0] shadow-[0_16px_50px_rgba(0,0,0,0.05)]">
                 <Image
                   src={item.src}
                   alt={item.label}
@@ -269,44 +269,44 @@ export default async function PabloNerudaMemorialPage() {
           </div>
         </div>
 
-        <div className="space-y-4 rounded-[32px] border border-[#e3d2b9] bg-white/90 p-8 shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
-          <p className="text-[10px] uppercase tracking-[0.42em] text-[#a07c55]">Poemas y hitos</p>
-          <h2 className="text-3xl font-serif text-[#2b2018]">Línea de vida</h2>
+        <div className="space-y-4 rounded-[32px] border border-[#e0e0e0] bg-white/90 p-8 shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
+          <p className="text-[10px] uppercase tracking-[0.42em] text-[#e87422]">Poemas y hitos</p>
+          <h2 className="text-3xl font-serif text-[#333333]">Línea de vida</h2>
           <div className="space-y-3">
             {timeline.map((item) => (
-              <div key={item.title} className="rounded-2xl border border-[#eadfcd] bg-[#fbf5ed] px-4 py-3">
+              <div key={item.title} className="rounded-2xl border border-[#e0e0e0] bg-[#f7f7f7] px-4 py-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-[#2b2018]">{item.title}</p>
-                  <span className="text-[11px] uppercase tracking-[0.3em] text-[#a07c55]">{item.date}</span>
+                  <p className="text-sm font-semibold text-[#333333]">{item.title}</p>
+                  <span className="text-[11px] uppercase tracking-[0.3em] text-[#e87422]">{item.date}</span>
                 </div>
-                <p className="text-sm text-[#3a2d22]">{item.detail}</p>
+                <p className="text-sm text-[#4a4a4a]">{item.detail}</p>
               </div>
             ))}
           </div>
-          <div className="mt-4 space-y-3 rounded-2xl border border-[#eadfcd] bg-gradient-to-br from-white via-[#fbf5ed] to-[#f3e6d4] p-4">
+          <div className="mt-4 space-y-3 rounded-2xl border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] p-4">
             {poems.map((poem) => (
               <div key={poem.title} className="space-y-1">
-                <p className="text-[10px] uppercase tracking-[0.32em] text-[#a07c55]">{poem.title}</p>
-                <p className="text-lg font-serif text-[#2b2018]">“{poem.fragment}”</p>
-                <p className="text-xs text-[#5e4430]">{poem.context}</p>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">{poem.title}</p>
+                <p className="text-lg font-serif text-[#333333]">“{poem.fragment}”</p>
+                <p className="text-xs text-[#555555]">{poem.context}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="rounded-[32px] border border-[#e3d2b9] bg-gradient-to-br from-white via-[#fbf5ed] to-[#f3e6d4] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
+      <section className="rounded-[32px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-[0.42em] text-[#a07c55]">Privado y compartible</p>
-            <h2 className="text-3xl font-serif text-[#2b2018]">Mantén vivo el enlace</h2>
-            <p className="max-w-3xl text-[#3a2d22]">
+            <p className="text-[10px] uppercase tracking-[0.42em] text-[#e87422]">Privado y compartible</p>
+            <h2 className="text-3xl font-serif text-[#333333]">Mantén vivo el enlace</h2>
+            <p className="max-w-3xl text-[#4a4a4a]">
               Envía este memorial a quienes aman su poesía. Pueden dejar mensajes moderados y encender velas digitales durante treinta días.
             </p>
           </div>
           <Link
             href="/login"
-            className="rounded-full border border-[#c9a36a]/70 px-5 py-3 text-[11px] uppercase tracking-[0.35em] text-[#7b5b3d]"
+            className="rounded-full border border-[#e87422]/70 px-5 py-3 text-[11px] uppercase tracking-[0.35em] text-[#e87422]"
           >
             Copiar enlace
           </Link>

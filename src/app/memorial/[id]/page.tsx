@@ -72,7 +72,7 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[]) {
         : "Pendiente de añadir memorias";
 
   return (
-    <div className="space-y-14 text-[#2f261f]">
+    <div className="space-y-14 text-[#333333]">
       <MemorialNavbar memorialName={memorial.name} memoryCount={memoryList.length} lastUpdatedLabel={formatDate(lastUpdated)} />
 
       <HeroSection
