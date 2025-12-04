@@ -1,15 +1,19 @@
 import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, context: { params: { id: string } } | { params: Promise<{ id: string }> }) {
   const session = await getServerSession();
   if (!session) {
     return NextResponse.json({ error: "Inicia sesión para dejar un mensaje" }, { status: 401 });
   }
 
-  const memorialId = params.id;
+  const resolvedParams = await Promise.resolve((context as any).params);
+  const memorialId = resolvedParams?.id as string | undefined;
+  if (!memorialId) {
+    return NextResponse.json({ error: "Memorial no encontrado" }, { status: 404 });
+  }
   const body = await req.json().catch(() => ({}));
   const title = typeof body.title === "string" ? body.title.trim() : "";
   const content = typeof body.content === "string" ? body.content.trim() : "";
