@@ -30,7 +30,7 @@ const memorialHighlights = [
   },
   {
     title: "Detalles virtuales que acompañan",
-    body: "Activa flores, velas o una paloma ascendente; las Flaming Candles de Memento permanecen encendidas treinta días.",
+    body: "Activa flores, velas o una paloma ascendente; las Flaming Candles de Recuerdame permanecen encendidas treinta días.",
   },
   {
     title: "Comparte con un enlace",
@@ -45,7 +45,7 @@ const memorialHighlights = [
 const serviceCommitments = [
   {
     title: "Memorial digital gratuito durante 30 días",
-    body: "Memento crea un espacio activo y accesible sin coste ni compromiso inicial; no necesitas tarjeta para comenzar.",
+    body: "Recuerdame crea un espacio activo y accesible sin coste ni compromiso inicial; no necesitas tarjeta para comenzar.",
   },
   {
     title: "Módulo de esquela sin coste",
@@ -95,7 +95,7 @@ const howItWorks = [
 const differentiators = [
   {
     title: "Facilidad de uso",
-    body: "La interfaz lineal de Memento evita menús saturados y mantiene cada paso claro.",
+    body: "La interfaz lineal de Recuerdame evita menús saturados y mantiene cada paso claro.",
   },
   {
     title: "Interacción viva",
@@ -325,7 +325,7 @@ export default async function HomePage() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="space-y-1">
               <p className="text-[10px] uppercase tracking-[0.45em] text-[#e87422]">Pasos guiados</p>
-              <h2 className="text-2xl font-serif text-[#333333]">Cómo funciona Memento</h2>
+              <h2 className="text-2xl font-serif text-[#333333]">Cómo funciona Recuerdame</h2>
               <p className="max-w-3xl text-sm text-[#4a4a4a] sm:text-base">
                 Una línea editorial que avanza paso a paso. No son tarjetas: es un carril donde ves de un vistazo qué sigue.
               </p>

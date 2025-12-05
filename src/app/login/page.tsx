@@ -30,7 +30,7 @@ export default async function LoginPage() {
             </div>
             <div className="rounded-2xl border border-[#e0e0e0] bg-white/95 px-4 py-3 text-sm text-[#4a4a4a] shadow-[0_14px_40px_rgba(0,0,0,0.04)]">
               <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Si es tu primera vez</p>
-              <p>Usa el correo con el que te acompañamos desde la funeraria o en el primer mensaje de Memento.</p>
+              <p>Usa el correo con el que te acompañamos desde la funeraria o en el primer mensaje de Recuerdame.</p>
             </div>
           </div>
         </div>

@@ -36,7 +36,7 @@ export function HeroSection({
         <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-white/75">
           <span className="rounded-full border border-white/25 bg-white/5 px-4 py-1">Memorial vivo</span>
           <span className="h-px w-12 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
-          <span className="text-[#ff9800]">Memento</span>
+          <span className="text-[#ff9800]">Recuerdame</span>
           <span className="h-px w-12 bg-gradient-to-r from-transparent via-white/70 to-transparent" />
           <span className="rounded-full border border-white/15 px-4 py-1">Compartible</span>
         </div>

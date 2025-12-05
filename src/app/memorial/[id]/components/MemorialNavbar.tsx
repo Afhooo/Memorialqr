@@ -14,7 +14,7 @@ export function MemorialNavbar({ memorialName, memoryCount, lastUpdatedLabel }: 
           href="/"
           className="rounded-full border border-[#e87422] bg-[#e87422]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#e87422]"
         >
-          Memento
+          Recuerdame
         </Link>
         <span className="text-[11px] uppercase tracking-[0.32em] text-[#555555]">Memorial privado</span>
       </div>

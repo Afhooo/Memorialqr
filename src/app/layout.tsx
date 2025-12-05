@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Memento",
+  title: "Recuerdame",
   description: "Un espacio editorial para crear memoriales digitales",
 };
 
@@ -46,7 +46,7 @@ export default async function RootLayout({
                   className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:text-[#e87422]"
                 >
                   <span className="h-2 w-2 rounded-full bg-gradient-to-br from-[#e87422] to-[#ff9800]" />
-                  Memento
+                Recuerdame
                 </Link>
                 <div className="sm:hidden">
                   <AuthActions userEmail={session?.user?.email ?? null} />
