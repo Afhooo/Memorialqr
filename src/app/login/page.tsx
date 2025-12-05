@@ -1,14 +1,12 @@
 import { redirect } from "next/navigation";
 import { LoginForm } from "./LoginForm";
-import { getDefaultMemorialRedirectPath } from "@/lib/memorialRedirect";
 import { getServerSession } from "@/lib/serverSession";
 
 export default async function LoginPage() {
   const session = await getServerSession();
 
   if (session?.user?.id) {
-    const redirectTo = await getDefaultMemorialRedirectPath(session.user.id);
-    redirect(redirectTo);
+    redirect("/elige-perfil");
   }
 
   return (

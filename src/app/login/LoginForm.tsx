@@ -38,7 +38,7 @@ export function LoginForm() {
         return;
       }
 
-      const redirectTo = body.redirectTo || searchParams.get("from") || "/memorial";
+      const redirectTo = searchParams.get("from") || "/elige-perfil";
       router.replace(redirectTo);
       router.refresh();
     } catch (loginError) {

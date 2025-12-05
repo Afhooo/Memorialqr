@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { AUTH_TOKEN_COOKIE, SESSION_MAX_AGE } from "@/lib/constants";
-import { getDefaultMemorialRedirectPath } from "@/lib/memorialRedirect";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
     expires_at: expiresAt,
   });
 
-  const redirectTo = await getDefaultMemorialRedirectPath(user.id);
+  const redirectTo = "/elige-perfil";
 
   const response = NextResponse.json({ ok: true, redirectTo });
   response.cookies.set(AUTH_TOKEN_COOKIE, token, {
