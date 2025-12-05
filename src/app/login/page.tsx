@@ -12,8 +12,8 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="mx-auto mt-10 flex max-w-5xl flex-col gap-8 rounded-[28px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-6 py-8 text-[#333333] shadow-[0_26px_80px_rgba(0,0,0,0.08)] sm:px-10 lg:mt-14">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+    <div className="mx-auto mt-10 flex max-w-5xl min-w-0 flex-col gap-8 rounded-[28px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-4 py-8 text-[#333333] shadow-[0_26px_80px_rgba(0,0,0,0.08)] sm:px-6 lg:mt-14 lg:px-10">
+      <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-3">
           <p className="text-[11px] uppercase tracking-[0.38em] text-[#e87422]">Tu espacio de memoria</p>
           <h1 className="text-2xl font-serif leading-tight text-[#333333] md:text-3xl">
