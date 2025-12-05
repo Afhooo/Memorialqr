@@ -147,12 +147,15 @@ export default async function HomePage() {
       .eq("owner_id", session.user.id)
       .order("name", { ascending: true });
 
-    if (error) {
-      throw new Error(error.message);
+    if (!error && memorials) {
+      memorialList = memorials;
     }
-
-    memorialList = memorials ?? [];
   }
+
+  const nerudaMemorial = memorialList.find(
+    (memorial) => memorial.name?.trim().toLowerCase() === "pablo neruda",
+  );
+  const nerudaHref = nerudaMemorial ? `/memorial/${nerudaMemorial.id}` : "/memorial/pablo-neruda";
 
   return (
     <main className="relative mx-auto max-w-6xl space-y-16 px-4 pb-14 text-[#333333]" id="principal">
@@ -168,10 +171,10 @@ export default async function HomePage() {
             <span className="rounded-full border border-white/10 px-4 py-1">Sin anuncios</span>
           </div>
           <div className="space-y-4 lg:max-w-4xl">
-            <h1 className="text-4xl font-serif leading-tight text-white md:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-serif leading-tight text-white md:text-4xl lg:text-5xl">
               Un memorial vivo para seguir cerca de quien amas
             </h1>
-            <p className="text-lg leading-relaxed text-white/85">
+            <p className="text-base leading-relaxed text-white/85">
               Reúne sus fotos, cartas y su historia en un espacio sereno. Sin prisa, sin publicidad, con moderación
               cuidada para que cada palabra acompañe. Comparte con quienes no pudieron estar y regresen cuando necesiten.
             </p>
@@ -197,26 +200,26 @@ export default async function HomePage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Presencias activas</p>
-              <p className="mt-2 text-3xl font-serif text-white">{session ? memorialList.length : "—"}</p>
+              <p className="mt-2 text-2xl font-serif text-white">{session ? memorialList.length : "—"}</p>
               <p className="text-sm text-white/80">
                 {session ? "Memoriales vivos que puedes abrir cuando quieras" : "Inicia sesión para ver los tuyos"}
               </p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">30 días sin coste</p>
-              <p className="mt-2 text-2xl font-serif text-white">Sin tarjeta</p>
+              <p className="mt-2 text-xl font-serif text-white">Sin tarjeta</p>
               <p className="text-sm text-white/80">Empieza ahora, edita con calma y decide después</p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Un solo enlace</p>
-              <p className="mt-2 text-2xl font-serif text-white">Para la familia</p>
+              <p className="mt-2 text-xl font-serif text-white">Para la familia</p>
               <p className="text-sm text-white/80">Los que están lejos también pueden dejar su cariño</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="crear" className="animate-fade-rise space-y-8">
+      <section id="crear" className="animate-fade-rise space-y-7">
         <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-[#e87422]">
           <span className="h-px w-12 bg-gradient-to-r from-transparent via-[#e87422] to-transparent" />
           <span>¿Qué incluye un memorial?</span>
@@ -235,7 +238,7 @@ export default async function HomePage() {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/55 via-black/35 to-transparent" />
             <div className="absolute bottom-6 left-6 max-w-md space-y-2 text-white drop-shadow-lg">
               <p className="text-[11px] uppercase tracking-[0.38em] text-white/80">Mantener la llama encendida</p>
-              <p className="text-2xl font-serif leading-snug">
+              <p className="text-lg font-serif leading-snug">
                 Un memorial vivo con fotos, notas de voz y cartas moderadas para que la familia regrese cuando necesite
                 sentirse cerca.
               </p>
@@ -249,7 +252,7 @@ export default async function HomePage() {
                   <span className="h-[2px] w-8 bg-gradient-to-r from-[#e87422] via-[#e0e0e0] to-transparent" />
                   <span>Incluye</span>
                 </div>
-                <h3 className="text-xl font-serif text-[#333333] group-hover:text-[#e87422]">{item.title}</h3>
+                <h3 className="text-lg font-serif text-[#333333] group-hover:text-[#e87422]">{item.title}</h3>
                 <p className="text-[#4a4a4a]">{item.body}</p>
               </div>
             ))}
@@ -317,13 +320,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="animate-fade-rise -mx-4 bg-gradient-to-r from-white via-[#f7f7f7] to-[#eef2ef] px-4 py-10 shadow-[0_24px_70px_rgba(0,0,0,0.06)] sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
-        <div className="mx-auto max-w-7xl overflow-hidden space-y-6 rounded-[32px] border border-[#e0e0e0] bg-white/85 p-6 sm:p-8">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div className="space-y-2">
+      <section className="animate-fade-rise -mx-4 px-4 py-8 sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
+        <div className="mx-auto max-w-[1400px] space-y-3 px-2 sm:px-0">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="space-y-1">
               <p className="text-[10px] uppercase tracking-[0.45em] text-[#e87422]">Pasos guiados</p>
-              <h2 className="text-3xl font-serif text-[#333333]">Cómo funciona Memento</h2>
-              <p className="max-w-3xl text-[#4a4a4a]">
+              <h2 className="text-2xl font-serif text-[#333333]">Cómo funciona Memento</h2>
+              <p className="max-w-3xl text-sm text-[#4a4a4a] sm:text-base">
                 Una línea editorial que avanza paso a paso. No son tarjetas: es un carril donde ves de un vistazo qué sigue.
               </p>
             </div>
@@ -332,22 +335,22 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="relative overflow-x-auto pb-4">
-            <div className="absolute left-8 right-8 top-12 hidden h-[2px] bg-gradient-to-r from-[#e87422] via-[#ff9800] to-[#4caf50] lg:block" />
-            <ol className="grid grid-flow-col auto-cols-[minmax(210px,1fr)] gap-4 pr-8 lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-6 lg:pr-0">
+            <div className="absolute left-2 right-2 top-9 hidden h-[1px] bg-gradient-to-r from-[#e87422] via-[#ff9800] to-[#4caf50] xl:block" />
+            <ol className="flex flex-wrap gap-3 pr-4 xl:pr-0">
               {howItWorks.map((step, index) => (
                 <li
                   key={step.title}
-                  className="relative rounded-3xl border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_16px_50px_rgba(0,0,0,0.06)]"
+                  className="relative min-w-[180px] max-w-[220px] flex-1 rounded-2xl border border-[#e0e0e0] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)]"
                   style={{ animationDelay: `${0.05 * index}s` }}
                 >
                   <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.35em] text-[#e87422]">
                     <span>Paso {index + 1}</span>
-                    <span className="h-9 w-9 rounded-full border border-[#e87422] bg-white text-center leading-9 text-[#e87422] shadow-[0_10px_28px_rgba(0,0,0,0.08)]">
+                    <span className="h-7 w-7 rounded-full border border-[#e87422] bg-white text-center leading-7 text-[#e87422] shadow-[0_8px_18px_rgba(0,0,0,0.06)]">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                   </div>
-                  <p className="mt-2 text-xl font-serif text-[#333333]">{step.title}</p>
-                  <p className="text-[#4a4a4a]">{step.body}</p>
+                  <p className="mt-2 text-lg font-serif text-[#333333]">{step.title}</p>
+                  <p className="text-sm text-[#4a4a4a] sm:text-base">{step.body}</p>
                 </li>
               ))}
             </ol>
@@ -392,12 +395,26 @@ export default async function HomePage() {
             <p className="text-[10px] uppercase tracking-[0.45em] text-[#e87422]">Inventario</p>
             <h2 className="text-3xl font-serif text-[#333333]">Tus memoriales activos</h2>
           </div>
-          <Link
-            href="/login"
-            className="rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.35em] text-[#e87422]"
-          >
-            {session ? "Crear otro memorial" : "Iniciar sesión"}
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {session ? (
+              <>
+                <CreateDemoMemorialButton label="Crear memorial nuevo" variant="outline" />
+                <Link
+                  href={nerudaHref}
+                  className="rounded-full border border-[#333333]/15 bg-white/80 px-4 py-2 text-[11px] uppercase tracking-[0.35em] text-[#333333] shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition hover:border-[#e87422] hover:text-[#e87422]"
+                >
+                  Abrir Pablo Neruda
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.35em] text-[#e87422]"
+              >
+                Iniciar sesión
+              </Link>
+            )}
+          </div>
         </div>
         {session ? (
           memorialList.length === 0 ? (

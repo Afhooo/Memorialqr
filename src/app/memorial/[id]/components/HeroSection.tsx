@@ -49,7 +49,7 @@ export function HeroSection({
                   <img src={profileSrc} alt={`Foto de ${memorialName}`} className="h-full w-full object-cover" />
                 </div>
               )}
-              <h1 className="text-4xl font-serif leading-tight text-white md:text-5xl lg:text-6xl">{memorialName}</h1>
+              <h1 className="text-3xl font-serif leading-tight text-white md:text-4xl lg:text-5xl">{memorialName}</h1>
             </div>
             <p className="text-xs uppercase tracking-[0.42em] text-[#ff9800]">
               {formatDate(birthDate)} · {formatDate(deathDate)}
@@ -62,20 +62,20 @@ export function HeroSection({
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_15px_45px_rgba(0,0,0,0.25)]">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Recuerdos curados</p>
-              <p className="mt-2 text-3xl font-serif text-white">{memoryCount}</p>
-              <p className="text-sm text-white/80">
+              <p className="mt-2 text-2xl font-serif text-white">{memoryCount}</p>
+              <p className="text-xs text-white/80">
                 {memoryCount ? "Capítulos publicados y visibles" : "Aún no hay memorias cargadas"}
               </p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_15px_45px_rgba(0,0,0,0.25)]">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Ventana de memorias</p>
               <p className="mt-2 text-xl font-serif text-white">{memoryWindow}</p>
-              <p className="text-sm text-white/80">Fechas de los aportes</p>
+              <p className="text-xs text-white/80">Fechas de los aportes</p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_15px_45px_rgba(0,0,0,0.25)]">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Última actualización</p>
-              <p className="mt-2 text-2xl font-serif text-white">{formatDate(lastUpdated)}</p>
-              <p className="text-sm text-white/80">Último movimiento del espacio</p>
+              <p className="mt-2 text-xl font-serif text-white">{formatDate(lastUpdated)}</p>
+              <p className="text-xs text-white/80">Último movimiento del espacio</p>
             </div>
           </div>
 

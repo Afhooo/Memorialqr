@@ -18,6 +18,16 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 13px;
+  }
+}
+
 body {
   background: var(--surface);
   color: var(--foreground);

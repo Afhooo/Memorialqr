@@ -25,16 +25,19 @@ export async function middleware(request: NextRequest) {
   loginUrl.pathname = "/login";
   loginUrl.searchParams.set("from", pathname);
 
-  // Redirige siempre la raíz al login
-  if (pathname === "/") {
-    return NextResponse.redirect(loginUrl);
-  }
-
   if (PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
     return NextResponse.next();
   }
 
   const token = request.cookies.get(AUTH_TOKEN_COOKIE)?.value;
+
+  if (pathname === "/") {
+    if (!token) {
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
+
   if (!token) {
     return NextResponse.redirect(loginUrl);
   }

@@ -72,10 +72,10 @@ export default function BenefitsPage() {
       <section className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-[#1f1f1f] via-[#2a2a2a] to-[#1a1a1a] px-6 py-12 text-white shadow-[0_36px_120px_rgba(0,0,0,0.35)] sm:px-10">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(76,175,80,0.18),transparent_40%),radial-gradient(circle_at_80%_10%,rgba(232,116,34,0.16),transparent_32%)]" />
         <div className="relative space-y-6">
-          <p className="text-[11px] uppercase tracking-[0.42em] text-[#ff9800]">Beneficios</p>
+          <p className="text-[10px] uppercase tracking-[0.42em] text-[#ff9800]">Beneficios</p>
           <div className="space-y-3 max-w-3xl">
-            <h1 className="text-4xl font-serif leading-tight text-white md:text-5xl">Un memorial cuidado, pensado para acompañar</h1>
-            <p className="text-lg leading-relaxed text-white/85">
+            <h1 className="text-3xl font-serif leading-tight text-white md:text-4xl">Un memorial cuidado, pensado para acompañar</h1>
+            <p className="text-base leading-relaxed text-white/85">
               Creamos un espacio sereno para avisar, compartir recuerdos y volver cuando duela. Sin anuncios, con moderación y con
               gestos simbólicos que mantienen viva la presencia de quien amas.
             </p>
@@ -98,7 +98,7 @@ export default function BenefitsPage() {
       </section>
 
       <section className="space-y-5 rounded-[32px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] p-8 shadow-[0_24px_70px_rgba(0,0,0,0.08)]">
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-[#e87422]">
+        <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.4em] text-[#e87422]">
           <span className="h-px w-10 bg-gradient-to-r from-transparent via-[#e87422] to-transparent" />
           <span>Beneficios clave</span>
           <span className="h-px w-10 bg-gradient-to-r from-transparent via-[#e87422] to-transparent" />

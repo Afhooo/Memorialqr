@@ -3,7 +3,19 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function CreateDemoMemorialButton() {
+type ButtonVariant = "solid" | "outline";
+
+interface CreateDemoMemorialButtonProps {
+  label?: string;
+  variant?: ButtonVariant;
+  className?: string;
+}
+
+export function CreateDemoMemorialButton({
+  label = "Crear memorial",
+  variant = "solid",
+  className = "",
+}: CreateDemoMemorialButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +26,17 @@ export function CreateDemoMemorialButton() {
     setError(null);
 
     try {
-      const response = await fetch("/api/demo-memorial", { method: "POST" });
+      const name = window.prompt("Nombre del memorial", "Nuevo memorial")?.trim();
+      if (!name) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch("/api/demo-memorial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
       const payload = await response.json().catch(() => ({}));
 
       if (!response.ok) {
@@ -35,15 +57,20 @@ export function CreateDemoMemorialButton() {
     }
   };
 
+  const baseClasses =
+    variant === "solid"
+      ? "rounded-full bg-[#e87422] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] transition hover:translate-y-[-2px]"
+      : "rounded-full border border-[#e87422] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-[#e87422] transition hover:bg-[#e87422]/10";
+
   return (
     <div className="flex flex-col gap-2">
       <button
         type="button"
         onClick={handleCreate}
         disabled={loading}
-        className="rounded-full bg-[#e87422] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] transition hover:translate-y-[-2px] disabled:cursor-not-allowed disabled:opacity-70"
+        className={`${baseClasses} disabled:cursor-not-allowed disabled:opacity-70 ${className}`}
       >
-        {loading ? "Creando…" : "Crear memorial"}
+        {loading ? "Creando…" : label}
       </button>
       {error && <p className="text-xs text-[#b3261e]">{error}</p>}
     </div>

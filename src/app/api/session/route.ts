@@ -14,5 +14,6 @@ export async function DELETE() {
 
   const response = NextResponse.json({ ok: true });
   response.cookies.delete(AUTH_TOKEN_COOKIE);
+  response.cookies.set(AUTH_TOKEN_COOKIE, "", { path: "/", maxAge: 0 });
   return response;
 }

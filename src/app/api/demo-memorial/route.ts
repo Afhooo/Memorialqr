@@ -3,11 +3,17 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 
-export async function POST() {
+export async function POST(req: Request) {
   const session = await getServerSession();
   if (!session) {
     return NextResponse.json({ error: "Necesitas iniciar sesión para crear un memorial" }, { status: 401 });
   }
+
+  const body = await req.json().catch(() => ({}));
+  const name =
+    typeof body.name === "string" && body.name.trim()
+      ? body.name.trim().slice(0, 120)
+      : "Memorial sin título";
 
   const supabase = createSupabaseServerClient();
   const memorialId = randomUUID();
@@ -16,10 +22,11 @@ export async function POST() {
   const memorialPayload = {
     id: memorialId,
     owner_id: session.user.id,
-    name: "Memorial guiado",
+    name,
     birth_date: "1950-06-12",
     death_date: "2024-02-02",
-    description: "Espacio listo para mostrar el flujo: datos básicos, obituario, condolencias y símbolos digitales.",
+    description:
+      "Espacio listo para mostrar el flujo: datos básicos, obituario, condolencias y símbolos digitales. Cambia estos datos cuando quieras.",
   };
 
   const { error: memorialError } = await supabase.from("memorials").insert(memorialPayload);
