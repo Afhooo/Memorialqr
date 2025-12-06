@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 import { SidebarNav } from "@/components/SidebarNav";
+import { AdminUserCreator } from "./AdminUserCreator";
 
 type MemorialRecord = {
   id: string;
@@ -217,6 +218,47 @@ export default async function AdminPage() {
                 );
               })}
             </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr]">
+            <div className="overflow-hidden rounded-2xl border border-[#e0e0e0]">
+              <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] bg-[#f7f7f7] px-3 py-2 text-[11px] uppercase tracking-[0.24em] text-[#555555] max-md:hidden">
+                <span>Cliente</span>
+                <span>Memoriales</span>
+                <span>Recuerdos</span>
+                <span>Plan</span>
+              </div>
+              <div className="divide-y divide-[#e0e0e0]">
+                {users.map((user) => {
+                  const userMemorials = memorialsByOwner[user.id] || [];
+                  const memoryCount = userMemorials.reduce(
+                    (acc, memorial) => acc + (memoriesByMemorial[memorial.id]?.length || 0),
+                    0,
+                  );
+                  return (
+                    <div
+                      key={user.id}
+                      className="grid grid-cols-1 gap-2 px-3 py-3 text-sm text-[#333333] max-md:rounded-none md:grid-cols-[1.5fr_1fr_1fr_1fr]"
+                    >
+                      <div className="space-y-1">
+                        <p className="font-semibold">{user.email}</p>
+                        <div className="flex flex-wrap gap-1">
+                          <span className={`${badgeBase} border-[#e87422] bg-[#e87422]/10 text-[#e87422]`}>
+                            {user.role}
+                          </span>
+                          <span className={`${badgeBase} border-[#e0e0e0] text-[#555555]`}>{planLabel(user)}</span>
+                        </div>
+                      </div>
+                      <div className="text-[13px] text-[#4a4a4a] md:text-center">{userMemorials.length}</div>
+                      <div className="text-[13px] text-[#4a4a4a] md:text-center">{memoryCount}</div>
+                      <div className="text-[12px] uppercase tracking-[0.18em] text-[#555555] md:text-center">—</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <AdminUserCreator />
           </div>
         </section>
 

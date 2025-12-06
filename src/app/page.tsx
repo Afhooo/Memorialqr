@@ -1,11 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabaseClient";
-import { getServerSession } from "@/lib/serverSession";
 import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
-import { CreateDemoMemorialButton } from "@/components/CreateDemoMemorialButton";
-import type { Memorial } from "@/lib/types";
+import { getServerSession } from "@/lib/serverSession";
 
 const memorialHighlights = [
   {
@@ -123,40 +120,12 @@ const highlightTags = ["Esencial", "Perfil", "Cuidado", "Memoria", "Hitos", "Det
 
 const homeHeroVideos = ["/m1.mp4", "/m2.mp4", "/a1.mp4"];
 
-const formatDate = (value: string | null) => {
-  if (!value) {
-    return "—";
-  }
-
-  return new Date(value).toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
 export default async function HomePage() {
   const session = await getServerSession();
-  let memorialList: Memorial[] = [];
 
   if (session) {
-    const supabase = createSupabaseServerClient();
-    const { data: memorials, error } = await supabase
-      .from("memorials")
-      .select("id, name, birth_date, death_date, description, owner_id")
-      .eq("owner_id", session.user.id)
-      .order("name", { ascending: true });
-
-    if (!error && memorials) {
-      memorialList = memorials;
-    }
+    redirect("/elige-perfil");
   }
-
-  const nerudaMemorial = memorialList.find(
-    (memorial) => memorial.name?.trim().toLowerCase() === "pablo neruda",
-  );
-  const nerudaHref = nerudaMemorial ? `/memorial/${nerudaMemorial.id}` : "/memorial/pablo-neruda";
-
   return (
     <main className="relative mx-auto max-w-6xl space-y-16 px-4 pb-14 text-[#333333]" id="principal">
       <section className="relative isolate -mx-[calc((100vw-100%)/2)] w-screen overflow-hidden bg-gradient-to-br from-[#1f1f1f] via-[#2a2a2a] to-[#1a1a1a] px-6 py-14 text-white sm:px-10">
@@ -180,18 +149,14 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-[11px] uppercase tracking-[0.4em]">
-            {session ? (
-              <CreateDemoMemorialButton />
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-full bg-[#e87422] px-6 py-3 font-semibold text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] transition hover:translate-y-[-2px]"
-              >
-                Crear memorial
-              </Link>
-            )}
             <Link
-              href="#inventario"
+              href="/login?from=/crear-memorial"
+              className="rounded-full bg-[#e87422] px-6 py-3 font-semibold text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] transition hover:translate-y-[-2px]"
+            >
+              Crear memorial
+            </Link>
+            <Link
+              href="/login?from=/elige-perfil"
               className="rounded-full border border-white/25 px-6 py-3 text-white transition hover:border-[#e87422] hover:text-[#e87422]"
             >
               Ver mis memoriales
@@ -200,10 +165,8 @@ export default async function HomePage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Presencias activas</p>
-              <p className="mt-2 text-2xl font-serif text-white">{session ? memorialList.length : "—"}</p>
-              <p className="text-sm text-white/80">
-                {session ? "Memoriales vivos que puedes abrir cuando quieras" : "Inicia sesión para ver los tuyos"}
-              </p>
+              <p className="mt-2 text-2xl font-serif text-white">—</p>
+              <p className="text-sm text-white/80">Inicia sesión para ver los tuyos</p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">30 días sin coste</p>
@@ -395,65 +358,16 @@ export default async function HomePage() {
             <p className="text-[10px] uppercase tracking-[0.45em] text-[#e87422]">Inventario</p>
             <h2 className="text-3xl font-serif text-[#333333]">Tus memoriales activos</h2>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            {session ? (
-              <>
-                <CreateDemoMemorialButton label="Crear memorial nuevo" variant="outline" />
-                <Link
-                  href={nerudaHref}
-                  className="rounded-full border border-[#333333]/15 bg-white/80 px-4 py-2 text-[11px] uppercase tracking-[0.35em] text-[#333333] shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition hover:border-[#e87422] hover:text-[#e87422]"
-                >
-                  Abrir Pablo Neruda
-                </Link>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.35em] text-[#e87422]"
-              >
-                Iniciar sesión
-              </Link>
-            )}
-          </div>
+          <Link
+            href="/login?from=/elige-perfil"
+            className="rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.35em] text-[#e87422]"
+          >
+            Iniciar sesión
+          </Link>
         </div>
-        {session ? (
-          memorialList.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-[#d5d5d5] bg-white/85 px-5 py-6 text-[#4a4a4a]">
-              No hay memoriales conectados todavía. Crea uno y aparecerá aquí listo para compartir o editar.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {memorialList.map((memorial) => (
-                <article
-                  key={memorial.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#e0e0e0] bg-white/95 px-4 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
-                >
-                  <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-[0.35em] text-[#e87422]">
-                      {formatDate(memorial.birth_date)} — {formatDate(memorial.death_date)}
-                    </p>
-                    <h3 className="text-xl font-serif text-[#333333]">{memorial.name}</h3>
-                    <p className="text-sm text-[#4a4a4a] line-clamp-2">
-                      {memorial.description || "Memorial listo para compartir y seguir editando."}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-[#555555]">
-                    <Link href={`/memorial/${memorial.id}`} className="rounded-full border border-[#e87422] px-3 py-1 text-[11px] uppercase tracking-[0.32em] text-[#e87422]">
-                      Abrir
-                    </Link>
-                    <span className="rounded-full bg-[#e87422]/10 px-3 py-1 text-[11px] uppercase tracking-[0.32em] text-[#e87422]">
-                      Activo
-                    </span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )
-        ) : (
-          <div className="rounded-3xl border border-dashed border-[#d5d5d5] bg-white/85 px-5 py-6 text-[#4a4a4a]">
-            Este espacio es privado. Inicia sesión para ver o editar los memoriales que has creado.
-          </div>
-        )}
+        <div className="rounded-3xl border border-dashed border-[#d5d5d5] bg-white/85 px-5 py-6 text-[#4a4a4a]">
+          Este espacio es privado. Inicia sesión para ver o editar los memoriales que has creado.
+        </div>
       </section>
     </main>
   );

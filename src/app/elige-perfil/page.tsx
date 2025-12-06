@@ -72,7 +72,7 @@ export default async function ChooseProfilePage() {
                 Ir a panel de dueño
               </Link>
               <Link
-                href="/panel#crear-memorial"
+                href="/crear-memorial"
                 className="rounded-full border border-[#e0e0e0] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#555555] transition hover:bg-[#f6f6f6]"
               >
                 Crear memorial

@@ -33,6 +33,11 @@ type CreateMemorialBody = {
     content?: string;
     mediaUrl?: string | null;
   };
+  gallery?: Array<{
+    title?: string;
+    content?: string;
+    mediaUrl?: string;
+  }>;
 };
 
 export async function POST(req: Request) {
@@ -86,6 +91,27 @@ export async function POST(req: Request) {
       media_url: mediaUrl,
       created_at: new Date().toISOString(),
     });
+  }
+
+  const gallery = Array.isArray(body.gallery) ? body.gallery : [];
+  const galleryPayload = gallery
+    .map((item) => ({
+      title: item.title?.trim() || "Recuerdo",
+      content: item.content?.trim() || "",
+      mediaUrl: item.mediaUrl?.trim() || "",
+    }))
+    .filter((item) => item.mediaUrl || item.content);
+
+  if (galleryPayload.length) {
+    const galleryRows = galleryPayload.map((item) => ({
+      id: randomUUID(),
+      memorial_id: memorialId,
+      title: item.title,
+      content: item.content,
+      media_url: item.mediaUrl || null,
+      created_at: new Date().toISOString(),
+    }));
+    await supabase.from("memories").insert(galleryRows);
   }
 
   return NextResponse.json({ memorialId });

@@ -61,7 +61,7 @@ export default async function RootLayout({
                   Principal
                 </Link>
                 <Link
-                  href="/#crear"
+                  href={session ? "/crear-memorial" : "/login?from=/crear-memorial"}
                   className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
                 >
                   Crear memorial
@@ -86,7 +86,7 @@ export default async function RootLayout({
             </div>
           </header>
           <main className="flex-1 px-4 pt-0 pb-10 text-[#333333] sm:px-6">
-            <div className="mx-auto w-full max-w-5xl min-w-0">{children}</div>
+            <div className="mx-auto w-full max-w-[1400px] min-w-0">{children}</div>
           </main>
         </div>
       </body>
