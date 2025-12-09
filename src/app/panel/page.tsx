@@ -57,7 +57,7 @@ export default async function OwnerPanelPage() {
               Panel del dueño
             </div>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
-              Curar y publicar memoriales con un flujo claro
+              Cuidar los memoriales de quienes ya partieron
             </h1>
             <p className="max-w-2xl text-sm text-white/75 sm:text-base">
               Administra tus espacios, revisa el avance y abre nuevos perfiles con una guía visual paso a paso. Todo queda

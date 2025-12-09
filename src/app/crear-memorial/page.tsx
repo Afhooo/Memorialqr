@@ -25,11 +25,10 @@ export default async function CrearMemorialPage() {
               Un lienzo completo para crear un memorial editorial, sin columnas partidas.
             </h1>
             <p className="text-sm text-white/80">
-              Flujo vertical curado: identidad, narrativa, multimedia y previsualización cinematográfica en un solo
-              hilo continuo.
+              Recorrido vertical guiado: identidad, narrativa, multimedia y previsualización cinematográfica en un solo hilo continuo.
             </p>
             <div className="flex flex-wrap gap-2">
-              {["Identidad + relato", "Portada y avatar", "Tema curado", "Preview viva"].map((pill) => (
+              {["Identidad + relato", "Portada y avatar", "Tema del memorial", "Preview viva"].map((pill) => (
                 <span
                   key={pill}
                   className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/80"

@@ -1,12 +1,22 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./LoginForm";
 import { getServerSession } from "@/lib/serverSession";
 
-export default async function LoginPage() {
+export const metadata: Metadata = {
+  title: "Iniciar sesión | Recuerdame",
+};
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams?: { from?: string };
+}) {
   const session = await getServerSession();
 
   if (session?.user?.id) {
-    redirect("/elige-perfil");
+    const redirectTo = searchParams?.from || "/elige-perfil";
+    redirect(redirectTo);
   }
 
   return (

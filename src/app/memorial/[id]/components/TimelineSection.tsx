@@ -30,7 +30,7 @@ export function TimelineSection({ memorialName, memories, lastUpdated, memoryWin
       {memories.length === 0 ? (
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <div className="rounded-3xl border border-dashed border-[#d5d5d5] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-4 py-5 text-sm text-[#4a4a4a]">
-            Escribe el obituario y datos del servicio para quienes no pudieron asistir.
+            Escribe el obituario y los detalles de la despedida para quienes no pudieron estar ese día.
           </div>
           <div className="rounded-3xl border border-dashed border-[#d5d5d5] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-4 py-5 text-sm text-[#4a4a4a]">
             Sube fotos, videos o audios; la primera imagen llena el altar superior.

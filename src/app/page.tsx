@@ -156,7 +156,7 @@ export default async function HomePage() {
               Crear memorial
             </Link>
             <Link
-              href="/login?from=/elige-perfil"
+              href="/login?from=/panel"
               className="rounded-full border border-white/25 px-6 py-3 text-white transition hover:border-[#e87422] hover:text-[#e87422]"
             >
               Ver mis memoriales
@@ -238,11 +238,11 @@ export default async function HomePage() {
               <h3 className="text-3xl font-serif text-[#333333]">Un relato continuo, no una colección de tarjetas</h3>
               <p className="text-[#4a4a4a]">
                 Las partes del memorial se leen como una línea de vida: obituario, condolencias moderadas, recuerdos multimedia
-                y los símbolos que siguen encendidos. Explora el flujo de izquierda a derecha o baja por la línea.
+                y los símbolos que siguen encendidos. Puedes recorrerlo de izquierda a derecha o simplemente bajar por la línea.
               </p>
               <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.32em] text-[#e87422]">
                 <span className="rounded-full bg-[#e87422]/12 px-3 py-1">Obituario</span>
-                <span className="rounded-full bg-[#4caf50]/12 px-3 py-1 text-[#2e7d32]">Condolencias curadas</span>
+                <span className="rounded-full bg-[#4caf50]/12 px-3 py-1 text-[#2e7d32]">Condolencias moderadas</span>
                 <span className="rounded-full bg-[#e87422]/12 px-3 py-1">Velas digitales</span>
               </div>
             </div>

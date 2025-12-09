@@ -89,7 +89,7 @@ export default async function PabloNerudaMemorialPage() {
     return (
       <div className="mx-auto max-w-4xl space-y-6 rounded-3xl border border-[#e0e0e0] bg-white/80 p-8 text-center text-[#333333]">
         <h1 className="text-3xl font-serif text-[#333333]">Memorial privado de Pablo Neruda</h1>
-        <p>Inicia sesión para acceder a esta vista curada.</p>
+        <p>Inicia sesión para ver este memorial completo.</p>
         <Link
           href="/login"
           className="inline-flex items-center justify-center rounded-full border border-[#e87422]/70 px-5 py-3 text-[11px] uppercase tracking-[0.35em] text-[#e87422]"

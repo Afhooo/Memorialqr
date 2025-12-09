@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     birth_date: "1950-06-12",
     death_date: "2024-02-02",
     description:
-      "Espacio listo para mostrar el flujo: datos básicos, obituario, condolencias y símbolos digitales. Cambia estos datos cuando quieras.",
+      "Espacio de ejemplo para mostrar cómo se ve un memorial en marcha: datos básicos, obituario, condolencias y símbolos digitales. Luego podrás ajustarlo a la historia real.",
   };
 
   const { error: memorialError } = await supabase.from("memorials").insert(memorialPayload);

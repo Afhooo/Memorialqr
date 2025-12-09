@@ -145,7 +145,7 @@ export function MemorialCreatorForm() {
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-[0.14em] text-white/70">Guía de creación</p>
             <h3 className="text-xl font-semibold leading-tight">Completa cada etapa con claridad</h3>
-            <p className="text-sm text-white/70">Identidad, portada, recuerdo y publicación en un flujo guiado.</p>
+            <p className="text-sm text-white/70">Identidad, portada, recuerdo y publicación en un recorrido guiado.</p>
           </div>
           <div className="flex items-center gap-3 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm">
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]">
@@ -189,7 +189,7 @@ export function MemorialCreatorForm() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Identidad editorial</p>
-            <p className="text-sm text-[#475569]">Dale tono curado a nombre, fechas y obituario.</p>
+            <p className="text-sm text-[#475569]">Dale un tono cuidado a nombre, fechas y obituario.</p>
           </div>
           <div className="w-full max-w-[220px]">
             <div className="flex items-center justify-between text-xs text-[#475569]">
@@ -282,7 +282,7 @@ export function MemorialCreatorForm() {
               />
             </label>
             <div className="rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a]">
-              <p className="font-semibold text-[#e87422]">Tip de curaduría</p>
+              <p className="font-semibold text-[#e87422]">Tip editorial</p>
               <p className="text-[#475569]">Portadas horizontales y retratos nítidos mejoran la lectura en móvil y escritorio.</p>
             </div>
           </div>

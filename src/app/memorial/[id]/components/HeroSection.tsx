@@ -61,7 +61,7 @@ export function HeroSection({
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_15px_45px_rgba(0,0,0,0.25)]">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Recuerdos curados</p>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Recuerdos publicados</p>
               <p className="mt-2 text-2xl font-serif text-white">{memoryCount}</p>
               <p className="text-xs text-white/80">
                 {memoryCount ? "Capítulos publicados y visibles" : "Aún no hay memorias cargadas"}

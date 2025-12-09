@@ -39,12 +39,12 @@ export default async function ChooseProfilePage() {
             {session.user.email}
           </span>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2" aria-label="Formas de entrar a tu espacio">
           <div className="flex flex-col gap-3 rounded-[18px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.06)]">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Modo negocio</p>
-            <h3 className="text-xl font-serif text-[#333333]">Entrar como administrador</h3>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Funeraria / equipo</p>
+            <h3 className="text-xl font-serif text-[#333333]">Entrar como administrador de Recuerdame</h3>
             <p className="text-sm text-[#4a4a4a]">
-              Gestiona clientes, memoriales y actividad global. Vista estilo CRM para operar la plataforma.
+              Revisa los memoriales activos de tus familias, ayuda a editar textos y mantén un vistazo general del uso del servicio.
             </p>
             <Link
               href="/admin"
@@ -59,10 +59,10 @@ export default async function ChooseProfilePage() {
             </Link>
           </div>
           <div className="flex flex-col gap-3 rounded-[18px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.06)]">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Modo cliente</p>
-            <h3 className="text-xl font-serif text-[#333333]">Entrar como propietario</h3>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Familia</p>
+            <h3 className="text-xl font-serif text-[#333333]">Entrar como persona que cuida el memorial</h3>
             <p className="text-sm text-[#4a4a4a]">
-              Crea y administra tus memoriales, actualiza datos y revisa condolencias como dueño.
+              Actualiza el memorial, sube fotos, revisa condolencias y mantén vivo el espacio de quien ya partió.
             </p>
             <div className="flex flex-wrap gap-2">
               <Link
@@ -81,8 +81,8 @@ export default async function ChooseProfilePage() {
           </div>
         </div>
         <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 px-4 py-3 text-sm text-[#4a4a4a] shadow-[0_14px_40px_rgba(0,0,0,0.05)]">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Demo</p>
-          <p>Elige un perfil propio o abre el demo público para mostrar la experiencia completa.</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Para mostrar a alguien más</p>
+          <p>Puedes abrir tu propio memorial o usar el ejemplo público para enseñar cómo se ve un espacio ya armado.</p>
         </div>
       </div>
 
