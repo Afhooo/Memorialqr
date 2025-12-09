@@ -67,7 +67,7 @@ export default async function RootLayout({
                   Crear memorial
                 </Link>
                 <Link
-                  href="/#inventario"
+                  href={session ? "/panel" : "/#inventario"}
                   className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
                 >
                   Explorar memoriales
