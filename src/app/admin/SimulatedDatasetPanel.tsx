@@ -52,6 +52,7 @@ export function SimulatedDatasetPanel() {
   const lastPoint = currentPoints[currentPoints.length - 1];
   const lastActivationRate =
     lastPoint && lastPoint.sold ? Math.round((lastPoint.activated / lastPoint.sold) * 100) : 0;
+  const chartMinWidth = useMemo(() => Math.max(720, currentPoints.length * 52), [currentPoints.length]);
 
   const chartData: ChartData<"bar" | "line"> = useMemo(
     () => ({
@@ -254,14 +255,16 @@ export function SimulatedDatasetPanel() {
             </div>
           </div>
 
-          <div className="relative mt-4 h-80 rounded-xl border border-white/60 bg-white">
-            {chartError ? (
-              <ChartErrorFallback message={chartError} onRetry={() => setChartError(null)} />
-            ) : (
-              <ChartErrorBoundary onError={(error) => setChartError(error?.message || "Error desconocido en gráfico")}>
-                <RuntimeChart type="bar" data={chartData} options={chartOptions} />
-              </ChartErrorBoundary>
-            )}
+          <div className="relative mt-4 h-80 overflow-x-auto rounded-xl border border-white/60 bg-white">
+            <div className="h-full" style={{ minWidth: `${chartMinWidth}px` }}>
+              {chartError ? (
+                <ChartErrorFallback message={chartError} onRetry={() => setChartError(null)} />
+              ) : (
+                <ChartErrorBoundary onError={(error) => setChartError(error?.message || "Error desconocido en gráfico")}>
+                  <RuntimeChart type="bar" data={chartData} options={chartOptions} />
+                </ChartErrorBoundary>
+              )}
+            </div>
           </div>
         </div>
 
