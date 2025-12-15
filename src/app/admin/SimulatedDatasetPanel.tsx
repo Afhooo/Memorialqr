@@ -1,19 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  type ChartData,
-  type ChartOptions,
-} from "chart.js";
-import { Chart as ChartComponent } from "react-chartjs-2";
 
 type TimeGranularity = "day" | "week" | "month";
 
@@ -32,8 +19,6 @@ type AggregatedPoint = {
 };
 
 const CAPACITY_MEMORIES = 1000;
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend);
 
 export function SimulatedDatasetPanel() {
   const [granularity, setGranularity] = useState<TimeGranularity>("month");
@@ -56,120 +41,6 @@ export function SimulatedDatasetPanel() {
   const lastPoint = currentPoints[currentPoints.length - 1];
   const lastActivationRate =
     lastPoint && lastPoint.sold ? Math.round((lastPoint.activated / lastPoint.sold) * 100) : 0;
-
-  const chartData: ChartData<"bar" | "line"> = useMemo(
-    () => ({
-      labels: currentPoints.map((point) => point.label),
-      datasets: [
-        {
-          type: "bar" as const,
-          label: "Memoriales vendidos",
-          data: currentPoints.map((point) => point.sold),
-          backgroundColor: "rgba(56, 189, 248, 0.9)",
-          hoverBackgroundColor: "rgba(56, 189, 248, 1)",
-          borderColor: "#0ea5e9",
-          borderRadius: 6,
-          maxBarThickness: 24,
-        },
-        {
-          type: "bar" as const,
-          label: "Memoriales activados",
-          data: currentPoints.map((point) => point.activated),
-          backgroundColor: "rgba(34, 197, 94, 0.9)",
-          hoverBackgroundColor: "rgba(34, 197, 94, 1)",
-          borderColor: "#16a34a",
-          borderRadius: 6,
-          maxBarThickness: 24,
-        },
-        {
-          type: "line" as const,
-          label: "% uso plan",
-          data: currentPoints.map((point) => point.usagePct),
-          borderColor: "#facc15",
-          backgroundColor: "rgba(250, 204, 21, 0.18)",
-          borderWidth: 2,
-          yAxisID: "y1",
-          tension: 0.3,
-          pointRadius: 3,
-          pointHoverRadius: 6,
-          pointBorderWidth: 1,
-          pointBackgroundColor: "#facc15",
-          pointBorderColor: "#92400e",
-        },
-      ],
-    }),
-    [currentPoints],
-  );
-
-  const chartOptions: ChartOptions<"bar" | "line"> = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 700,
-        easing: "easeOutQuart",
-      },
-      interaction: {
-        mode: "index",
-        intersect: false,
-      },
-      hover: {
-        mode: "index",
-        intersect: false,
-        animationDuration: 250,
-      },
-      plugins: {
-        legend: {
-          position: "bottom",
-          labels: {
-            font: { size: 11 },
-          },
-        },
-        tooltip: {
-          callbacks: {
-            label(context) {
-              const value = context.parsed.y;
-              if (context.dataset.type === "line") {
-                const numeric = typeof value === "number" ? value : Number(value ?? 0);
-                return `${context.dataset.label}: ${numeric.toFixed(1)}%`;
-              }
-              return `${context.dataset.label}: ${value}`;
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          grid: {
-            display: false,
-          },
-          ticks: {
-            maxRotation: 0,
-            minRotation: 0,
-          },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            precision: 0,
-          },
-        },
-        y1: {
-          position: "right",
-          beginAtZero: true,
-          grid: {
-            drawOnChartArea: false,
-          },
-          ticks: {
-            callback(value) {
-              return `${value}%`;
-            },
-          },
-        },
-      },
-    }),
-    [],
-  );
 
   return (
     <section
@@ -241,7 +112,7 @@ export function SimulatedDatasetPanel() {
           </div>
 
           <div className="relative mt-4 h-64">
-            <ChartComponent type="bar" data={chartData} options={chartOptions} />
+            <SparkChart points={currentPoints} />
           </div>
         </div>
 
@@ -456,5 +327,143 @@ function TopBranchesPanel() {
         })}
       </div>
     </div>
+  );
+}
+
+type SparkChartProps = {
+  points: AggregatedPoint[];
+};
+
+function SparkChart({ points }: SparkChartProps) {
+  if (!points.length) {
+    return (
+      <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[#e5e7eb] bg-[#f9fafb] text-sm text-[#6b7280]">
+        Sin datos para graficar
+      </div>
+    );
+  }
+
+  const maxPrimary = useMemo(
+    () => points.reduce((max, point) => Math.max(max, point.sold, point.activated), 1),
+    [points],
+  );
+  const width = Math.max(320, points.length * 56);
+  const height = 240;
+  const padding = { top: 16, right: 46, bottom: 48, left: 46 };
+  const plotWidth = width - padding.left - padding.right;
+  const plotHeight = height - padding.top - padding.bottom;
+  const step = plotWidth / Math.max(points.length, 1);
+
+  const yPrimary = (value: number) => padding.top + (1 - value / maxPrimary) * plotHeight;
+  const ySecondary = (value: number) => padding.top + (1 - value / 100) * plotHeight;
+  const xForIndex = (index: number) => padding.left + index * step + step / 2;
+
+  const usagePath = points
+    .map((point, index) => `${xForIndex(index)},${ySecondary(point.usagePct)}`)
+    .join(" ");
+  const usageArea = `${usagePath} ${padding.left + plotWidth},${padding.top + plotHeight} ${padding.left},${padding.top + plotHeight}`;
+
+  const ticks = useMemo(() => {
+    const raw = [0, maxPrimary / 2, maxPrimary];
+    return raw.map((value) => Math.round(value));
+  }, [maxPrimary]);
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full">
+      <defs>
+        <linearGradient id="usageFill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#facc15" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#facc15" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+
+      <rect
+        x={padding.left}
+        y={padding.top}
+        width={plotWidth}
+        height={plotHeight}
+        className="fill-[#f8fafc] stroke-[#e5e7eb]"
+        rx={12}
+      />
+
+      {/* Grid */}
+      {ticks.map((value) => {
+        const y = yPrimary(value);
+        return (
+          <g key={value}>
+            <line x1={padding.left} x2={padding.left + plotWidth} y1={y} y2={y} className="stroke-[#e5e7eb]" />
+            <text x={padding.left - 8} y={y + 4} textAnchor="end" className="fill-[#6b7280] text-[10px]">
+              {value}
+            </text>
+          </g>
+        );
+      })}
+      <text
+        x={width - padding.right + 6}
+        y={padding.top + 10}
+        textAnchor="start"
+        className="fill-[#facc15] text-[10px]"
+      >
+        % uso plan
+      </text>
+
+      {/* Usage area + line */}
+      <polygon
+        points={usageArea}
+        fill="url(#usageFill)"
+        stroke="none"
+        className="transition-all duration-300 ease-out"
+      />
+      <polyline
+        points={usagePath}
+        fill="none"
+        stroke="#facc15"
+        strokeWidth={2}
+        className="transition-all duration-300 ease-out"
+      />
+
+      {/* Bars */}
+      {points.map((point, index) => {
+        const center = xForIndex(index);
+        const groupWidth = Math.min(40, step * 0.7);
+        const barWidth = Math.max(10, groupWidth / 2 - 3);
+        const soldHeight = plotHeight * (point.sold / maxPrimary);
+        const activatedHeight = plotHeight * (point.activated / maxPrimary);
+        const soldX = center - groupWidth / 2;
+        const activatedX = center - groupWidth / 2 + barWidth + 6;
+        const baseY = padding.top + plotHeight;
+
+        return (
+          <g key={point.label} className="transition-all duration-300 ease-out">
+            <rect
+              x={soldX}
+              y={baseY - soldHeight}
+              width={barWidth}
+              height={soldHeight}
+              rx={6}
+              className="fill-[#38bdf8] stroke-[#0ea5e9]"
+            />
+            <rect
+              x={activatedX}
+              y={baseY - activatedHeight}
+              width={barWidth}
+              height={activatedHeight}
+              rx={6}
+              className="fill-[#22c55e] stroke-[#16a34a]"
+            />
+            <circle cx={center} cy={ySecondary(point.usagePct)} r={3} className="fill-[#facc15] stroke-[#92400e]" />
+            <text
+              x={center}
+              y={baseY + 14}
+              textAnchor="middle"
+              className="fill-[#0f172a] text-[9px]"
+              transform={`rotate(0 ${center} ${baseY + 14})`}
+            >
+              {point.label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
   );
 }
