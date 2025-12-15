@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
+import { Component, type ReactNode } from "react";
 import type { ChartData, ChartOptions } from "chart.js";
 
 const RuntimeChart = dynamic(() => import("./SimulatedDatasetRuntimeChart"), {
@@ -31,6 +32,7 @@ const CAPACITY_MEMORIES = 1000;
 
 export function SimulatedDatasetPanel() {
   const [granularity, setGranularity] = useState<TimeGranularity>("month");
+  const [chartError, setChartError] = useState<string | null>(null);
 
   const { monthlyHistory, monthlyAggregates } = useMemo(() => buildMonthlyHistory(), []);
   const weeklyAggregates = useMemo(() => buildWeeklyAggregates(monthlyHistory), [monthlyHistory]);
@@ -253,7 +255,13 @@ export function SimulatedDatasetPanel() {
           </div>
 
           <div className="relative mt-4 h-80 rounded-xl border border-white/60 bg-white">
-            <RuntimeChart type="bar" data={chartData} options={chartOptions} />
+            {chartError ? (
+              <ChartErrorFallback message={chartError} onRetry={() => setChartError(null)} />
+            ) : (
+              <ChartErrorBoundary onError={(error) => setChartError(error?.message || "Error desconocido en gráfico")}>
+                <RuntimeChart type="bar" data={chartData} options={chartOptions} />
+              </ChartErrorBoundary>
+            )}
           </div>
         </div>
 
@@ -467,6 +475,51 @@ function TopBranchesPanel() {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+type ChartErrorBoundaryProps = {
+  children: ReactNode;
+  onError: (error: Error) => void;
+};
+
+type ChartErrorBoundaryState = {
+  hasError: boolean;
+};
+
+class ChartErrorBoundary extends Component<ChartErrorBoundaryProps, ChartErrorBoundaryState> {
+  state: ChartErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: unknown) {
+    console.error("Chart runtime error", error, info);
+    this.props.onError(error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
+
+function ChartErrorFallback({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#fecdd3] bg-[#fff1f2] px-4 text-center text-sm text-[#9f1239]">
+      <p className="font-semibold">No pudimos renderizar el gráfico</p>
+      <p className="text-xs text-[#b91c1c]">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="rounded-full bg-[#0ea5e9] px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white shadow-sm hover:bg-[#0284c7]"
+      >
+        Reintentar
+      </button>
     </div>
   );
 }
