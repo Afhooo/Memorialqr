@@ -1,21 +1,8 @@
 "use client";
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  Filler,
-  type ChartData,
-  type ChartOptions,
-} from "chart.js";
+import type { ChartData, ChartOptions } from "chart.js";
+import "chart.js/auto";
 import { Chart as ChartComponent } from "react-chartjs-2";
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend, Filler);
 
 type RuntimeChartProps = {
   type: "bar";
