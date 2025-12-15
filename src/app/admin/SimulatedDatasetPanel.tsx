@@ -52,7 +52,11 @@ export function SimulatedDatasetPanel() {
   const lastPoint = currentPoints[currentPoints.length - 1];
   const lastActivationRate =
     lastPoint && lastPoint.sold ? Math.round((lastPoint.activated / lastPoint.sold) * 100) : 0;
-  const chartMinWidth = useMemo(() => Math.max(720, currentPoints.length * 52), [currentPoints.length]);
+  const chartMinWidth = useMemo(
+    () => Math.min(1200, Math.max(720, currentPoints.length * 46)),
+    [currentPoints.length],
+  );
+  const chartMaxWidth = 1200;
 
   const chartData: ChartData<"bar" | "line"> = useMemo(
     () => ({
@@ -256,7 +260,10 @@ export function SimulatedDatasetPanel() {
           </div>
 
           <div className="relative mt-4 h-80 overflow-x-auto rounded-xl border border-white/60 bg-white">
-            <div className="h-full" style={{ minWidth: `${chartMinWidth}px` }}>
+            <div
+              className="h-full"
+              style={{ minWidth: `${chartMinWidth}px`, maxWidth: `${chartMaxWidth}px`, margin: "0 auto" }}
+            >
               {chartError ? (
                 <ChartErrorFallback message={chartError} onRetry={() => setChartError(null)} />
               ) : (

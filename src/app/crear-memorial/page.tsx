@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "@/lib/serverSession";
 import { MemorialCreatorForm } from "@/app/panel/MemorialCreatorForm";
+import { PanelBackButton } from "./panelBackButton";
 
 export default async function CrearMemorialPage() {
   const session = await getServerSession();
@@ -46,12 +47,7 @@ export default async function CrearMemorialPage() {
             >
               Ver demo
             </Link>
-            <Link
-              href="/panel"
-              className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-white transition hover:border-[#e87422] hover:text-[#e87422]"
-            >
-              Volver al panel
-            </Link>
+            <PanelBackButton />
           </div>
         </div>
       </section>
