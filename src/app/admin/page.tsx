@@ -41,22 +41,45 @@ export default async function AdminPage() {
   }
 
   const supabase = createSupabaseServerClient();
+  let memorialsData: MemorialRecord[] | null = null;
+  let memoriesData: MemoryRecord[] | null = null;
+  let usersData: AdminUserRecord[] | null = null;
+  let loadError: string | null = null;
 
-  const [
-    { data: memorialsData, error: memorialsError },
-    { data: memoriesData, error: memoriesError },
-    { data: usersData, error: usersError },
-  ] = await Promise.all([
-    supabase
-      .from("memorials")
-      .select("id, name, owner_id")
-      .order("name", { ascending: true }),
-    supabase.from("memories").select("id, memorial_id, created_at").order("created_at", { ascending: false }),
-    supabase.from("admin_users").select("id, email, role, created_at").order("created_at", { ascending: false }),
-  ]);
+  try {
+    const [memorialsRes, memoriesRes, usersRes] = await Promise.all([
+      supabase.from("memorials").select("id, name, owner_id").order("name", { ascending: true }),
+      supabase.from("memories").select("id, memorial_id, created_at").order("created_at", { ascending: false }),
+      supabase.from("admin_users").select("id, email, role, created_at").order("created_at", { ascending: false }),
+    ]);
 
-  if (memorialsError || memoriesError || usersError) {
-    throw new Error(memorialsError?.message || memoriesError?.message || usersError?.message || "Error al cargar datos");
+    memorialsData = memorialsRes.data;
+    memoriesData = memoriesRes.data;
+    usersData = usersRes.data;
+
+    loadError = memorialsRes.error?.message || memoriesRes.error?.message || usersRes.error?.message || null;
+  } catch (error) {
+    loadError = error instanceof Error ? error.message : "No fue posible cargar datos";
+  }
+
+  if (loadError) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-10 text-[#0f172a]">
+        <div className="rounded-2xl border border-[#fecaca] bg-[#fef2f2] p-5 text-sm text-[#991b1b] shadow-[0_18px_55px_rgba(185,28,28,0.12)]">
+          <p className="text-[11px] uppercase tracking-[0.32em] text-[#b91c1c]">Error al cargar panel</p>
+          <p className="mt-2 font-semibold">No pudimos cargar los datos del panel admin.</p>
+          <p className="mt-1 text-[#7f1d1d]">
+            {loadError}
+          </p>
+          <p className="mt-2 text-xs text-[#9f1239]">
+            Verifica las variables de entorno de Supabase en Vercel (URL y ANON KEY) y los permisos de lectura en las tablas
+            <code className="ml-1 rounded bg-white/70 px-2 py-0.5">memorials</code>,{" "}
+            <code className="rounded bg-white/70 px-2 py-0.5">memories</code> y{" "}
+            <code className="rounded bg-white/70 px-2 py-0.5">admin_users</code>.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const memorials = memorialsData ?? [];
