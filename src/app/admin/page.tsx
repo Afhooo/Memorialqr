@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 import { formatDate } from "@/app/memorial/[id]/components/dateUtils";
-import { SimulatedDatasetPanel } from "./SimulatedDatasetPanel";
 
 type MemorialRecord = {
   id: string;
@@ -295,95 +294,49 @@ export default async function AdminPage() {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.8fr,1.2fr]">
-        <div className="space-y-6">
-          <SimulatedDatasetPanel />
-        </div>
-
-        <div className="space-y-6">
-          <section
-            id="ritmo-ventas"
-            className="rounded-[24px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.08)]"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Embudo de uso</p>
-                <h2 className="text-xl font-serif text-[#111827]">Ventas y activaciones por período</h2>
-                <p className="text-sm text-[#4b5563]">
-                  Vista rápida del ritmo comercial por día, semana y mes.
-                </p>
-              </div>
-              <div className="rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-[#4b5563]">
-                Datos agregados de la plataforma
-              </div>
+      <section className="space-y-6">
+        <section
+          id="ritmo-ventas"
+          className="rounded-[24px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.08)]"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Embudo de uso</p>
+              <h2 className="text-xl font-serif text-[#111827]">Ventas y activaciones (resumen rápido)</h2>
+              <p className="text-sm text-[#4b5563]">
+                Vista en texto plano para evitar errores del dashboard visual.
+              </p>
             </div>
+            <div className="rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-[#4b5563]">
+              Datos agregados de la plataforma
+            </div>
+          </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              {[
-                {
-                  label: "Hoy",
-                  subtitle: "Corte al día calendario actual",
-                  sold: funnelToday.sold,
-                  activated: funnelToday.activated,
-                },
-                {
-                  label: "Semana actual",
-                  subtitle: "Desde el lunes a hoy",
-                  sold: funnelWeek.sold,
-                  activated: funnelWeek.activated,
-                },
-                {
-                  label: "Mes en curso",
-                  subtitle: "Desde el 1 del mes",
-                  sold: funnelMonth.sold,
-                  activated: funnelMonth.activated,
-                },
-              ].map((bucket) => {
-                const activationPercent =
-                  bucket.sold > 0 ? Math.round((bucket.activated / bucket.sold) * 100) : 0;
-                const activationBarWidth = bucket.sold > 0 ? `${Math.min(100, activationPercent)}%` : "0%";
-
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {[{ label: "Hoy", ...funnelToday }, { label: "Semana actual", ...funnelWeek }, { label: "Mes en curso", ...funnelMonth }].map(
+              (bucket) => {
+                const activationPercent = bucket.sold > 0 ? Math.round((bucket.activated / bucket.sold) * 100) : 0;
                 return (
                   <div
                     key={bucket.label}
-                    className="flex flex-col justify-between rounded-2xl border border-[#e0e0e0] bg-white/95 p-4 shadow-[0_16px_44px_rgba(0,0,0,0.06)] transition hover:-translate-y-[2px] hover:shadow-[0_22px_60px_rgba(0,0,0,0.08)]"
+                    className="rounded-2xl border border-[#e0e0e0] bg-white/95 p-4 text-sm text-[#111827] shadow-[0_16px_44px_rgba(0,0,0,0.06)]"
                   >
-                    <div className="space-y-1">
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">{bucket.label}</p>
-                      <p className="text-xs text-[#4b5563]">{bucket.subtitle}</p>
-                    </div>
-                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-[#111827]">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#6b7280]">Vendidos</p>
-                        <p className="mt-1 text-2xl font-serif">{bucket.sold}</p>
-                        <p className="mt-1 text-[11px] text-[#6b7280]">Servicios donde se ofreció un memorial.</p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#6b7280]">Activados</p>
-                        <p className="mt-1 text-2xl font-serif">{bucket.activated}</p>
-                        <p className="mt-1 text-[11px] text-[#6b7280]">Memoriales con al menos un recuerdo.</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 space-y-2">
-                      <div className="flex items-center justify-between text-[11px] text-[#4b5563]">
-                        <span>Tasa de activación</span>
-                        <span className="font-semibold">
-                          {activationPercent}
-                          <span className="ml-0.5 text-[10px] font-normal">%</span>
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full bg-[#f3f4f6]">
-                        <div
-                          className="h-2 rounded-full bg-gradient-to-r from-[#e87422] via-[#fbbf77] to-[#34d399]"
-                          style={{ width: activationBarWidth }}
-                        />
-                      </div>
-                    </div>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">{bucket.label}</p>
+                    <p className="mt-1 text-xs text-[#4b5563]">
+                      Vendidos: <span className="font-semibold">{bucket.sold}</span>
+                    </p>
+                    <p className="text-xs text-[#4b5563]">
+                      Activados: <span className="font-semibold">{bucket.activated}</span>
+                    </p>
+                    <p className="text-xs text-[#4b5563]">
+                      Tasa: <span className="font-semibold">{activationPercent}%</span>
+                    </p>
                   </div>
                 );
-              })}
-            </div>
-          </section>
+              },
+            )}
+          </div>
+        </section>
 
           <section
             id="clientes"
@@ -501,8 +454,7 @@ export default async function AdminPage() {
             </div>
           </div>
         </div>
-          </section>
-        </div>
+        </section>
       </section>
 
       {/* Secciones de servicios contratados y actividad reciente eliminadas para un cierre más limpio */}
