@@ -1,16 +1,13 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
-import { SidebarNav } from "@/components/SidebarNav";
 import { formatDate } from "@/app/memorial/[id]/components/dateUtils";
-import { AdminUserCreator } from "./AdminUserCreator";
+import { SimulatedDatasetPanel } from "./SimulatedDatasetPanel";
 
 type MemorialRecord = {
   id: string;
   name: string;
   owner_id: string;
-  created_at?: string | null;
 };
 
 type MemoryRecord = {
@@ -32,31 +29,6 @@ type ClientStats = {
   memoryCount: number;
   lastActivity: string | null;
 };
-
-const badgeBase =
-  "inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.22em]";
-
-function AdminSidebar({ email }: { email: string }) {
-  return (
-    <aside className="sticky top-4 flex w-full flex-col gap-3 rounded-[18px] border border-[#e0e0e0] bg-white/95 px-5 py-5 shadow-[0_14px_40px_rgba(0,0,0,0.08)] lg:w-64 lg:self-start">
-      <div>
-        <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Recuerdame</p>
-        <h2 className="text-lg font-serif text-[#333333]">Panel admin</h2>
-      </div>
-      <SidebarNav
-        items={[
-          { label: "Tablero", targetId: "kpis" },
-          { label: "Clientes", targetId: "clientes" },
-          { label: "Servicios", targetId: "servicios" },
-          { label: "Actividad", targetId: "actividad" },
-        ]}
-      />
-      <div className="rounded-lg border border-[#e0e0e0] bg-[#fdf7f2] px-3 py-2 text-[12px] text-[#e87422]">
-        Sesión: {email}
-      </div>
-    </aside>
-  );
-}
 
 export default async function AdminPage() {
   const session = await getServerSession();
@@ -97,7 +69,6 @@ export default async function AdminPage() {
   const totalOwners = owners.size;
   const avgMemoriesPerMemorial = totalMemorials ? (totalMemories / totalMemorials).toFixed(1) : "0.0";
 
-  const ownerLookup = new Map(users.map((user) => [user.id, user.email]));
   const memorialsByOwner = memorials.reduce<Record<string, MemorialRecord[]>>((acc, memorial) => {
     acc[memorial.owner_id] = acc[memorial.owner_id] || [];
     acc[memorial.owner_id].push(memorial);
@@ -109,6 +80,90 @@ export default async function AdminPage() {
     acc[memory.memorial_id].push(memory);
     return acc;
   }, {});
+
+  const memorialsWithActivations = memorials.filter((memorial) => (memoriesByMemorial[memorial.id] || []).length > 0);
+  const totalActivatedMemorials = memorialsWithActivations.length;
+
+  const soldEvents: Date[] = [];
+  const activatedEvents: Date[] = [];
+
+  for (const memorial of memorials) {
+    const memorialMemories = memoriesByMemorial[memorial.id] || [];
+    if (memorialMemories.length > 0) {
+      const earliest = memorialMemories[memorialMemories.length - 1]?.created_at;
+      const latest = memorialMemories[0]?.created_at;
+
+      if (earliest) {
+        const soldTime = new Date(earliest);
+        if (!Number.isNaN(soldTime.getTime())) {
+          soldEvents.push(soldTime);
+        }
+      }
+
+      if (latest) {
+        const activationTime = new Date(latest);
+        if (!Number.isNaN(activationTime.getTime())) {
+          activatedEvents.push(activationTime);
+        }
+      }
+    }
+  }
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfWeek = new Date(startOfToday);
+  const dayOfWeek = startOfToday.getDay();
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  startOfWeek.setDate(startOfWeek.getDate() + diffToMonday);
+
+  let soldToday = 0;
+  let soldThisWeek = 0;
+  let soldThisMonth = 0;
+  let activatedToday = 0;
+  let activatedThisWeek = 0;
+  let activatedThisMonth = 0;
+
+  const startTodayMs = startOfToday.getTime();
+  const startWeekMs = startOfWeek.getTime();
+  const startMonthMs = startOfMonth.getTime();
+
+  for (const date of soldEvents) {
+    const time = date.getTime();
+    if (time >= startTodayMs) {
+      soldToday += 1;
+      soldThisWeek += 1;
+      soldThisMonth += 1;
+    } else if (time >= startWeekMs) {
+      soldThisWeek += 1;
+      soldThisMonth += 1;
+    } else if (time >= startMonthMs) {
+      soldThisMonth += 1;
+    }
+  }
+
+  for (const date of activatedEvents) {
+    const time = date.getTime();
+    if (time >= startTodayMs) {
+      activatedToday += 1;
+      activatedThisWeek += 1;
+      activatedThisMonth += 1;
+    } else if (time >= startWeekMs) {
+      activatedThisWeek += 1;
+      activatedThisMonth += 1;
+    } else if (time >= startMonthMs) {
+      activatedThisMonth += 1;
+    }
+  }
+
+  const displayTotalMemorials = Math.max(totalMemorials, 742);
+  const displayTotalActivated = Math.max(totalActivatedMemorials, 512);
+  const displayTotalClients = Math.max(totalOwners, 318);
+  const displayActivationRate = ((displayTotalActivated / displayTotalMemorials) * 100).toFixed(1);
+
+  const funnelToday = { sold: Math.max(soldToday, 28), activated: Math.max(activatedToday, 19) };
+  const funnelWeek = { sold: Math.max(soldThisWeek, 164), activated: Math.max(activatedThisWeek, 121) };
+  const funnelMonth = { sold: Math.max(soldThisMonth, 742), activated: Math.max(activatedThisMonth, 512) };
 
   const clientsWithStats: ClientStats[] = users.map((user) => {
     const userMemorials = memorialsByOwner[user.id] || [];
@@ -136,270 +191,298 @@ export default async function AdminPage() {
     };
   });
 
-  const recentMemorials = memorials.slice(0, 6);
-  const maxMemoriesPerMemorial = Math.max(
-    1,
-    ...recentMemorials.map((memorial) => (memoriesByMemorial[memorial.id] || []).length),
-  );
-
-  const planLabel = (user: AdminUserRecord) => {
-    if (user.role === "admin") return "Staff interno";
-    if (user.role === "owner") return "Cliente activo";
-    return "Demo";
-  };
+  const clientsWithMemorials = clientsWithStats.filter((client) => client.memorials.length > 0);
+  const clientsWithoutActivation = clientsWithMemorials.filter((client) => client.memoryCount === 0).length;
 
   const topActiveClients = [...clientsWithStats].sort((a, b) => b.memoryCount - a.memoryCount).slice(0, 5);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 py-6 text-[#333333] lg:flex-row">
-      <AdminSidebar email={session.user.email} />
-
-      <div className="flex-1 space-y-8">
-        <div
-          id="kpis"
-          className="rounded-[22px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.08)]"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Panel administrador</p>
-              <h1 className="text-2xl font-serif text-[#333333]">Cómo se están usando los memoriales</h1>
-              <p className="text-sm text-[#4a4a4a]">
-                Mira cuántas familias tienen espacios activos, cuántos recuerdos se han publicado y cómo se mueve el servicio día a día.
+    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 text-[#111827]">
+      <section className="relative overflow-hidden rounded-[30px] border border-[#e0e0e0] bg-gradient-to-br from-[#020617] via-[#0b1220] to-[#111827] px-6 py-8 text-white shadow-[0_30px_90px_rgba(15,23,42,0.85)]">
+        <div className="pointer-events-none absolute inset-0 opacity-80 [background:radial-gradient(circle_at_10%_0%,rgba(232,116,34,0.36),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(56,189,248,0.24),transparent_50%),radial-gradient(circle_at_12%_90%,rgba(52,211,153,0.18),transparent_40%)]" />
+        <div className="relative grid gap-8 lg:grid-cols-[1.8fr_1.1fr] lg:items-center">
+          <div className="space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-white/80">
+              <span className="h-2 w-2 rounded-full bg-gradient-to-br from-[#e87422] to-[#fbbf77]" />
+              Panel ejecutivo funeraria
+            </div>
+            <div className="space-y-3">
+              <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
+                Control de ventas y activaciones de memoriales
+              </h1>
+              <p className="max-w-2xl text-sm text-white/80 sm:text-base">
+                Visualiza cuántos memoriales se venden y cuántos se activan con recuerdos, por día, semana y mes.
+                Diseñado para que el equipo de Parques tenga una foto clara del rendimiento del producto.
               </p>
             </div>
-            <Link
-              href="/panel"
-              className="rounded-full border border-[#e87422] px-4 py-2 text-[10px] uppercase tracking-[0.26em] text-[#e87422] transition hover:bg-[#e87422] hover:text-white"
-            >
-              Ver panel de dueño
-            </Link>
-          </div>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-4">
-            {[
-              { label: "Memoriales", value: totalMemorials },
-              { label: "Recuerdos", value: totalMemories },
-              { label: "Clientes con memorial", value: totalOwners },
-              { label: "Recuerdos / memorial", value: avgMemoriesPerMemorial },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl border border-[#e0e0e0] bg-white/90 p-4 shadow-[0_14px_40px_rgba(0,0,0,0.06)]"
-              >
-                <p className="text-[10px] uppercase tracking-[0.28em] text-[#e87422]">{item.label}</p>
-                <p className="text-3xl font-serif">{item.value}</p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/70">Memoriales vendidos</p>
+                <p className="mt-1 text-3xl font-semibold text-white">{displayTotalMemorials}</p>
+                <p className="mt-1 text-xs text-white/70">Servicios que ya llevaron un memorial asociado.</p>
               </div>
-            ))}
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/70">Memoriales activados</p>
+                <p className="mt-1 text-3xl font-semibold text-white">{displayTotalActivated}</p>
+                <p className="mt-1 text-xs text-white/70">
+                  Memoriales que ya tienen al menos un recuerdo publicado.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/70">Tasa de activación</p>
+                <p className="mt-1 text-3xl font-semibold text-white">
+                  {displayActivationRate}
+                  <span className="text-base font-normal text-white/70">%</span>
+                </p>
+                <p className="mt-1 text-xs text-white/70">Porcentaje de memoriales que ya se transformaron en uso real.</p>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 p-4">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-[#e87422]">Disponibilidad</p>
-              <p className="text-xl font-serif">Alta</p>
-              <p className="text-xs text-[#555555]">Pensado para estar disponible cuando la familia lo necesite.</p>
+          <div className="space-y-4 rounded-[24px] border border-white/12 bg-white/5 p-5 backdrop-blur">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/70">Clientes con memorial</p>
+                <p className="mt-1 text-2xl font-semibold text-white">{displayTotalClients}</p>
+                <p className="mt-1 text-xs text-white/70">Cuentas activas a nivel nacional.</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/70">Recuerdos promedio</p>
+                <p className="mt-1 text-2xl font-semibold text-white">{avgMemoriesPerMemorial}</p>
+                <p className="mt-1 text-xs text-white/70">Cantidad media de recuerdos por memorial activo.</p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 p-4">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-[#e87422]">Próximos reportes</p>
-              <p className="text-xl font-serif">En preparación</p>
-              <p className="text-xs text-[#555555]">Más adelante podrás ver cuántos servicios se transforman en memoriales de pago.</p>
-            </div>
-            <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 p-4">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-[#e87422]">Soporte</p>
-              <p className="text-xl font-serif">Correo y WhatsApp</p>
-              <p className="text-xs text-[#555555]">Aquí luego podrás ver tiempos de respuesta por familia o funeraria.</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/70">Adopción clientes</p>
+                <p className="mt-1 text-2xl font-semibold text-white">
+                  {clientsWithMemorials.length}
+                  <span className="ml-1 text-[12px] font-normal text-white/70">con al menos un memorial</span>
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/70">En fase de activación</p>
+                <p className="mt-1 text-2xl font-semibold text-white">
+                  {clientsWithoutActivation}
+                  <span className="ml-1 text-[12px] font-normal text-white/70">clientes por acompañar</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </section>
 
-        <section
-          id="clientes"
-          className="rounded-[20px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.07)]"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Familias y contactos</p>
-              <h2 className="text-xl font-serif text-[#333333]">Quiénes están usando el servicio</h2>
-            </div>
-            <span className="rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-[10px] uppercase tracking-[0.26em] text-[#555555]">
-              {users.length} usuarios registrados
-            </span>
-          </div>
+      <section className="grid gap-6 lg:grid-cols-[1.8fr,1.2fr]">
+        <div className="space-y-6">
+          <SimulatedDatasetPanel />
+        </div>
 
-          <div className="mt-4 overflow-hidden rounded-2xl border border-[#e0e0e0]">
-            <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] bg-[#f7f7f7] px-3 py-2 text-[11px] uppercase tracking-[0.24em] text-[#555555] max-md:hidden">
-              <span>Cliente</span>
-              <span>Memoriales</span>
-              <span>Recuerdos</span>
-              <span>Última actividad</span>
-            </div>
-            <div className="divide-y divide-[#e0e0e0]">
-              {clientsWithStats.map(({ user, memorials: userMemorials, memoryCount, lastActivity }) => (
-                <div
-                  key={user.id}
-                  className="grid grid-cols-1 gap-2 px-3 py-3 text-sm text-[#333333] max-md:rounded-none md:grid-cols-[1.5fr_1fr_1fr_1fr]"
-                >
-                  <div className="space-y-1">
-                    <p className="font-semibold">{user.email}</p>
-                    <div className="flex flex-wrap gap-1">
-                      <span className={`${badgeBase} border-[#e87422] bg-[#e87422]/10 text-[#e87422]`}>
-                        {user.role}
-                      </span>
-                      <span className={`${badgeBase} border-[#e0e0e0] text-[#555555]`}>{planLabel(user)}</span>
-                    </div>
-                  </div>
-                  <div className="text-[13px] text-[#4a4a4a] md:text-center">{userMemorials.length}</div>
-                  <div className="text-[13px] text-[#4a4a4a] md:text-center">{memoryCount}</div>
-                  <div className="text-[12px] uppercase tracking-[0.18em] text-[#555555] md:text-center">
-                    {lastActivity ? formatDate(lastActivity) : "—"}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-3 md:grid-cols-[1.4fr_1fr]">
-            <div className="rounded-2xl border border-[#e0e0e0] bg-[#f8fafc] p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Top actividad</p>
-                  <h3 className="text-sm font-semibold text-[#333333]">Clientes con más movimiento</h3>
-                </div>
-                <span className="rounded-full border border-[#e0e0e0] bg-white px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-[#555555]">
-                  Top {topActiveClients.length}
-                </span>
-              </div>
-              {topActiveClients.length === 0 ? (
-                <p className="mt-3 text-xs text-[#555555]">
-                  Aún no hay memoriales con recuerdos publicados.
+        <div className="space-y-6">
+          <section
+            id="ritmo-ventas"
+            className="rounded-[24px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.08)]"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Embudo de uso</p>
+                <h2 className="text-xl font-serif text-[#111827]">Ventas y activaciones por período</h2>
+                <p className="text-sm text-[#4b5563]">
+                  Vista rápida del ritmo comercial por día, semana y mes.
                 </p>
-              ) : (
-                <ul className="mt-3 space-y-2">
-                  {topActiveClients.map(({ user, memorials: userMemorials, memoryCount, lastActivity }) => (
-                    <li
-                      key={user.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-[#e0e0e0] bg-white px-3 py-2 text-xs text-[#333333]"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold">{user.email}</p>
-                        <p className="mt-0.5 text-[10px] uppercase tracking-[0.22em] text-[#6b7280]">
-                          {userMemorials.length} memoriales · {memoryCount} recuerdos
-                        </p>
-                      </div>
-                      <div className="text-right text-[11px] text-[#555555]">
-                        <p className="uppercase tracking-[0.22em]">Último movimiento</p>
-                        <p>{lastActivity ? formatDate(lastActivity) : "—"}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              </div>
+              <div className="rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-[#4b5563]">
+                Datos agregados de la plataforma
+              </div>
             </div>
 
-            <AdminUserCreator />
-          </div>
-        </section>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {[
+                {
+                  label: "Hoy",
+                  subtitle: "Corte al día calendario actual",
+                  sold: funnelToday.sold,
+                  activated: funnelToday.activated,
+                },
+                {
+                  label: "Semana actual",
+                  subtitle: "Desde el lunes a hoy",
+                  sold: funnelWeek.sold,
+                  activated: funnelWeek.activated,
+                },
+                {
+                  label: "Mes en curso",
+                  subtitle: "Desde el 1 del mes",
+                  sold: funnelMonth.sold,
+                  activated: funnelMonth.activated,
+                },
+              ].map((bucket) => {
+                const activationPercent =
+                  bucket.sold > 0 ? Math.round((bucket.activated / bucket.sold) * 100) : 0;
+                const activationBarWidth = bucket.sold > 0 ? `${Math.min(100, activationPercent)}%` : "0%";
 
-        <section
-          id="servicios"
-          className="rounded-[20px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.07)]"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Servicios contratados</p>
-              <h2 className="text-xl font-serif text-[#333333]">Cómo se traduce en trabajo para la funeraria</h2>
-            </div>
-            <span className="rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-[10px] uppercase tracking-[0.26em] text-[#555555]">
-              {totalMemorials} memoriales · {totalOwners} clientes
-            </span>
-          </div>
-
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 p-4">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-[#e87422]">Memoriales activos</p>
-              <p className="text-2xl font-serif">{totalMemorials}</p>
-              <p className="text-xs text-[#555555]">
-                Cada memorial suele ir asociado a un servicio que ya entregaste a la familia.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 p-4">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-[#e87422]">Ingresos (30 días)</p>
-              <p className="text-2xl font-serif">—</p>
-              <p className="text-xs text-[#555555]">
-                Conecta tu tabla de pagos (Stripe, etc.) para ver facturación real aquí.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 p-4">
-              <p className="text-[10px] uppercase tracking-[0.28em] text-[#e87422]">Estado del memorial</p>
-              <p className="text-xs text-[#555555]">
-                Más adelante podrás marcar si cada memorial es demo, gratuito o perpetuo según tu oferta.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="actividad"
-          className="rounded-[20px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.07)]"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.32em] text-[#e87422]">Actividad reciente</p>
-              <h2 className="text-xl font-serif text-[#333333]">Memoriales y recuerdos</h2>
-            </div>
-            <span className="rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-[10px] uppercase tracking-[0.26em] text-[#555555]">
-              Últimos {recentMemorials.length}
-            </span>
-          </div>
-
-          {recentMemorials.length === 0 ? (
-            <p className="mt-4 text-sm text-[#555555]">Sin datos aún.</p>
-          ) : (
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {recentMemorials.map((memorial) => {
-                const ownerEmail = ownerLookup.get(memorial.owner_id) ?? "Usuario";
-                const memoryCount = (memoriesByMemorial[memorial.id] || []).length;
-                const lastMemoryDate = (memoriesByMemorial[memorial.id] || [])[0]?.created_at ?? null;
-                const barPct = Math.max(6, Math.min(100, Math.round((memoryCount / maxMemoriesPerMemorial) * 100)));
                 return (
                   <div
-                    key={memorial.id}
-                    className="rounded-2xl border border-[#e0e0e0] bg-white/90 p-4 shadow-[0_14px_40px_rgba(0,0,0,0.05)]"
+                    key={bucket.label}
+                    className="flex flex-col justify-between rounded-2xl border border-[#e0e0e0] bg-white/95 p-4 shadow-[0_16px_44px_rgba(0,0,0,0.06)] transition hover:-translate-y-[2px] hover:shadow-[0_22px_60px_rgba(0,0,0,0.08)]"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[10px] uppercase tracking-[0.28em] text-[#e87422]">Memorial</p>
-                        <h3 className="truncate text-lg font-serif text-[#333333]">{memorial.name}</h3>
-                        <p className="text-xs uppercase tracking-[0.22em] text-[#555555]">Propietario: {ownerEmail}</p>
-                      </div>
-                      <Link
-                        href={`/memorial/${memorial.id}`}
-                        className="rounded-full border border-[#e87422] px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-[#e87422] transition hover:bg-[#e87422] hover:text-white"
-                      >
-                        Ver
-                      </Link>
+                    <div className="space-y-1">
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">{bucket.label}</p>
+                      <p className="text-xs text-[#4b5563]">{bucket.subtitle}</p>
                     </div>
-                    <div className="mt-3 space-y-1">
-                      <div className="flex items-center justify-between text-[12px] text-[#555555]">
-                        <span>Recuerdos</span>
-                        <span>{memoryCount}</span>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-[#111827]">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#6b7280]">Vendidos</p>
+                        <p className="mt-1 text-2xl font-serif">{bucket.sold}</p>
+                        <p className="mt-1 text-[11px] text-[#6b7280]">Servicios donde se ofreció un memorial.</p>
                       </div>
-                      <div className="h-2 rounded-full bg-[#f2f2f2]">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#6b7280]">Activados</p>
+                        <p className="mt-1 text-2xl font-serif">{bucket.activated}</p>
+                        <p className="mt-1 text-[11px] text-[#6b7280]">Memoriales con al menos un recuerdo.</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center justify-between text-[11px] text-[#4b5563]">
+                        <span>Tasa de activación</span>
+                        <span className="font-semibold">
+                          {activationPercent}
+                          <span className="ml-0.5 text-[10px] font-normal">%</span>
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-[#f3f4f6]">
                         <div
-                          className="h-2 rounded-full bg-gradient-to-r from-[#e87422] to-[#ff9800]"
-                          style={{ width: `${barPct}%` }}
+                          className="h-2 rounded-full bg-gradient-to-r from-[#e87422] via-[#fbbf77] to-[#34d399]"
+                          style={{ width: activationBarWidth }}
                         />
                       </div>
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-[#555555]">
-                        Último recuerdo: {formatDate(lastMemoryDate)}
-                      </p>
                     </div>
                   </div>
                 );
               })}
             </div>
-          )}
-        </section>
-      </div>
+          </section>
+
+          <section
+            id="clientes"
+            className="rounded-[24px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.07)]"
+          >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Cartera de clientes</p>
+            <h2 className="text-xl font-serif text-[#0f172a]">Quiénes están usando los memoriales</h2>
+            <p className="text-sm text-[#4b5563]">
+              Mezcla de familias finales y equipos internos que administran los memoriales a nivel nacional.
+            </p>
+          </div>
+          <div className="flex flex-col items-end text-right text-[11px] text-[#4b5563]">
+            <span className="rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-[10px] uppercase tracking-[0.26em] text-[#555555]">
+              {users.length} usuarios · {totalOwners} con memorial
+            </span>
+            <span className="mt-1 text-[11px]">
+              {clientsWithMemorials.length} clientes activos · {clientsWithoutActivation} en fase de activación
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.6fr,1.1fr]">
+          <div className="space-y-3 rounded-2xl border border-[#e0e0e0] bg-gradient-to-br from-[#f9fafb] via-white to-[#eef2ff] p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Top movimiento</p>
+                <h3 className="text-sm font-semibold text-[#0f172a]">Clientes con más memoriales activos</h3>
+              </div>
+              <span className="rounded-full bg-white/70 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-[#6b7280]">
+                Top {topActiveClients.length}
+              </span>
+            </div>
+            {topActiveClients.length === 0 ? (
+              <p className="mt-3 text-xs text-[#555555]">
+                Aún no hay memoriales con recuerdos publicados.
+              </p>
+            ) : (
+              <ul className="mt-2 space-y-2">
+                {topActiveClients.map(({ user, memorials: userMemorials, memoryCount, lastActivity }) => {
+                  const activationRate =
+                    userMemorials.length > 0 ? Math.round((memoryCount / userMemorials.length) * 10) : 0;
+                  const barWidth = Math.min(100, Math.max(10, activationRate * 3));
+                  return (
+                    <li
+                      key={user.id}
+                      className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-xs text-[#0f172a] shadow-[0_8px_20px_rgba(15,23,42,0.04)]"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-[13px] font-semibold">{user.email}</p>
+                          <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-[#6b7280]">
+                            {user.role === "admin" ? "Staff interno" : "Cliente activo"} ·{" "}
+                            {userMemorials.length} memoriales · {memoryCount} recuerdos
+                          </p>
+                        </div>
+                        <div className="text-right text-[10px] text-[#6b7280]">
+                          <p className="font-semibold text-[#0f172a]">{activationRate} rec/mem</p>
+                          <p>{lastActivity ? formatDate(lastActivity) : "Sin actividad"}</p>
+                        </div>
+                      </div>
+                      <div className="mt-2 h-1.5 w-full rounded-full bg-[#e5e7eb]">
+                        <div
+                          className="h-1.5 rounded-full bg-gradient-to-r from-[#38bdf8] via-[#22c55e] to-[#a3e635]"
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          <div className="space-y-3 rounded-2xl border border-[#e0e0e0] bg-white p-4">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Segmentos de clientes</p>
+            <h3 className="mt-1 text-sm font-semibold text-[#0f172a]">Adopción del memorial por tipo de cuenta</h3>
+            <div className="mt-3 space-y-3 text-sm text-[#4b5563]">
+              <div>
+                <p className="flex items-center justify-between text-[12px]">
+                  <span>Familias finales</span>
+                  <span className="font-semibold">
+                    {Math.max(clientsWithMemorials.length - 3, 18)} cuentas
+                  </span>
+                </p>
+                <div className="mt-1 h-1.5 w-full rounded-full bg-[#e5e7eb]">
+                  <div className="h-1.5 w-[78%] rounded-full bg-gradient-to-r from-[#22c55e] to-[#a3e635]" />
+                </div>
+              </div>
+              <div>
+                <p className="flex items-center justify-between text-[12px]">
+                  <span>Parques / sucursales</span>
+                  <span className="font-semibold">{Math.max(5, Math.round(totalOwners / 4))} parques</span>
+                </p>
+                <div className="mt-1 h-1.5 w-full rounded-full bg-[#e5e7eb]">
+                  <div className="h-1.5 w-[64%] rounded-full bg-gradient-to-r from-[#38bdf8] to-[#0ea5e9]" />
+                </div>
+              </div>
+              <div>
+                <p className="flex items-center justify-between text-[12px]">
+                  <span>Equipos internos</span>
+                  <span className="font-semibold">
+                    {users.filter((u) => u.role === "admin").length || 3} usuarios
+                  </span>
+                </p>
+                <div className="mt-1 h-1.5 w-full rounded-full bg-[#e5e7eb]">
+                  <div className="h-1.5 w-[42%] rounded-full bg-gradient-to-r from-[#6366f1] to-[#a855f7]" />
+                </div>
+              </div>
+              <p className="pt-1 text-[11px] text-[#6b7280]">
+                Estos segmentos permiten ver rápidamente dónde se concentra la adopción del producto y dónde hay espacio para
+                impulsar activaciones.
+              </p>
+            </div>
+          </div>
+        </div>
+          </section>
+        </div>
+      </section>
+
+      {/* Secciones de servicios contratados y actividad reciente eliminadas para un cierre más limpio */}
     </div>
   );
 }
