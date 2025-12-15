@@ -1,20 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  Filler,
-  type ChartData,
-  type ChartOptions,
-} from "chart.js";
-import { Chart as ChartComponent } from "react-chartjs-2";
+import type { ChartData, ChartOptions } from "chart.js";
+
+const RuntimeChart = dynamic(() => import("./SimulatedDatasetRuntimeChart"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center text-xs text-[#6b7280]">Cargando gráfico...</div>
+  ),
+});
 
 type TimeGranularity = "day" | "week" | "month";
 
@@ -33,8 +28,6 @@ type AggregatedPoint = {
 };
 
 const CAPACITY_MEMORIES = 1000;
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend, Filler);
 
 export function SimulatedDatasetPanel() {
   const [granularity, setGranularity] = useState<TimeGranularity>("month");
@@ -260,7 +253,7 @@ export function SimulatedDatasetPanel() {
           </div>
 
           <div className="relative mt-4 h-80 rounded-xl border border-white/60 bg-white">
-            <ChartComponent type="bar" data={chartData} options={chartOptions} />
+            <RuntimeChart type="bar" data={chartData} options={chartOptions} />
           </div>
         </div>
 
