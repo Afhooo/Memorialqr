@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 import { formatDate } from "@/app/memorial/[id]/components/dateUtils";
+import { SimulatedDatasetSection } from "./SimulatedDatasetSection";
 
 type MemorialRecord = {
   id: string;
@@ -295,6 +296,8 @@ export default async function AdminPage() {
       </section>
 
       <section className="space-y-6">
+        <SimulatedDatasetSection />
+
         <section
           id="ritmo-ventas"
           className="rounded-[24px] border border-[#e0e0e0] bg-gradient-to-br from-white via-[#f7f7f7] to-[#eef2ef] px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.08)]"
