@@ -52,11 +52,6 @@ export function SimulatedDatasetPanel() {
   const lastPoint = currentPoints[currentPoints.length - 1];
   const lastActivationRate =
     lastPoint && lastPoint.sold ? Math.round((lastPoint.activated / lastPoint.sold) * 100) : 0;
-  const chartMinWidth = useMemo(
-    () => Math.min(980, Math.max(720, currentPoints.length * 44)),
-    [currentPoints.length],
-  );
-  const chartMaxWidth = 1100;
 
   const chartData: ChartData<"bar" | "line"> = useMemo(
     () => ({
@@ -111,6 +106,9 @@ export function SimulatedDatasetPanel() {
     () => ({
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: { left: 8, right: 8, top: 4, bottom: 4 },
+      },
       animation: {
         duration: 800,
         easing: "easeOutQuart",
@@ -160,6 +158,8 @@ export function SimulatedDatasetPanel() {
             maxRotation: 0,
             minRotation: 0,
             font: { size: 11 },
+            autoSkip: true,
+            maxTicksLimit: 12,
           },
         },
         y: {
@@ -193,9 +193,9 @@ export function SimulatedDatasetPanel() {
   return (
     <section
       id="historia-6-meses"
-      className="rounded-[24px] border border-[#e0e0e0] bg-white px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]"
+      className="overflow-hidden rounded-[24px] border border-[#e0e0e0] bg-white px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]"
     >
-      <div className="mx-auto w-full max-w-[1180px] space-y-5">
+      <div className="mx-auto w-full max-w-[1180px] space-y-5 lg:max-w-screen-xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Últimos 6 meses</p>
@@ -231,8 +231,8 @@ export function SimulatedDatasetPanel() {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-6 lg:grid-cols-[2fr,1fr]">
-        <div className="space-y-4 rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] p-4">
+      <div className="mt-5 grid gap-6 lg:grid-cols-[2fr,1fr] lg:items-start">
+        <div className="min-w-0 space-y-4 rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-[#0ea5e9]">Serie temporal</p>
@@ -260,15 +260,8 @@ export function SimulatedDatasetPanel() {
             </div>
           </div>
 
-          <div className="relative mt-4 h-80 overflow-x-auto rounded-xl border border-white/60 bg-white">
-            <div
-              className="h-full"
-              style={{
-                minWidth: `${chartMinWidth}px`,
-                maxWidth: `${chartMaxWidth}px`,
-                margin: "0 auto",
-              }}
-            >
+          <div className="relative mt-4 h-80 min-h-[320px] min-w-0 overflow-hidden rounded-xl border border-white/60 bg-white px-2 py-2">
+            <div className="h-full w-full overflow-hidden">
               {chartError ? (
                 <ChartErrorFallback message={chartError} onRetry={() => setChartError(null)} />
               ) : (
@@ -280,7 +273,7 @@ export function SimulatedDatasetPanel() {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <div className="rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] p-4">
             <p className="text-[10px] uppercase tracking-[0.3em] text-[#0ea5e9]">Resumen numérico</p>
             <p className="mt-1 text-sm font-semibold text-[#0f172a]">

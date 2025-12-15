@@ -11,5 +11,13 @@ type RuntimeChartProps = {
 };
 
 export default function SimulatedDatasetRuntimeChart({ type, data, options }: RuntimeChartProps) {
-  return <ChartComponent type={type} data={data} options={options} />;
+  return (
+    <ChartComponent
+      type={type}
+      data={data}
+      options={options}
+      className="!h-full !w-full"
+      style={{ maxWidth: "100%", maxHeight: "100%" }}
+    />
+  );
 }
