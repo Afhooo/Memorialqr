@@ -13,7 +13,7 @@ import {
   type ChartData,
   type ChartOptions,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
+import { Chart as ChartComponent } from "react-chartjs-2";
 
 type TimeGranularity = "day" | "week" | "month";
 
@@ -57,7 +57,7 @@ export function SimulatedDatasetPanel() {
   const lastActivationRate =
     lastPoint && lastPoint.sold ? Math.round((lastPoint.activated / lastPoint.sold) * 100) : 0;
 
-  const chartData: ChartData<"bar"> = useMemo(
+  const chartData: ChartData<"bar" | "line"> = useMemo(
     () => ({
       labels: currentPoints.map((point) => point.label),
       datasets: [
@@ -101,7 +101,7 @@ export function SimulatedDatasetPanel() {
     [currentPoints],
   );
 
-  const chartOptions: ChartOptions<"bar"> = useMemo(
+  const chartOptions: ChartOptions<"bar" | "line"> = useMemo(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
@@ -241,7 +241,7 @@ export function SimulatedDatasetPanel() {
           </div>
 
           <div className="relative mt-4 h-64">
-            <Bar data={chartData} options={chartOptions} />
+            <ChartComponent type="bar" data={chartData} options={chartOptions} />
           </div>
         </div>
 
