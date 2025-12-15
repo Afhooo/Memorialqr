@@ -53,10 +53,10 @@ export function SimulatedDatasetPanel() {
   const lastActivationRate =
     lastPoint && lastPoint.sold ? Math.round((lastPoint.activated / lastPoint.sold) * 100) : 0;
   const chartMinWidth = useMemo(
-    () => Math.min(1200, Math.max(720, currentPoints.length * 46)),
+    () => Math.min(980, Math.max(720, currentPoints.length * 44)),
     [currentPoints.length],
   );
-  const chartMaxWidth = 1200;
+  const chartMaxWidth = 1100;
 
   const chartData: ChartData<"bar" | "line"> = useMemo(
     () => ({
@@ -195,6 +195,7 @@ export function SimulatedDatasetPanel() {
       id="historia-6-meses"
       className="rounded-[24px] border border-[#e0e0e0] bg-white px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]"
     >
+      <div className="mx-auto w-full max-w-[1180px] space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Últimos 6 meses</p>
@@ -262,7 +263,11 @@ export function SimulatedDatasetPanel() {
           <div className="relative mt-4 h-80 overflow-x-auto rounded-xl border border-white/60 bg-white">
             <div
               className="h-full"
-              style={{ minWidth: `${chartMinWidth}px`, maxWidth: `${chartMaxWidth}px`, margin: "0 auto" }}
+              style={{
+                minWidth: `${chartMinWidth}px`,
+                maxWidth: `${chartMaxWidth}px`,
+                margin: "0 auto",
+              }}
             >
               {chartError ? (
                 <ChartErrorFallback message={chartError} onRetry={() => setChartError(null)} />
@@ -327,6 +332,7 @@ export function SimulatedDatasetPanel() {
 
           <TopBranchesPanel />
         </div>
+      </div>
       </div>
     </section>
   );
