@@ -16,13 +16,20 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [confetti, setConfetti] = useState<Array<{ id: number; x: number; delay: number; color: string }>>([]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (loading || disabled) return;
 
     setLoading(true);
+    setProgress(6);
     setError(null);
+
+    const timer = setInterval(() => {
+      setProgress((value) => Math.min(96, value + 6 + Math.random() * 8));
+    }, 180);
 
     try {
       const response = await fetch(`/api/memorials/${memorialId}/memories`, {
@@ -41,17 +48,29 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
 
       setTitle("");
       setContent("");
+      setProgress(100);
+      setConfetti(
+        Array.from({ length: 26 }).map((_, idx) => ({
+          id: Date.now() + idx,
+          x: Math.random() * 100,
+          delay: Math.random() * 120,
+          color: ["#e87422", "#facc15", "#38bdf8", "#22c55e"][idx % 4],
+        })),
+      );
+      setTimeout(() => setConfetti([]), 1500);
       router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : "No pudimos guardar tu mensaje";
       setError(message);
     } finally {
       setLoading(false);
+      clearInterval(timer);
+      setTimeout(() => setProgress(0), 400);
     }
   };
 
   return (
-    <form className="space-y-3" onSubmit={handleSubmit}>
+    <form className="relative space-y-3 overflow-hidden" onSubmit={handleSubmit}>
       <div className="grid gap-3 sm:grid-cols-[1fr_1fr]">
         <label className="block text-xs uppercase tracking-[0.26em] text-[#555555]">
           Título del mensaje
@@ -79,6 +98,12 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
       </div>
       {helper && <p className="text-xs text-[#555555]">{helper}</p>}
       {error && <p className="text-xs text-[#b3261e]">{error}</p>}
+      <div className="h-1 overflow-hidden rounded-full bg-[#f1f5f9]">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#e87422] via-[#facc15] to-[#22c55e] transition-[width]"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
       <button
         type="submit"
         disabled={disabled || loading}
@@ -86,6 +111,40 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
       >
         {loading ? "Publicando…" : "Publicar mensaje"}
       </button>
+      {confetti.length > 0 && (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {confetti.map((piece) => (
+            <span
+              key={piece.id}
+              className="absolute text-lg animate-[confetti_1.2s_ease-out_forwards]"
+              style={{
+                left: `${piece.x}%`,
+                top: "-8%",
+                animationDelay: `${piece.delay}ms`,
+                color: piece.color,
+              }}
+            >
+              ✦
+            </span>
+          ))}
+        </div>
+      )}
+      <style jsx>{`
+        @keyframes confetti {
+          0% {
+            opacity: 0.9;
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: translateY(35vh) rotate(90deg);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(70vh) rotate(180deg);
+          }
+        }
+      `}</style>
     </form>
   );
 }

@@ -8,27 +8,35 @@ interface MemorialNavbarProps {
 
 export function MemorialNavbar({ memorialName, memoryCount, lastUpdatedLabel }: MemorialNavbarProps) {
   return (
-    <header className="flex items-center justify-between rounded-2xl border border-[#e0e0e0] bg-white/90 px-5 py-4 text-[#333333] shadow-[0_14px_50px_rgba(0,0,0,0.06)] backdrop-blur">
-      <div className="flex items-center gap-3">
+    <header className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-[#e5e7eb] bg-white px-4 py-3 text-[#111827] shadow-[0_10px_35px_rgba(0,0,0,0.06)]">
+      <Link
+        href="/"
+        className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-[#0f172a] transition hover:border-[#e87422] hover:text-[#e87422]"
+      >
+        Inicio
+      </Link>
+      <span className="rounded-full bg-[#f4f4f5] px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-[#0f172a]">
+        Muro de {memorialName}
+      </span>
+      <span className="rounded-full border border-[#e5e7eb] bg-white px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-[#6b7280]">
+        {memoryCount} recuerdos
+      </span>
+      <span className="rounded-full border border-[#e5e7eb] bg-white px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-[#6b7280]">
+        Último movimiento: {lastUpdatedLabel}
+      </span>
+      <div className="ml-auto flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-[#0f172a]">
         <Link
-          href="/"
-          className="rounded-full border border-[#e87422] bg-[#e87422]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#e87422]"
+          href="#muro"
+          className="rounded-full bg-[#e87422]/10 px-3 py-1 font-semibold text-[#e87422] transition hover:bg-[#e87422]/20"
         >
-          Recuerdame
+          Muro
         </Link>
-        <span className="text-[11px] uppercase tracking-[0.32em] text-[#555555]">Memorial privado</span>
-      </div>
-
-      <div className="flex items-center gap-3 text-sm text-[#4a4a4a]">
-        <span className="hidden rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-xs uppercase tracking-[0.32em] text-[#e87422] sm:inline">
-          {memorialName}
-        </span>
-        <span className="rounded-full border border-[#e0e0e0] bg-white/80 px-3 py-1 text-xs uppercase tracking-[0.32em] text-[#e87422]">
-          {memoryCount} recuerdos
-        </span>
-        <span className="hidden text-xs uppercase tracking-[0.32em] text-[#555555] sm:inline">
-          Último movimiento: {lastUpdatedLabel}
-        </span>
+        <Link
+          href="#galeria"
+          className="rounded-full border border-[#e5e7eb] px-3 py-1 font-semibold text-[#0f172a] transition hover:border-[#e87422] hover:text-[#e87422]"
+        >
+          Fotos / video
+        </Link>
       </div>
     </header>
   );

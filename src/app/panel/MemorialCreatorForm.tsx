@@ -140,18 +140,28 @@ export function MemorialCreatorForm() {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
-      <div className="rounded-[22px] border border-[#e6e8ef] bg-gradient-to-r from-[#0f172a] via-[#152238] to-[#0f172a] p-5 text-white shadow-[0_18px_55px_rgba(15,23,42,0.25)]">
+      <div className="rounded-[20px] border border-[#e5e7eb] bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.14em] text-white/70">Guía de creación</p>
-            <h3 className="text-xl font-semibold leading-tight">Completa cada etapa con claridad</h3>
-            <p className="text-sm text-white/70">Identidad, portada, recuerdo y publicación en un recorrido guiado.</p>
+          <div className="space-y-2">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[#6b7280]">Modo social</p>
+            <h3 className="text-2xl font-semibold leading-tight text-[#0f172a]">Arma el memorial como si fuera un post largo</h3>
+            <p className="text-sm text-[#6b7280]">Nombre, foto de portada, historia y galería en un flujo sencillo, al estilo de una red social.</p>
+            <div className="flex flex-wrap gap-2 text-xs">
+              {["Nombre", "Foto", "Historia", "Galería", "Publicar"].map((chip) => (
+                <span
+                  key={chip}
+                  className="rounded-full bg-[#f3f4f6] px-3 py-1 font-semibold uppercase tracking-[0.2em] text-[#0f172a]"
+                >
+                  {chip}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center gap-3 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm">
-            <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]">
+          <div className="flex items-center gap-3 rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-sm text-[#0f172a]">
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#0f172a]">
               Avance
             </span>
-            <span className="text-xl font-semibold text-white">{completion}%</span>
+            <span className="text-xl font-semibold text-[#0f172a]">{completion}%</span>
           </div>
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -159,13 +169,13 @@ export function MemorialCreatorForm() {
             <div
               key={step.key}
               className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs ${
-                step.done ? "border-white/30 bg-white/10 text-white" : "border-white/10 bg-white/5 text-white/70"
+                step.done ? "border-[#22c55e]/40 bg-[#dcfce7] text-[#065f46]" : "border-[#e5e7eb] bg-[#f8fafc] text-[#6b7280]"
               }`}
             >
               <div className="flex items-center gap-2">
                 <span
                   className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold ${
-                    step.done ? "bg-white text-[#0f172a]" : "bg-white/10 text-white"
+                    step.done ? "bg-white text-[#065f46]" : "bg-white text-[#6b7280]"
                   }`}
                 >
                   {step.done ? "✓" : index + 1}
@@ -176,9 +186,9 @@ export function MemorialCreatorForm() {
             </div>
           ))}
         </div>
-        <div className="mt-4 h-2 rounded-full bg-white/10">
+        <div className="mt-4 h-2 rounded-full bg-[#f1f5f9]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#e87422] via-[#f3b172] to-[#33c2b3]"
+            className="h-full rounded-full bg-gradient-to-r from-[#22c55e] via-[#e87422] to-[#3b82f6]"
             style={{ width: `${completion}%` }}
           />
         </div>
@@ -188,8 +198,13 @@ export function MemorialCreatorForm() {
         <div id="identidad" className="absolute -top-24 left-0 h-1 w-1 opacity-0" />
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Identidad editorial</p>
-            <p className="text-sm text-[#475569]">Dale un tono cuidado a nombre, fechas y obituario.</p>
+            <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Perfil rápido</p>
+            <p className="text-sm text-[#475569]">Completa como si crearas un perfil social: nombre, fechas y bio breve.</p>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+              <span className="rounded-full bg-[#f8fafc] px-3 py-1 text-[#0f172a]">Nombre + apodo</span>
+              <span className="rounded-full bg-[#f8fafc] px-3 py-1 text-[#0f172a]">Fechas</span>
+              <span className="rounded-full bg-[#f8fafc] px-3 py-1 text-[#0f172a]">Bio / obituario</span>
+            </div>
           </div>
           <div className="w-full max-w-[220px]">
             <div className="flex items-center justify-between text-xs text-[#475569]">
@@ -212,7 +227,7 @@ export function MemorialCreatorForm() {
               required
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="Nombre y apellidos"
+              placeholder="Nombre, apodo familiar o ambos"
               className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
             />
           </label>
@@ -241,7 +256,7 @@ export function MemorialCreatorForm() {
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={4}
-            placeholder="Perfil, logros, anécdotas o mensaje editorial."
+            placeholder="Cuenta quién fue, cómo lo recuerdan, como si fuera un post largo para la familia."
             className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
           />
         </label>
@@ -252,7 +267,7 @@ export function MemorialCreatorForm() {
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Portada y avatar</p>
-            <p className="text-sm text-[#475569]">Usa URLs limpias mientras habilitamos la subida directa.</p>
+            <p className="text-sm text-[#475569]">Pega links de tus fotos (Drive, iCloud, Instagram) mientras habilitamos la subida directa.</p>
           </div>
           <div className="hidden items-center gap-2 rounded-full border border-[#e6e8ef] bg-[#f8fafc] px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#0f172a] sm:flex">
             <span className="h-2 w-2 rounded-full bg-gradient-to-br from-[#e87422] to-[#33c2b3]" />
@@ -283,11 +298,11 @@ export function MemorialCreatorForm() {
             </label>
             <div className="rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a]">
               <p className="font-semibold text-[#e87422]">Tip editorial</p>
-              <p className="text-[#475569]">Portadas horizontales y retratos nítidos mejoran la lectura en móvil y escritorio.</p>
+              <p className="text-[#475569]">Usa fotos horizontales para la portada y un retrato cercano para el avatar, como lo harías en tu perfil social.</p>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-2xl border border-[#e6e8ef] bg-gradient-to-br from-[#0f172a] via-[#111c2f] to-[#0f172a] text-white shadow-[0_18px_55px_rgba(15,23,42,0.25)]">
-            <div className="relative h-44 w-full overflow-hidden">
+          <div className="relative overflow-hidden rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] text-[#0f172a] shadow-[0_16px_45px_rgba(0,0,0,0.08)]">
+            <div className="relative h-44 w-full overflow-hidden bg-white">
               {coverUrl ? (
                 coverUrl.match(/\.mp4|\.mov|\.webm/i) ? (
                   <video src={coverUrl} autoPlay loop muted className="h-full w-full object-cover" />
@@ -295,25 +310,25 @@ export function MemorialCreatorForm() {
                   <img src={coverUrl} alt="Portada mini" className="h-full w-full object-cover" />
                 )
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-[0.14em] text-white/70">
-                  Portada
+                <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-[0.14em] text-[#6b7280]">
+                  Portada estilo post
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/10 to-transparent" />
             </div>
-            <div className="absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 backdrop-blur">
-              <div className="h-12 w-12 overflow-hidden rounded-full border border-white/70 bg-white/30">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="h-12 w-12 overflow-hidden rounded-full border border-[#e5e7eb] bg-white">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Avatar mini" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-[11px] uppercase tracking-[0.16em]">
+                  <div className="flex h-full w-full items-center justify-center text-[11px] uppercase tracking-[0.16em] text-[#6b7280]">
                     Avatar
                   </div>
                 )}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">{name || "Nombre del memorial"}</p>
-                <p className="text-xs text-white/75">
+                <p className="truncate text-sm font-semibold text-[#0f172a]">{name || "Nombre del memorial"}</p>
+                <p className="text-xs text-[#6b7280]">
                   {birthDate || "Nacimiento"} · {deathDate || "Fallecimiento"}
                 </p>
               </div>
@@ -324,17 +339,17 @@ export function MemorialCreatorForm() {
 
       <div
         id="tema"
-        className="relative overflow-hidden rounded-[24px] border border-[#0f172a] bg-gradient-to-br from-[#0b1220] via-[#0f172a] to-[#0b1220] text-white shadow-[0_24px_70px_rgba(15,23,42,0.35)]"
+        className="relative overflow-hidden rounded-[24px] border border-[#e5e7eb] bg-white text-[#0f172a] shadow-[0_18px_60px_rgba(0,0,0,0.08)]"
       >
-        <div className="pointer-events-none absolute inset-0 opacity-80 [background:radial-gradient(circle_at_18%_12%,rgba(232,116,34,0.2),transparent_36%),radial-gradient(circle_at_80%_0%,rgba(41,181,165,0.16),transparent_36%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(circle_at_18%_12%,rgba(232,116,34,0.16),transparent_36%),radial-gradient(circle_at_80%_0%,rgba(41,181,165,0.14),transparent_36%)]" />
         <div className="relative grid gap-5 p-5 lg:grid-cols-[1fr,1.1fr]">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[12px] uppercase tracking-[0.14em] text-white/70">Plantilla y atmósfera</p>
-                <p className="text-sm text-white/70">Define el tono visual del memorial.</p>
+                <p className="text-[12px] uppercase tracking-[0.14em] text-[#6b7280]">Plantilla y atmósfera</p>
+                <p className="text-sm text-[#475569]">Elige un tono visual como si escogieras fondo de historia.</p>
               </div>
-              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
+              <span className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#0f172a]">
                 {template.name}
               </span>
             </div>
@@ -346,11 +361,11 @@ export function MemorialCreatorForm() {
                   onClick={() => setTemplate(tpl)}
                   className={`relative overflow-hidden rounded-2xl border-2 px-3 py-3 text-left text-sm transition ${
                     template.id === tpl.id
-                      ? "border-white shadow-[0_18px_48px_rgba(0,0,0,0.35)]"
-                      : "border-white/15 hover:border-white/50"
+                      ? "border-[#0f172a] shadow-[0_18px_48px_rgba(0,0,0,0.12)]"
+                      : "border-[#e5e7eb] hover:border-[#0f172a]/30"
                   } bg-gradient-to-br ${tpl.background}`}
                 >
-                  <span className="absolute inset-0 bg-black/10" />
+                  <span className="absolute inset-0 bg-black/5" />
                   <div className="relative space-y-1 text-white drop-shadow">
                     <span className="block text-[11px] uppercase tracking-[0.18em]">Tema</span>
                     <span className="text-base font-semibold">{tpl.name}</span>
@@ -361,8 +376,8 @@ export function MemorialCreatorForm() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/15 bg-white/5 p-3 backdrop-blur">
-            <div className="relative overflow-hidden rounded-xl border border-white/15 bg-black/10">
+          <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] p-3">
+            <div className="relative overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
               <div className="relative h-56 w-full overflow-hidden">
                 {coverUrl ? (
                   coverUrl.match(/\.mp4|\.mov|\.webm/i) ? (
@@ -371,7 +386,7 @@ export function MemorialCreatorForm() {
                     <img src={coverUrl} alt="Portada" className="h-full w-full object-cover" />
                   )
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-[0.16em] text-white/80">
+                  <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-[0.16em] text-[#6b7280]">
                     Portada
                   </div>
                 )}
@@ -396,7 +411,7 @@ export function MemorialCreatorForm() {
               </div>
 
               <div className="space-y-3 px-3 pb-3 pt-3">
-                <div className="rounded-xl border border-white/15 bg-white/90 p-3 text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.12)]">
+                <div className="rounded-xl border border-[#e5e7eb] bg-white p-3 text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] uppercase tracking-[0.14em] text-[#64748b]">Obituario</p>
                   <p className="text-sm leading-relaxed">
                     {description || "Aquí verás el obituario o resumen editorial del memorial."}
@@ -404,7 +419,7 @@ export function MemorialCreatorForm() {
                 </div>
 
                 {(draftMemory.mediaUrl || draftMemory.content) && (
-                  <div className="rounded-xl border border-white/15 bg-white/90 p-3 text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.12)]">
+                  <div className="rounded-xl border border-[#e5e7eb] bg-white p-3 text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.08)]">
                     <p className="text-[11px] uppercase tracking-[0.14em]" style={{ color: template.accent }}>
                       {draftMemory.title || "Primer recuerdo"}
                     </p>
@@ -423,15 +438,15 @@ export function MemorialCreatorForm() {
 
                 {carouselItems.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-white/80">Carrusel multimedia</p>
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-[#6b7280]">Carrusel multimedia</p>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#0b1220] via-[#0b1220]/70 to-transparent pointer-events-none" />
-                      <div className="absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#0b1220] via-[#0b1220]/70 to-transparent pointer-events-none" />
+                      <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#f8fafc] via-[#f8fafc]/70 to-transparent pointer-events-none" />
+                      <div className="absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#f8fafc] via-[#f8fafc]/70 to-transparent pointer-events-none" />
                       <div className="flex gap-3 overflow-x-auto pb-3 pr-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         {carouselItems.map((item, index) => (
                           <div
                             key={`${item.title}-${index}`}
-                            className="snap-start min-w-[230px] max-w-[260px] rounded-xl border border-white/15 bg-white/90 p-3 text-[#0f172a] shadow-[0_12px_30px_rgba(15,23,42,0.15)]"
+                            className="snap-start min-w-[230px] max-w-[260px] rounded-xl border border-[#e5e7eb] bg-white p-3 text-[#0f172a] shadow-[0_12px_30px_rgba(15,23,42,0.12)]"
                           >
                             <p className="text-[11px] uppercase tracking-[0.14em]" style={{ color: template.accent }}>
                               {item.title}
@@ -586,21 +601,21 @@ export function MemorialCreatorForm() {
 
       <div
         id="publicar"
-        className="relative overflow-hidden rounded-[24px] border border-[#0f172a] bg-gradient-to-r from-[#0f172a] via-[#182b45] to-[#0f172a] p-5 text-white shadow-[0_22px_70px_rgba(15,23,42,0.35)]"
+        className="relative overflow-hidden rounded-[24px] border border-[#e5e7eb] bg-white p-5 text-[#0f172a] shadow-[0_18px_60px_rgba(0,0,0,0.08)]"
       >
-        <div className="pointer-events-none absolute inset-0 opacity-90 [background:radial-gradient(circle_at_20%_10%,rgba(232,116,34,0.24),transparent_36%),radial-gradient(circle_at_80%_-10%,rgba(41,181,165,0.18),transparent_36%)]" />
+        <div className="pointer-events-none absolute inset-0 opacity-80 [background:radial-gradient(circle_at_20%_10%,rgba(232,116,34,0.16),transparent_36%),radial-gradient(circle_at_80%_-10%,rgba(41,181,165,0.12),transparent_36%)]" />
         <div className="relative space-y-3">
-          {error && <p className="text-xs text-[#ffb1a8]">{error}</p>}
-          {success && <p className="text-xs text-[#b3ffcc]">{success}</p>}
+          {error && <p className="text-xs text-[#b3261e]">{error}</p>}
+          {success && <p className="text-xs text-[#166534]">{success}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#0f172a] shadow-[0_18px_45px_rgba(0,0,0,0.25)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-2xl bg-[#e87422] px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_45px_rgba(232,116,34,0.35)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loading ? "Creando…" : "Publicar memorial"}
           </button>
-          <p className="text-[12px] uppercase tracking-[0.14em] text-white/75">
-            Revisa datos y tono antes de publicar.
+          <p className="text-[12px] uppercase tracking-[0.14em] text-[#6b7280]">
+            Revisa datos y tono antes de publicar; se abrirá en tu muro privado.
           </p>
         </div>
       </div>

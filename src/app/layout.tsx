@@ -29,6 +29,8 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const session = await getServerSession();
+  const isAdmin = session?.user?.role === "admin";
+  const exploreHref = session ? (isAdmin ? "/admin" : "/panel") : "/memorial/pablo-neruda";
 
   return (
     <html lang="es">
@@ -46,10 +48,10 @@ export default async function RootLayout({
                   className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:text-[#e87422]"
                 >
                   <span className="h-2 w-2 rounded-full bg-gradient-to-br from-[#e87422] to-[#ff9800]" />
-                Recuerdame
+                  Recuerdame
                 </Link>
                 <div className="sm:hidden">
-                  <AuthActions userEmail={session?.user?.email ?? null} />
+                  <AuthActions userEmail={session?.user?.email ?? null} userRole={session?.user?.role ?? null} />
                 </div>
               </div>
 
@@ -67,7 +69,7 @@ export default async function RootLayout({
                   Crear memorial
                 </Link>
                 <Link
-                  href={session ? "/panel" : "/#inventario"}
+                  href={exploreHref}
                   className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
                 >
                   Explorar memoriales
@@ -81,7 +83,7 @@ export default async function RootLayout({
               </nav>
 
               <div className="hidden items-center gap-3 sm:flex">
-                <AuthActions userEmail={session?.user?.email ?? null} />
+                <AuthActions userEmail={session?.user?.email ?? null} userRole={session?.user?.role ?? null} />
               </div>
             </div>
           </header>
