@@ -1,33 +1,52 @@
-export function TributeHighlightsSection() {
+import { formatDate } from "./dateUtils";
+
+interface TributeHighlightsSectionProps {
+  memorialName: string;
+  description: string | null;
+  birthDate: string | null;
+  deathDate: string | null;
+  memoryWindow: string;
+}
+
+export function TributeHighlightsSection({
+  memorialName,
+  description,
+  birthDate,
+  deathDate,
+  memoryWindow,
+}: TributeHighlightsSectionProps) {
   return (
-    <section className="animate-fade-rise delay-1 space-y-5">
-      <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-[#e87422]">
-        <span className="h-px w-10 bg-gradient-to-r from-transparent via-[#e87422] to-transparent" />
-        <span>Circulo del homenaje</span>
-        <span className="h-px w-10 bg-gradient-to-r from-transparent via-[#e87422] to-transparent" />
+    <section id="intro" className="relative space-y-4 pl-6 text-[#0f172a]">
+      <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-gradient-to-b from-[#e87422] via-[#0ea5e9] to-transparent" />
+      <p className="text-[11px] uppercase tracking-[0.32em] text-[#e87422]">Círculo del homenaje · tono cercano</p>
+      <h2 className="text-2xl font-serif leading-tight">Quién fue {memorialName} para su gente</h2>
+      <p className="max-w-4xl text-base leading-relaxed text-[#374151]">
+        {description ||
+          "Más que un gran personaje, alguien cotidiano al que extrañamos. Aquí quedan los momentos simples: sobremesas, audios, chistes internos y las fotos de siempre."}
+      </p>
+      <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.24em] text-[#0f172a]/80">
+        {birthDate && (
+          <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 font-semibold text-[#0f172a]">Nació {formatDate(birthDate)}</span>
+        )}
+        {deathDate && (
+          <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 font-semibold text-[#0f172a]">Lo despedimos {formatDate(deathDate)}</span>
+        )}
+        <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 font-semibold text-[#0f172a]">Ventana {memoryWindow}</span>
+        <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 font-semibold text-[#0f172a]">Familia y amigos</span>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <article className="h-full rounded-3xl border border-[#e0e0e0] bg-white/90 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.08)]">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-[#e87422]">Obituario editorial</p>
-          <h3 className="mt-2 text-xl font-serif text-[#333333]">Contexto y relato</h3>
-          <p className="mt-2 text-[#4a4a4a]">
-            Quién fue, cómo vivió y qué huellas dejó. Claro, breve y respetuoso.
-          </p>
-        </article>
-        <article className="h-full rounded-3xl border border-[#e0e0e0] bg-white/90 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.08)]">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-[#e87422]">Cartas y condolencias</p>
-          <h3 className="mt-2 text-xl font-serif text-[#333333]">Moderadas y serenas</h3>
-          <p className="mt-2 text-[#4a4a4a]">
-            Se revisan antes de mostrarse. Solo queda lo que acompaña con calma.
-          </p>
-        </article>
-        <article className="h-full rounded-3xl border border-[#e0e0e0] bg-white/90 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.08)]">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-[#e87422]">Presencia simbólica</p>
-          <h3 className="mt-2 text-xl font-serif text-[#333333]">Velas y detalles</h3>
-          <p className="mt-2 text-[#4a4a4a]">
-            Velas, flores o palomas que siguen encendidas y recuerdan que el memorial está vivo.
-          </p>
-        </article>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="flex items-start gap-3 text-sm text-[#334155]">
+          <span className="mt-1 h-9 w-[3px] rounded-full bg-gradient-to-b from-[#f59e0b] via-[#fb923c] to-transparent" />
+          <p>Ficha breve: fechas, barrio, y la frase que más repetía en casa.</p>
+        </div>
+        <div className="flex items-start gap-3 text-sm text-[#334155]">
+          <span className="mt-1 h-9 w-[3px] rounded-full bg-gradient-to-b from-[#22d3ee] via-[#60a5fa] to-transparent" />
+          <p>Relato corrido que se mezcla con el muro, como un feed que se sigue escribiendo.</p>
+        </div>
+        <div className="flex items-start gap-3 text-sm text-[#334155]">
+          <span className="mt-1 h-9 w-[3px] rounded-full bg-gradient-to-b from-[#10b981] via-[#34d399] to-transparent" />
+          <p>Chips para anclar lo esencial: familia, apodos y momentos domésticos.</p>
+        </div>
       </div>
     </section>
   );
