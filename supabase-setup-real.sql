@@ -39,3 +39,6 @@ create index if not exists sales_orders_buyer_id_idx on public.sales_orders (buy
 create index if not exists sales_orders_channel_idx on public.sales_orders (channel);
 create index if not exists sales_orders_created_at_idx on public.sales_orders (created_at desc);
 
+-- Demo opcional:
+-- Si necesitas ver el dashboard con datos llenos en un entorno de demo/staging,
+-- ejecuta también `supabase-seed-demo.sql`.

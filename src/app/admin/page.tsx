@@ -1,10 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 import { formatDate } from "@/app/memorial/[id]/components/dateUtils";
-import { SimulatedDatasetSection } from "./SimulatedDatasetSection";
-import { AdminCustomerCreator } from "./AdminCustomerCreator";
 import { SalesChannelPieChart } from "./SalesChannelPieChart";
+import { SalesOrdersTrendChart } from "./SalesOrdersTrendChart";
 
 type MemorialRecord = {
   id: string;
@@ -135,30 +135,28 @@ export default async function AdminPage() {
   const memorialsWithActivations = memorials.filter((memorial) => (memoriesByMemorial[memorial.id] || []).length > 0);
   const totalActivatedMemorials = memorialsWithActivations.length;
 
-  const soldEvents: Date[] = [];
-  const activatedEvents: Date[] = [];
+  const toValidDate = (value?: string | null) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed;
+  };
 
-  for (const memorial of memorials) {
-    const memorialMemories = memoriesByMemorial[memorial.id] || [];
-    if (memorialMemories.length > 0) {
-      const earliest = memorialMemories[memorialMemories.length - 1]?.created_at;
-      const latest = memorialMemories[0]?.created_at;
+  const normalizeChannelKey = (channel: string) => {
+    const normalized = channel.trim().toLowerCase();
+    if (normalized.includes("contact") || normalized.includes("call")) return "contact_center";
+    if (normalized.includes("web") || normalized.includes("online") || normalized.includes("ecommerce")) return "web";
+    if (normalized.includes("convenio") || normalized.includes("alianza")) return "convenios";
+    if (normalized.includes("presencial") || normalized.includes("sucursal") || normalized.includes("parque") || normalized.includes("funer")) return "presencial";
+    return normalized || "otro";
+  };
 
-      if (earliest) {
-        const soldTime = new Date(earliest);
-        if (!Number.isNaN(soldTime.getTime())) {
-          soldEvents.push(soldTime);
-        }
-      }
-
-      if (latest) {
-        const activationTime = new Date(latest);
-        if (!Number.isNaN(activationTime.getTime())) {
-          activatedEvents.push(activationTime);
-        }
-      }
-    }
-  }
+  const channelMeta = [
+    { key: "presencial", label: "Presencial", color: "rgba(14,165,233,0.92)" },
+    { key: "contact_center", label: "Contact Center", color: "rgba(34,197,94,0.92)" },
+    { key: "web", label: "Web", color: "rgba(232,116,34,0.92)" },
+    { key: "convenios", label: "Convenios", color: "rgba(168,85,247,0.84)" },
+  ] as const;
 
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -179,7 +177,26 @@ export default async function AdminPage() {
   const startWeekMs = startOfWeek.getTime();
   const startMonthMs = startOfMonth.getTime();
 
-  for (const date of soldEvents) {
+  const paidOrders = orders.filter((order) => (order.status || "").toLowerCase() === "paid");
+  const paidOrdersByBuyer = paidOrders.reduce<Record<string, SalesOrderRecord[]>>((acc, order) => {
+    acc[order.buyer_id] = acc[order.buyer_id] || [];
+    acc[order.buyer_id].push(order);
+    return acc;
+  }, {});
+
+  const salesEvents = paidOrders
+    .map((order) => toValidDate(order.created_at))
+    .filter((date): date is Date => Boolean(date));
+
+  const activationEvents = memorials
+    .map((memorial) => {
+      const memorialMemories = memoriesByMemorial[memorial.id] || [];
+      const earliest = memorialMemories[memorialMemories.length - 1]?.created_at;
+      return toValidDate(earliest ?? null);
+    })
+    .filter((date): date is Date => Boolean(date));
+
+  for (const date of salesEvents) {
     const time = date.getTime();
     if (time >= startTodayMs) {
       soldToday += 1;
@@ -193,7 +210,7 @@ export default async function AdminPage() {
     }
   }
 
-  for (const date of activatedEvents) {
+  for (const date of activationEvents) {
     const time = date.getTime();
     if (time >= startTodayMs) {
       activatedToday += 1;
@@ -207,30 +224,15 @@ export default async function AdminPage() {
     }
   }
 
-  const displayTotalMemorials = Math.max(totalMemorials, 742);
-  const displayTotalActivated = Math.max(totalActivatedMemorials, 512);
-  const displayTotalClients = Math.max(totalOwners, 318);
-  const displayActivationRate = ((displayTotalActivated / displayTotalMemorials) * 100).toFixed(1);
+  const totalSales = paidOrders.length;
+  const displayTotalMemorials = totalSales;
+  const displayTotalActivated = totalActivatedMemorials;
+  const displayTotalClients = totalOwners;
+  const displayActivationRate = (displayTotalMemorials ? (displayTotalActivated / displayTotalMemorials) * 100 : 0).toFixed(1);
 
-  const funnelToday = { sold: Math.max(soldToday, 28), activated: Math.max(activatedToday, 19) };
-  const funnelWeek = { sold: Math.max(soldThisWeek, 164), activated: Math.max(activatedThisWeek, 121) };
-  const funnelMonth = { sold: Math.max(soldThisMonth, 742), activated: Math.max(activatedThisMonth, 512) };
-
-  const displayChannelLabel = (channel: string) => {
-    const normalized = channel.trim().toLowerCase();
-    if (normalized === "funeraria" || normalized === "parque") return "Funeraria/Parque";
-    if (normalized === "web" || normalized === "online" || normalized === "ecommerce") return "Web";
-    if (normalized === "alianza" || normalized === "convenio") return "Alianzas";
-    if (normalized === "referido") return "Referidos";
-    return channel || "Otro";
-  };
-
-  const paidOrders = orders.filter((order) => (order.status || "").toLowerCase() === "paid");
-  const paidOrdersByBuyer = paidOrders.reduce<Record<string, SalesOrderRecord[]>>((acc, order) => {
-    acc[order.buyer_id] = acc[order.buyer_id] || [];
-    acc[order.buyer_id].push(order);
-    return acc;
-  }, {});
+  const funnelToday = { sold: soldToday, activated: activatedToday };
+  const funnelWeek = { sold: soldThisWeek, activated: activatedThisWeek };
+  const funnelMonth = { sold: soldThisMonth, activated: activatedThisMonth };
 
   const clientsWithStats: ClientStats[] = users.map((user) => {
     const userMemorials = memorialsByOwner[user.id] || [];
@@ -270,19 +272,63 @@ export default async function AdminPage() {
   const topActiveClients = [...clientsWithStats].sort((a, b) => b.memoryCount - a.memoryCount).slice(0, 5);
 
   const channelCounts = paidOrders.reduce<Record<string, number>>((acc, order) => {
-    const label = displayChannelLabel(order.channel || "");
-    acc[label] = (acc[label] || 0) + 1;
+    const key = normalizeChannelKey(order.channel || "");
+    acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {});
 
   const channelPoints = Object.entries(channelCounts)
-    .map(([label, value]) => ({ label, value }))
+    .map(([key, value]) => ({
+      label: channelMeta.find((c) => c.key === key)?.label ?? key,
+      value,
+    }))
     .sort((a, b) => b.value - a.value);
 
-  const totalSales = paidOrders.length;
   const customers = users.filter((user) => user.role !== "admin");
   const buyers = new Set(paidOrders.map((order) => order.buyer_id));
   const uniqueBuyers = buyers.size;
+
+  const monthBuckets = Array.from({ length: 6 }).map((_, reverseIndex) => {
+    const index = 5 - reverseIndex;
+    const start = new Date(now.getFullYear(), now.getMonth() - index, 1);
+    const key = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}`;
+    const label = start.toLocaleString("es-CL", { month: "short" }).replace(".", "") + ` ${String(start.getFullYear()).slice(-2)}`;
+    return { start, key, label };
+  });
+
+  const monthlySalesByChannel: Record<string, number[]> = {};
+  for (const channel of channelMeta) {
+    monthlySalesByChannel[channel.key] = Array.from({ length: monthBuckets.length }).map(() => 0);
+  }
+
+  for (const order of paidOrders) {
+    const created = toValidDate(order.created_at);
+    if (!created) continue;
+    const monthKey = `${created.getFullYear()}-${String(created.getMonth() + 1).padStart(2, "0")}`;
+    const bucketIndex = monthBuckets.findIndex((bucket) => bucket.key === monthKey);
+    if (bucketIndex < 0) continue;
+    const key = normalizeChannelKey(order.channel || "");
+    if (!monthlySalesByChannel[key]) {
+      monthlySalesByChannel[key] = Array.from({ length: monthBuckets.length }).map(() => 0);
+    }
+    monthlySalesByChannel[key]![bucketIndex] += 1;
+  }
+
+  const monthlyActivations = Array.from({ length: monthBuckets.length }).map(() => 0);
+  for (const activation of activationEvents) {
+    const monthKey = `${activation.getFullYear()}-${String(activation.getMonth() + 1).padStart(2, "0")}`;
+    const bucketIndex = monthBuckets.findIndex((bucket) => bucket.key === monthKey);
+    if (bucketIndex < 0) continue;
+    monthlyActivations[bucketIndex] += 1;
+  }
+
+  const monthlyLabels = monthBuckets.map((b) => b.label);
+  const channelSeries = channelMeta.map((meta) => ({
+    key: meta.key,
+    label: meta.label,
+    color: meta.color,
+    values: monthlySalesByChannel[meta.key] ?? Array.from({ length: monthBuckets.length }).map(() => 0),
+  }));
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 text-[#111827]">
@@ -299,15 +345,22 @@ export default async function AdminPage() {
                 Control de ventas y activaciones de memoriales
               </h1>
               <p className="max-w-2xl text-sm text-white/80 sm:text-base">
-                Visualiza cuántos memoriales se venden y cuántos se activan con recuerdos, por día, semana y mes.
-                Diseñado para que el equipo de Parques tenga una foto clara del rendimiento del producto.
+                Vista ejecutiva: ventas por canal, distribución mensual y activaciones (primer recuerdo publicado).
               </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/admin/usuarios"
+                className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white transition hover:bg-white/15"
+              >
+                Mantenedor usuarios
+              </Link>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-white/70">Memoriales vendidos</p>
                 <p className="mt-1 text-3xl font-semibold text-white">{displayTotalMemorials}</p>
-                <p className="mt-1 text-xs text-white/70">Servicios que ya llevaron un memorial asociado.</p>
+                <p className="mt-1 text-xs text-white/70">Órdenes pagadas registradas (sales_orders).</p>
               </div>
               <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-white/70">Memoriales activados</p>
@@ -322,7 +375,7 @@ export default async function AdminPage() {
                   {displayActivationRate}
                   <span className="text-base font-normal text-white/70">%</span>
                 </p>
-                <p className="mt-1 text-xs text-white/70">Porcentaje de memoriales que ya se transformaron en uso real.</p>
+                <p className="mt-1 text-xs text-white/70">Activados / vendidos.</p>
               </div>
             </div>
           </div>
@@ -370,7 +423,7 @@ export default async function AdminPage() {
               <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Vista macro</p>
               <h2 className="text-xl font-serif text-[#0f172a]">Canales de venta (participación)</h2>
               <p className="text-sm text-[#4b5563]">
-                Torta de participación por canal + altas reales de clientes con compra registrada.
+                Participación por canal (presencial, contact center, web, convenios).
               </p>
             </div>
             <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em]">
@@ -430,19 +483,29 @@ export default async function AdminPage() {
             </div>
 
             <div className="space-y-4">
-              <AdminCustomerCreator />
               <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] p-4 text-sm text-[#475569]">
-                <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">De lo general a lo particular</p>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Operación</p>
                 <p className="mt-2">
-                  1) Mira participación por canal → 2) crea un cliente con compra → 3) entra con ese usuario y crea el memorial
-                  → 4) vuelve aquí y revisa activación (recuerdos).
+                  Para crear usuarios/compras usa el mantenedor dedicado.
                 </p>
+                <Link
+                  href="/admin/usuarios"
+                  className="mt-3 inline-flex items-center justify-center rounded-full border border-[#0ea5e9] bg-[#0ea5e9] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white shadow-[0_12px_28px_rgba(14,165,233,0.22)] transition hover:-translate-y-[1px]"
+                >
+                  Abrir mantenedor
+                </Link>
+              </div>
+              <div className="rounded-2xl border border-[#e5e7eb] bg-white p-4">
+                <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Distribución mensual</p>
+                <h3 className="mt-1 text-sm font-semibold text-[#0f172a]">Ventas por canal + activaciones</h3>
+                <p className="mt-1 text-xs text-[#64748b]">Últimos 6 meses.</p>
+                <div className="mt-4">
+                  <SalesOrdersTrendChart labels={monthlyLabels} channels={channelSeries} activated={monthlyActivations} />
+                </div>
               </div>
             </div>
           </div>
         </section>
-
-        <SimulatedDatasetSection />
 
         <section
           id="ritmo-ventas"

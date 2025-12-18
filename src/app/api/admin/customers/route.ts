@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const role = typeof body.role === "string" && body.role.trim() ? body.role.trim() : "owner";
   const createOrder = Boolean(body.createOrder);
-  const channel = typeof body.channel === "string" ? body.channel.trim().slice(0, 80) : "funeraria";
+  const channel = typeof body.channel === "string" ? body.channel.trim().slice(0, 80) : "presencial";
   const currency = typeof body.currency === "string" && body.currency.trim() ? body.currency.trim().slice(0, 8) : "CLP";
   const externalRef = typeof body.externalRef === "string" && body.externalRef.trim() ? body.externalRef.trim().slice(0, 120) : null;
   const amountCents = typeof body.amountCents === "number" && Number.isFinite(body.amountCents) ? Math.round(body.amountCents) : null;
@@ -86,4 +86,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ user, password, order });
 }
-

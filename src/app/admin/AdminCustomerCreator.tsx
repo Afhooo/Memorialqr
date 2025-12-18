@@ -9,10 +9,10 @@ type CreatedCustomer = {
 };
 
 const CHANNELS = [
-  { value: "funeraria", label: "Funeraria / Parque" },
-  { value: "web", label: "Web / Ecommerce" },
-  { value: "alianza", label: "Alianza / Convenio" },
-  { value: "referido", label: "Referido" },
+  { value: "presencial", label: "Presencial (sucursal/parque)" },
+  { value: "contact_center", label: "Contact Center (tel/whatsapp)" },
+  { value: "web", label: "Web (landing/ecommerce)" },
+  { value: "convenios", label: "Convenios (alianzas)" },
 ];
 
 export function AdminCustomerCreator() {
@@ -176,4 +176,3 @@ export function AdminCustomerCreator() {
     </div>
   );
 }
-
