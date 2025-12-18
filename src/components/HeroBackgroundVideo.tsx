@@ -8,7 +8,8 @@ interface HeroBackgroundVideoProps {
 }
 
 export function HeroBackgroundVideo({ sources, roundedClass = "rounded-[38px]" }: HeroBackgroundVideoProps) {
-  const videoRefs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
+  const primaryRef = useRef<HTMLVideoElement>(null);
+  const secondaryRef = useRef<HTMLVideoElement>(null);
   const [active, setActive] = useState<0 | 1>(0);
   const activeRef = useRef<0 | 1>(0);
   const sourceIndexRef = useRef(0);
@@ -18,8 +19,8 @@ export function HeroBackgroundVideo({ sources, roundedClass = "rounded-[38px]" }
       return;
     }
 
-    const primary = videoRefs[0].current;
-    const secondary = videoRefs[1].current;
+    const primary = primaryRef.current;
+    const secondary = secondaryRef.current;
     if (!primary || !secondary) {
       return;
     }
@@ -36,7 +37,7 @@ export function HeroBackgroundVideo({ sources, roundedClass = "rounded-[38px]" }
     const handleEnded = () => {
       const outgoing = activeRef.current;
       const incoming = outgoing === 0 ? 1 : 0;
-      const incomingEl = videoRefs[incoming].current;
+      const incomingEl = incoming === 0 ? primaryRef.current : secondaryRef.current;
       if (!incomingEl) {
         return;
       }
@@ -63,20 +64,28 @@ export function HeroBackgroundVideo({ sources, roundedClass = "rounded-[38px]" }
 
   return (
     <div className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${roundedClass}`}>
-      {[0, 1].map((slot) => (
-        <video
-          key={slot}
-          ref={videoRefs[slot]}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
-            active === slot ? "opacity-100" : "opacity-0"
-          }`}
-          muted
-          autoPlay
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-        />
-      ))}
+      <video
+        ref={primaryRef}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
+          active === 0 ? "opacity-100" : "opacity-0"
+        }`}
+        muted
+        autoPlay
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+      />
+      <video
+        ref={secondaryRef}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
+          active === 1 ? "opacity-100" : "opacity-0"
+        }`}
+        muted
+        autoPlay
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+      />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/55" />
     </div>
   );

@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 import { formatDate } from "@/app/memorial/[id]/components/dateUtils";
 import { SimulatedDatasetSection } from "./SimulatedDatasetSection";
+import { AdminCustomerCreator } from "./AdminCustomerCreator";
+import { SalesChannelPieChart } from "./SalesChannelPieChart";
 
 type MemorialRecord = {
   id: string;
@@ -23,11 +25,23 @@ type AdminUserRecord = {
   created_at?: string | null;
 };
 
+type SalesOrderRecord = {
+  id: string;
+  buyer_id: string;
+  channel: string;
+  status: string;
+  amount_cents?: number | null;
+  currency?: string | null;
+  created_at?: string | null;
+};
+
 type ClientStats = {
   user: AdminUserRecord;
   memorials: MemorialRecord[];
   memoryCount: number;
   lastActivity: string | null;
+  purchaseCount: number;
+  lastPurchase: string | null;
 };
 
 export default async function AdminPage() {
@@ -44,7 +58,9 @@ export default async function AdminPage() {
   let memorialsData: MemorialRecord[] | null = null;
   let memoriesData: MemoryRecord[] | null = null;
   let usersData: AdminUserRecord[] | null = null;
+  let ordersData: SalesOrderRecord[] | null = null;
   let loadError: string | null = null;
+  let ordersLoadError: string | null = null;
 
   try {
     const [memorialsRes, memoriesRes, usersRes] = await Promise.all([
@@ -58,6 +74,17 @@ export default async function AdminPage() {
     usersData = usersRes.data;
 
     loadError = memorialsRes.error?.message || memoriesRes.error?.message || usersRes.error?.message || null;
+
+    const ordersRes = await supabase
+      .from("sales_orders")
+      .select("id, buyer_id, channel, status, amount_cents, currency, created_at")
+      .order("created_at", { ascending: false });
+    if (ordersRes.error) {
+      ordersLoadError = ordersRes.error.message;
+      ordersData = [];
+    } else {
+      ordersData = ordersRes.data ?? [];
+    }
   } catch (error) {
     loadError = error instanceof Error ? error.message : "No fue posible cargar datos";
   }
@@ -85,6 +112,7 @@ export default async function AdminPage() {
   const memorials = memorialsData ?? [];
   const memories = memoriesData ?? [];
   const users = usersData ?? [];
+  const orders = ordersData ?? [];
 
   const totalMemorials = memorials.length;
   const totalMemories = memories.length;
@@ -188,6 +216,22 @@ export default async function AdminPage() {
   const funnelWeek = { sold: Math.max(soldThisWeek, 164), activated: Math.max(activatedThisWeek, 121) };
   const funnelMonth = { sold: Math.max(soldThisMonth, 742), activated: Math.max(activatedThisMonth, 512) };
 
+  const displayChannelLabel = (channel: string) => {
+    const normalized = channel.trim().toLowerCase();
+    if (normalized === "funeraria" || normalized === "parque") return "Funeraria/Parque";
+    if (normalized === "web" || normalized === "online" || normalized === "ecommerce") return "Web";
+    if (normalized === "alianza" || normalized === "convenio") return "Alianzas";
+    if (normalized === "referido") return "Referidos";
+    return channel || "Otro";
+  };
+
+  const paidOrders = orders.filter((order) => (order.status || "").toLowerCase() === "paid");
+  const paidOrdersByBuyer = paidOrders.reduce<Record<string, SalesOrderRecord[]>>((acc, order) => {
+    acc[order.buyer_id] = acc[order.buyer_id] || [];
+    acc[order.buyer_id].push(order);
+    return acc;
+  }, {});
+
   const clientsWithStats: ClientStats[] = users.map((user) => {
     const userMemorials = memorialsByOwner[user.id] || [];
     const memoryCount = userMemorials.reduce((acc, memorial) => {
@@ -206,11 +250,17 @@ export default async function AdminPage() {
       return new Date(newestForMemorial) > new Date(latest) ? newestForMemorial : latest;
     }, null);
 
+    const ordersForBuyer = paidOrdersByBuyer[user.id] || [];
+    const purchaseCount = ordersForBuyer.length;
+    const lastPurchase = ordersForBuyer[0]?.created_at ?? null;
+
     return {
       user,
       memorials: userMemorials,
       memoryCount,
       lastActivity,
+      purchaseCount,
+      lastPurchase,
     };
   });
 
@@ -218,6 +268,21 @@ export default async function AdminPage() {
   const clientsWithoutActivation = clientsWithMemorials.filter((client) => client.memoryCount === 0).length;
 
   const topActiveClients = [...clientsWithStats].sort((a, b) => b.memoryCount - a.memoryCount).slice(0, 5);
+
+  const channelCounts = paidOrders.reduce<Record<string, number>>((acc, order) => {
+    const label = displayChannelLabel(order.channel || "");
+    acc[label] = (acc[label] || 0) + 1;
+    return acc;
+  }, {});
+
+  const channelPoints = Object.entries(channelCounts)
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value);
+
+  const totalSales = paidOrders.length;
+  const customers = users.filter((user) => user.role !== "admin");
+  const buyers = new Set(paidOrders.map((order) => order.buyer_id));
+  const uniqueBuyers = buyers.size;
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 text-[#111827]">
@@ -296,6 +361,87 @@ export default async function AdminPage() {
       </section>
 
       <section className="space-y-6">
+        <section
+          id="macro-canales"
+          className="rounded-[24px] border border-[#e0e0e0] bg-white/95 px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Vista macro</p>
+              <h2 className="text-xl font-serif text-[#0f172a]">Canales de venta (participación)</h2>
+              <p className="text-sm text-[#4b5563]">
+                Torta de participación por canal + altas reales de clientes con compra registrada.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em]">
+              <span className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-3 py-1 text-[#334155]">
+                Ventas pagadas: <span className="font-semibold text-[#0f172a]">{totalSales}</span>
+              </span>
+              <span className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-3 py-1 text-[#334155]">
+                Compradores únicos: <span className="font-semibold text-[#0f172a]">{uniqueBuyers}</span>
+              </span>
+              <span className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-3 py-1 text-[#334155]">
+                Clientes (no staff): <span className="font-semibold text-[#0f172a]">{customers.length}</span>
+              </span>
+            </div>
+          </div>
+
+          {ordersLoadError && (
+            <div className="mt-4 rounded-2xl border border-[#fde68a] bg-[#fffbeb] px-4 py-3 text-sm text-[#92400e]">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#b45309]">Falta tabla de ventas</p>
+              <p className="mt-1">
+                No se pudo leer <code className="rounded bg-white/70 px-2 py-0.5">sales_orders</code>: {ordersLoadError}
+              </p>
+              <p className="mt-1 text-xs text-[#92400e]">
+                Ejecuta <code className="rounded bg-white/70 px-2 py-0.5">supabase-setup-real.sql</code> en Supabase y recarga.
+              </p>
+            </div>
+          )}
+
+          <div className="mt-5 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="space-y-4">
+              <SalesChannelPieChart points={channelPoints} />
+              {channelPoints.length > 0 && (
+                <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] p-4">
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Detalle por canal</p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {channelPoints.map((point) => {
+                      const pct = totalSales ? Math.round((point.value / totalSales) * 100) : 0;
+                      return (
+                        <div
+                          key={point.label}
+                          className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#0f172a] shadow-[0_8px_18px_rgba(15,23,42,0.04)]"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[12px] font-semibold">{point.label}</p>
+                            <p className="text-[12px] text-[#475569]">
+                              <span className="font-semibold text-[#0f172a]">{point.value}</span> · {pct}%
+                            </p>
+                          </div>
+                          <div className="mt-2 h-1.5 w-full rounded-full bg-[#e5e7eb]">
+                            <div className="h-1.5 rounded-full bg-gradient-to-r from-[#0ea5e9] via-[#22c55e] to-[#e87422]" style={{ width: `${Math.max(4, pct)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <AdminCustomerCreator />
+              <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] p-4 text-sm text-[#475569]">
+                <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">De lo general a lo particular</p>
+                <p className="mt-2">
+                  1) Mira participación por canal → 2) crea un cliente con compra → 3) entra con ese usuario y crea el memorial
+                  → 4) vuelve aquí y revisa activación (recuerdos).
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <SimulatedDatasetSection />
 
         <section
@@ -380,7 +526,7 @@ export default async function AdminPage() {
               </p>
             ) : (
               <ul className="mt-2 space-y-2">
-                {topActiveClients.map(({ user, memorials: userMemorials, memoryCount, lastActivity }) => {
+                {topActiveClients.map(({ user, memorials: userMemorials, memoryCount, lastActivity, purchaseCount, lastPurchase }) => {
                   const activationRate =
                     userMemorials.length > 0 ? Math.round((memoryCount / userMemorials.length) * 10) : 0;
                   const barWidth = Math.min(100, Math.max(10, activationRate * 3));
@@ -394,12 +540,14 @@ export default async function AdminPage() {
                           <p className="truncate text-[13px] font-semibold">{user.email}</p>
                           <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-[#6b7280]">
                             {user.role === "admin" ? "Staff interno" : "Cliente activo"} ·{" "}
+                            {purchaseCount ? `${purchaseCount} compras` : "Sin compra registrada"} ·{" "}
                             {userMemorials.length} memoriales · {memoryCount} recuerdos
                           </p>
                         </div>
                         <div className="text-right text-[10px] text-[#6b7280]">
                           <p className="font-semibold text-[#0f172a]">{activationRate} rec/mem</p>
                           <p>{lastActivity ? formatDate(lastActivity) : "Sin actividad"}</p>
+                          {lastPurchase && <p>Compra: {formatDate(lastPurchase)}</p>}
                         </div>
                       </div>
                       <div className="mt-2 h-1.5 w-full rounded-full bg-[#e5e7eb]">

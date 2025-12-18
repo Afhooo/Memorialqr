@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 type ReactionButtonsProps = {
   presetLove?: number;
@@ -16,7 +16,13 @@ export function ReactionButtons({ presetLove = 0, presetCandle = 0, presetShare 
   const [share, setShare] = useState(presetShare);
   const [bursts, setBursts] = useState<Burst[]>([]);
   const [isPending, startTransition] = useTransition();
-  const [ctx] = useState(() => (typeof window !== "undefined" ? new (window.AudioContext || (window as any).webkitAudioContext)() : null));
+  const [ctx] = useState<AudioContext | null>(() => {
+    if (typeof window === "undefined") return null;
+    const typedWindow = window as Window & { webkitAudioContext?: typeof AudioContext };
+    const AudioContextCtor = window.AudioContext ?? typedWindow.webkitAudioContext;
+    if (!AudioContextCtor) return null;
+    return new AudioContextCtor();
+  });
 
   const spawnBurst = (emoji: string) => {
     const palette = ["❤️", "🕯️", "✨", "🕊️"];
@@ -66,14 +72,11 @@ export function ReactionButtons({ presetLove = 0, presetCandle = 0, presetShare 
     });
   };
 
-  const emojis = useMemo(
-    () => [
-      { key: "love", label: "❤️", value: love, action: () => handle("love") },
-      { key: "candle", label: "🕯️", value: candle, action: () => handle("candle") },
-      { key: "share", label: "🔁", value: share, action: () => handle("share") },
-    ],
-    [love, candle, share],
-  );
+  const emojis = [
+    { key: "love", label: "❤️", value: love, action: () => handle("love") },
+    { key: "candle", label: "🕯️", value: candle, action: () => handle("candle") },
+    { key: "share", label: "🔁", value: share, action: () => handle("share") },
+  ];
 
   return (
     <div className="relative flex flex-wrap items-center gap-2 text-xs text-[#334155]">

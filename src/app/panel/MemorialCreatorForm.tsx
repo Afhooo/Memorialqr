@@ -8,18 +8,21 @@ type DraftMemory = {
   title: string;
   content: string;
   mediaUrl: string;
+  mediaPath: string | null;
 };
 
 const initialDraftMemory: DraftMemory = {
   title: "",
   content: "",
   mediaUrl: "",
+  mediaPath: null,
 };
 
 type GalleryItem = {
   title: string;
   content: string;
   mediaUrl: string;
+  mediaPath: string | null;
 };
 
 const templates = [
@@ -35,11 +38,14 @@ export function MemorialCreatorForm() {
   const [deathDate, setDeathDate] = useState("");
   const [description, setDescription] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
+  const [coverPath, setCoverPath] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarPath, setAvatarPath] = useState<string | null>(null);
   const [draftMemory, setDraftMemory] = useState<DraftMemory>(initialDraftMemory);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [template, setTemplate] = useState(templates[0]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -79,15 +85,39 @@ export function MemorialCreatorForm() {
   });
 
   const addGalleryItem = () => {
-    setGallery((prev) => [...prev, { title: "", content: "", mediaUrl: "" }]);
+    setGallery((prev) => [...prev, { title: "", content: "", mediaUrl: "", mediaPath: null }]);
   };
 
-  const updateGalleryItem = (index: number, field: keyof GalleryItem, value: string) => {
+  const updateGalleryItem = <Key extends keyof GalleryItem>(index: number, field: Key, value: GalleryItem[Key]) => {
     setGallery((prev) => prev.map((item, idx) => (idx === index ? { ...item, [field]: value } : item)));
   };
 
   const removeGalleryItem = (index: number) => {
     setGallery((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  const uploadMedia = async (params: { kind: string; file: File; key: string; memorialId?: string }) => {
+    setUploading((prev) => ({ ...prev, [params.key]: true }));
+    setError(null);
+
+    try {
+      const form = new FormData();
+      form.set("file", params.file);
+      form.set("kind", params.kind);
+      if (params.memorialId) {
+        form.set("memorialId", params.memorialId);
+      }
+
+      const response = await fetch("/api/uploads", { method: "POST", body: form });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || "No pudimos subir el archivo");
+      }
+
+      return payload as { path: string; signedUrl: string };
+    } finally {
+      setUploading((prev) => ({ ...prev, [params.key]: false }));
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -107,11 +137,24 @@ export function MemorialCreatorForm() {
           birthDate: birthDate || null,
           deathDate: deathDate || null,
           description,
-          coverUrl,
-          avatarUrl,
-          template: template.id,
-          firstMemory: draftMemory.mediaUrl || draftMemory.content || draftMemory.title ? draftMemory : undefined,
-          gallery: gallery.filter((item) => item.mediaUrl || item.content || item.title),
+          coverMediaPath: coverPath,
+          coverMediaUrl: coverPath ? null : (coverUrl || null),
+          avatarMediaPath: avatarPath,
+          avatarMediaUrl: avatarPath ? null : (avatarUrl || null),
+          templateId: template.id,
+          firstMemory:
+            draftMemory.mediaUrl || draftMemory.mediaPath || draftMemory.content || draftMemory.title
+              ? {
+                  ...draftMemory,
+                  mediaUrl: draftMemory.mediaPath ? null : (draftMemory.mediaUrl || null),
+                }
+              : undefined,
+          gallery: gallery
+            .filter((item) => item.mediaUrl || item.mediaPath || item.content || item.title)
+            .map((item) => ({
+              ...item,
+              mediaUrl: item.mediaPath ? null : (item.mediaUrl || null),
+            })),
         }),
       });
 
@@ -126,7 +169,9 @@ export function MemorialCreatorForm() {
       setDeathDate("");
       setDescription("");
       setCoverUrl("");
+      setCoverPath(null);
       setAvatarUrl("");
+      setAvatarPath(null);
       setDraftMemory(initialDraftMemory);
       setGallery([]);
       router.refresh();
@@ -281,21 +326,97 @@ export function MemorialCreatorForm() {
               <input
                 type="url"
                 value={coverUrl}
-                onChange={(event) => setCoverUrl(event.target.value)}
+                onChange={(event) => {
+                  setCoverUrl(event.target.value);
+                  setCoverPath(null);
+                }}
                 placeholder="https://..."
                 className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
               />
             </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#0f172a]/10 bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px]">
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  className="hidden"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    event.currentTarget.value = "";
+                    if (!file) return;
+                    try {
+                      const uploaded = await uploadMedia({ kind: "cover", file, key: "cover" });
+                      setCoverUrl(uploaded.signedUrl);
+                      setCoverPath(uploaded.path);
+                    } catch (err) {
+                      const message = err instanceof Error ? err.message : "No pudimos subir la portada";
+                      setError(message);
+                    }
+                  }}
+                />
+                {uploading.cover ? "Subiendo…" : "Subir portada"}
+              </label>
+              {coverPath && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCoverPath(null);
+                    setCoverUrl("");
+                  }}
+                  className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#475569] transition hover:bg-white"
+                >
+                  Quitar subida
+                </button>
+              )}
+            </div>
             <label className="block text-sm font-semibold text-[#0f172a]">
               URL avatar (foto)
               <input
                 type="url"
                 value={avatarUrl}
-                onChange={(event) => setAvatarUrl(event.target.value)}
+                onChange={(event) => {
+                  setAvatarUrl(event.target.value);
+                  setAvatarPath(null);
+                }}
                 placeholder="https://..."
                 className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
               />
             </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#0f172a]/10 bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px]">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0];
+                    event.currentTarget.value = "";
+                    if (!file) return;
+                    try {
+                      const uploaded = await uploadMedia({ kind: "avatar", file, key: "avatar" });
+                      setAvatarUrl(uploaded.signedUrl);
+                      setAvatarPath(uploaded.path);
+                    } catch (err) {
+                      const message = err instanceof Error ? err.message : "No pudimos subir el avatar";
+                      setError(message);
+                    }
+                  }}
+                />
+                {uploading.avatar ? "Subiendo…" : "Subir avatar"}
+              </label>
+              {avatarPath && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAvatarPath(null);
+                    setAvatarUrl("");
+                  }}
+                  className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#475569] transition hover:bg-white"
+                >
+                  Quitar subida
+                </button>
+              )}
+            </div>
             <div className="rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a]">
               <p className="font-semibold text-[#e87422]">Tip editorial</p>
               <p className="text-[#475569]">Usa fotos horizontales para la portada y un retrato cercano para el avatar, como lo harías en tu perfil social.</p>
@@ -502,11 +623,44 @@ export function MemorialCreatorForm() {
             <input
               type="url"
               value={draftMemory.mediaUrl}
-              onChange={(event) => setDraftMemory((prev) => ({ ...prev, mediaUrl: event.target.value }))}
+              onChange={(event) =>
+                setDraftMemory((prev) => ({ ...prev, mediaUrl: event.target.value, mediaPath: null }))
+              }
               placeholder="https://..."
               className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
             />
           </label>
+          <div className="flex flex-wrap items-center gap-2 md:col-span-2">
+            <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#0f172a]/10 bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px]">
+              <input
+                type="file"
+                accept="image/*,video/*,audio/*"
+                className="hidden"
+                onChange={async (event) => {
+                  const file = event.target.files?.[0];
+                  event.currentTarget.value = "";
+                  if (!file) return;
+                  try {
+                    const uploaded = await uploadMedia({ kind: "first-memory", file, key: "first-memory" });
+                    setDraftMemory((prev) => ({ ...prev, mediaUrl: uploaded.signedUrl, mediaPath: uploaded.path }));
+                  } catch (err) {
+                    const message = err instanceof Error ? err.message : "No pudimos subir el archivo";
+                    setError(message);
+                  }
+                }}
+              />
+              {uploading["first-memory"] ? "Subiendo…" : "Subir archivo"}
+            </label>
+            {draftMemory.mediaPath && (
+              <button
+                type="button"
+                onClick={() => setDraftMemory((prev) => ({ ...prev, mediaPath: null, mediaUrl: "" }))}
+                className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#475569] transition hover:bg-white"
+              >
+                Quitar subida
+              </button>
+            )}
+          </div>
         </div>
         <label className="mt-3 block text-sm font-semibold text-[#0f172a]">
           Texto del recuerdo
@@ -570,11 +724,49 @@ export function MemorialCreatorForm() {
                   <input
                     type="url"
                     value={item.mediaUrl}
-                    onChange={(event) => updateGalleryItem(index, "mediaUrl", event.target.value)}
+                    onChange={(event) => {
+                      updateGalleryItem(index, "mediaUrl", event.target.value);
+                      updateGalleryItem(index, "mediaPath", null);
+                    }}
                     placeholder="https://..."
                     className="mt-1 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-3 py-2.5 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
                   />
                 </label>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#0f172a]/10 bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px]">
+                  <input
+                    type="file"
+                    accept="image/*,video/*,audio/*"
+                    className="hidden"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      event.currentTarget.value = "";
+                      if (!file) return;
+                      try {
+                        const uploaded = await uploadMedia({ kind: "gallery", file, key: `gallery-${index}` });
+                        updateGalleryItem(index, "mediaUrl", uploaded.signedUrl);
+                        updateGalleryItem(index, "mediaPath", uploaded.path);
+                      } catch (err) {
+                        const message = err instanceof Error ? err.message : "No pudimos subir el archivo";
+                        setError(message);
+                      }
+                    }}
+                  />
+                  {uploading[`gallery-${index}`] ? "Subiendo…" : "Subir archivo"}
+                </label>
+                {item.mediaPath && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateGalleryItem(index, "mediaPath", null);
+                      updateGalleryItem(index, "mediaUrl", "");
+                    }}
+                    className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#475569] transition hover:bg-white"
+                  >
+                    Quitar subida
+                  </button>
+                )}
               </div>
               <label className="block text-sm font-semibold text-[#0f172a]">
                 Texto / pie

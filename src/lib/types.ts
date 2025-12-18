@@ -5,6 +5,11 @@ export interface Memorial {
   death_date: string | null;
   description: string | null;
   owner_id: string;
+  cover_media_url?: string | null;
+  cover_media_path?: string | null;
+  avatar_media_url?: string | null;
+  avatar_media_path?: string | null;
+  template_id?: string | null;
 }
 
 export interface Memory {
@@ -13,6 +18,7 @@ export interface Memory {
   title: string;
   content: string;
   media_url: string | null;
+  media_path?: string | null;
   created_at: string;
 }
 

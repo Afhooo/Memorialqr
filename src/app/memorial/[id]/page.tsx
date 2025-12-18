@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabaseClient";
+import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 import type { Memory } from "@/lib/types";
+import { MEMORIAL_MEDIA_BUCKET } from "@/lib/storage";
 import { HeroSection } from "./components/HeroSection";
 import { MemorialFooter } from "./components/MemorialFooter";
 import { MemorialNavbar } from "./components/MemorialNavbar";
@@ -20,6 +21,11 @@ type MemorialRecord = {
   birth_date: string | null;
   death_date: string | null;
   owner_id: string;
+  cover_media_url?: string | null;
+  cover_media_path?: string | null;
+  avatar_media_url?: string | null;
+  avatar_media_path?: string | null;
+  template_id?: string | null;
 };
 
 const DEMO_MEMORIAL_ID = "pablo-neruda";
@@ -32,6 +38,11 @@ const DEMO_MEMORIAL: MemorialRecord = {
   birth_date: "1904-07-12",
   death_date: "1973-09-23",
   owner_id: "demo",
+  cover_media_url: null,
+  cover_media_path: null,
+  avatar_media_url: null,
+  avatar_media_path: null,
+  template_id: null,
 };
 
 const DEMO_MEMORIES: Memory[] = [
@@ -41,6 +52,7 @@ const DEMO_MEMORIES: Memory[] = [
     title: "Residencia en la Tierra",
     content: "Versos que marcaron una época y acompañan a quien aún busca consuelo en su voz.",
     media_url: null,
+    media_path: null,
     created_at: "2022-01-01T12:00:00Z",
   },
   {
@@ -49,6 +61,7 @@ const DEMO_MEMORIES: Memory[] = [
     title: "Canto General",
     content: "Un poema-río que recorre América Latina y mantiene viva la memoria colectiva.",
     media_url: null,
+    media_path: null,
     created_at: "2022-05-15T12:00:00Z",
   },
   {
@@ -57,9 +70,26 @@ const DEMO_MEMORIES: Memory[] = [
     title: "Casa de Isla Negra",
     content: "El refugio frente al mar donde cada objeto cuenta una historia.",
     media_url: null,
+    media_path: null,
     created_at: "2023-03-21T12:00:00Z",
   },
 ];
+
+async function signStoragePaths(paths: Array<string | null | undefined>, expiresInSeconds = 60 * 60) {
+  const unique = [...new Set(paths.filter((path): path is string => Boolean(path)))];
+  if (!unique.length) return new Map<string, string>();
+
+  const service = createSupabaseServiceClient();
+  const signedPairs = await Promise.all(
+    unique.map(async (path) => {
+      const { data, error } = await service.storage.from(MEMORIAL_MEDIA_BUCKET).createSignedUrl(path, expiresInSeconds);
+      if (error || !data?.signedUrl) return [path, null] as const;
+      return [path, data.signedUrl] as const;
+    }),
+  );
+
+  return new Map<string, string>(signedPairs.filter((pair): pair is [string, string] => Boolean(pair[1])));
+}
 
 function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: boolean) {
   const memoryList: Memory[] = memories ?? [];
@@ -85,6 +115,8 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
             birthDate={memorial.birth_date}
             deathDate={memorial.death_date}
             description={memorial.description}
+            avatarUrl={memorial.avatar_media_url ?? null}
+            coverUrl={memorial.cover_media_url ?? null}
             memoryCount={memoryList.length}
             memoryWindow={memoryWindow}
             lastUpdated={lastUpdated}
@@ -181,7 +213,7 @@ export default async function MemorialPage({
     error: memorialError,
   } = await supabase
     .from("memorials")
-    .select("id, name, description, birth_date, death_date, owner_id")
+    .select("*")
     .eq("id", memorialId)
     .maybeSingle();
 
@@ -198,7 +230,7 @@ export default async function MemorialPage({
     error: memoryError,
   } = await supabase
     .from("memories")
-    .select("id, memorial_id, title, content, media_url, created_at")
+    .select("*")
     .eq("memorial_id", memorialId)
     .order("created_at", { ascending: false });
 
@@ -206,5 +238,27 @@ export default async function MemorialPage({
     throw new Error(memoryError.message);
   }
 
-  return renderMemorial(memorial as MemorialRecord, memories ?? [], true);
+  const memorialRecord = memorial as MemorialRecord;
+  const memoryRecords = (memories ?? []) as Memory[];
+
+  const signedMap = await signStoragePaths([
+    memorialRecord.cover_media_path,
+    memorialRecord.avatar_media_path,
+    ...memoryRecords.map((memory) => memory.media_path),
+  ]);
+
+  const withSignedMemorial: MemorialRecord = {
+    ...memorialRecord,
+    cover_media_url:
+      memorialRecord.cover_media_url || (memorialRecord.cover_media_path ? signedMap.get(memorialRecord.cover_media_path) : null) || null,
+    avatar_media_url:
+      memorialRecord.avatar_media_url || (memorialRecord.avatar_media_path ? signedMap.get(memorialRecord.avatar_media_path) : null) || null,
+  };
+
+  const withSignedMemories: Memory[] = memoryRecords.map((memory) => {
+    const signed = memory.media_path ? signedMap.get(memory.media_path) : null;
+    return { ...memory, media_url: memory.media_url || signed || null };
+  });
+
+  return renderMemorial(withSignedMemorial, withSignedMemories, true);
 }

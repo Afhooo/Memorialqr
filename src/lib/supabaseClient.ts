@@ -9,6 +9,7 @@ const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
   process.env.SUPABASE_ANON_KEY ??
   process.env.SUPABASE_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const missingKeys: string[] = [];
 if (!supabaseUrl) {
@@ -33,4 +34,11 @@ export const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
 
 export function createSupabaseServerClient(): SupabaseClient {
   return createClient(supabaseUrl!, supabaseAnonKey!, serverOptions);
+}
+
+export function createSupabaseServiceClient(): SupabaseClient {
+  if (!supabaseServiceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY must be set");
+  }
+  return createClient(supabaseUrl!, supabaseServiceRoleKey, serverOptions);
 }

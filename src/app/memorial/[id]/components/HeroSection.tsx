@@ -10,6 +10,8 @@ interface HeroSectionProps {
   birthDate: string | null;
   deathDate: string | null;
   description: string | null;
+  avatarUrl?: string | null;
+  coverUrl?: string | null;
   memoryCount: number;
   memoryWindow: string;
   lastUpdated: string | null;
@@ -20,12 +22,14 @@ export function HeroSection({
   birthDate,
   deathDate,
   description,
+  avatarUrl,
+  coverUrl,
   memoryCount,
   memoryWindow,
   lastUpdated,
 }: HeroSectionProps) {
   const isNeruda = memorialName.trim().toLowerCase() === "pablo neruda";
-  const profileSrc = isNeruda ? "/neruda-profile.png" : null;
+  const profileSrc = avatarUrl || (isNeruda ? "/neruda-profile.png" : null);
   const initials = memorialName.slice(0, 2).toUpperCase();
   const heroRef = useRef<HTMLDivElement>(null);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
@@ -39,6 +43,12 @@ export function HeroSection({
     if (isNeruda) return ["/m2.mp4", "/a1.mp4"];
     return ["/m1.mp4", "/m2.mp4"];
   }, [isNeruda]);
+
+  const coverIsVideo = useMemo(() => {
+    if (!coverUrl) return false;
+    const clean = coverUrl.split("?")[0] ?? "";
+    return /\.(mp4|mov|webm|ogg)$/i.test(clean);
+  }, [coverUrl]);
 
   const orbStyle = (dx: number, dy: number) => ({
     transform: `translate3d(${parallax.x + dx}px, ${parallax.y + dy}px, 0) scale(1)`,
@@ -94,7 +104,15 @@ export function HeroSection({
     >
       <div className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(circle_at_16%_22%,rgba(255,173,107,0.22),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(99,179,255,0.28),transparent_32%),radial-gradient(circle_at_16%_86%,rgba(125,211,179,0.16),transparent_36%)]" />
       <div className="absolute inset-0 mix-blend-screen" style={{ filter: `blur(${blur}px)` }}>
-        <HeroBackgroundVideo sources={heroSources} roundedClass="" />
+        {coverUrl ? (
+          coverIsVideo ? (
+            <video src={coverUrl} className="h-full w-full object-cover" muted loop playsInline autoPlay />
+          ) : (
+            <img src={coverUrl} alt="" className="h-full w-full object-cover" />
+          )
+        ) : (
+          <HeroBackgroundVideo sources={heroSources} roundedClass="" />
+        )}
       </div>
       <div className="absolute inset-0 bg-gradient-to-br from-black/55 via-black/45 to-[#0b1324]/65 backdrop-blur-[2px]" />
       <div className="absolute inset-0">

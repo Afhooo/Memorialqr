@@ -28,15 +28,22 @@ type CreateMemorialBody = {
   description?: string;
   birthDate?: string;
   deathDate?: string;
+  coverMediaUrl?: string | null;
+  coverMediaPath?: string | null;
+  avatarMediaUrl?: string | null;
+  avatarMediaPath?: string | null;
+  templateId?: string | null;
   firstMemory?: {
     title?: string;
     content?: string;
     mediaUrl?: string | null;
+    mediaPath?: string | null;
   };
   gallery?: Array<{
     title?: string;
     content?: string;
-    mediaUrl?: string;
+    mediaUrl?: string | null;
+    mediaPath?: string | null;
   }>;
 };
 
@@ -53,6 +60,11 @@ export async function POST(req: Request) {
     typeof body.description === "string" ? body.description.trim().slice(0, 1200) : null;
   const birthDate = typeof body.birthDate === "string" ? body.birthDate.slice(0, 32) : null;
   const deathDate = typeof body.deathDate === "string" ? body.deathDate.slice(0, 32) : null;
+  const coverMediaUrl = typeof body.coverMediaUrl === "string" ? body.coverMediaUrl.trim().slice(0, 2000) : null;
+  const coverMediaPath = typeof body.coverMediaPath === "string" ? body.coverMediaPath.trim().slice(0, 600) : null;
+  const avatarMediaUrl = typeof body.avatarMediaUrl === "string" ? body.avatarMediaUrl.trim().slice(0, 2000) : null;
+  const avatarMediaPath = typeof body.avatarMediaPath === "string" ? body.avatarMediaPath.trim().slice(0, 600) : null;
+  const templateId = typeof body.templateId === "string" ? body.templateId.trim().slice(0, 64) : null;
 
   if (!name) {
     return NextResponse.json({ error: "El nombre es obligatorio" }, { status: 400 });
@@ -68,6 +80,11 @@ export async function POST(req: Request) {
     description,
     birth_date: birthDate,
     death_date: deathDate,
+    cover_media_url: coverMediaPath ? null : coverMediaUrl,
+    cover_media_path: coverMediaPath,
+    avatar_media_url: avatarMediaPath ? null : avatarMediaUrl,
+    avatar_media_path: avatarMediaPath,
+    template_id: templateId,
   });
 
   if (insertError) {
@@ -81,7 +98,8 @@ export async function POST(req: Request) {
   if (hasMemoryContent) {
     const title = firstMemory?.title?.trim() || "Recuerdo";
     const content = firstMemory?.content?.trim() || "";
-    const mediaUrl = firstMemory?.mediaUrl?.trim() || null;
+    const mediaPath = firstMemory?.mediaPath?.trim() || null;
+    const mediaUrl = mediaPath ? null : firstMemory?.mediaUrl?.trim() || null;
 
     await supabase.from("memories").insert({
       id: randomUUID(),
@@ -89,6 +107,7 @@ export async function POST(req: Request) {
       title,
       content,
       media_url: mediaUrl,
+      media_path: mediaPath,
       created_at: new Date().toISOString(),
     });
   }
@@ -99,8 +118,9 @@ export async function POST(req: Request) {
       title: item.title?.trim() || "Recuerdo",
       content: item.content?.trim() || "",
       mediaUrl: item.mediaUrl?.trim() || "",
+      mediaPath: item.mediaPath?.trim() || "",
     }))
-    .filter((item) => item.mediaUrl || item.content);
+    .filter((item) => item.mediaUrl || item.mediaPath || item.content);
 
   if (galleryPayload.length) {
     const galleryRows = galleryPayload.map((item) => ({
@@ -108,7 +128,8 @@ export async function POST(req: Request) {
       memorial_id: memorialId,
       title: item.title,
       content: item.content,
-      media_url: item.mediaUrl || null,
+      media_url: item.mediaPath ? null : item.mediaUrl || null,
+      media_path: item.mediaPath || null,
       created_at: new Date().toISOString(),
     }));
     await supabase.from("memories").insert(galleryRows);

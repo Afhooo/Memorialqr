@@ -9,8 +9,8 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
     return NextResponse.json({ error: "Inicia sesión para dejar un mensaje" }, { status: 401 });
   }
 
-  const resolvedParams = await Promise.resolve((context as any).params);
-  const memorialId = resolvedParams?.id as string | undefined;
+  const resolvedParams = await Promise.resolve(context.params);
+  const memorialId = resolvedParams?.id;
   if (!memorialId) {
     return NextResponse.json({ error: "Memorial no encontrado" }, { status: 404 });
   }
