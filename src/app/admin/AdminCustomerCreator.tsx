@@ -108,13 +108,13 @@ export function AdminCustomerCreator() {
             </select>
           </label>
           <label className="block text-xs uppercase tracking-[0.26em] text-[#555555]">
-            Monto (centavos)
+            Monto (CLP)
             <input
               type="number"
               inputMode="numeric"
               value={amountCents}
               onChange={(event) => setAmountCents(event.target.value)}
-              placeholder="Ej: 19990"
+              placeholder="Ej: 2999000"
               className="mt-2 w-full rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/25"
               disabled={!createOrder}
             />
