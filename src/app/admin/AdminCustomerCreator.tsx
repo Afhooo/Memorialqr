@@ -6,6 +6,7 @@ type CreatedCustomer = {
   user: { id: string; email: string; role: string };
   password: string | null;
   order: { id: string; channel: string; status: string } | null;
+  memorialId?: string | null;
 };
 
 const CHANNELS = [
@@ -17,8 +18,10 @@ const CHANNELS = [
 
 export function AdminCustomerCreator() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [attachDemoMemorial, setAttachDemoMemorial] = useState(false);
   const [createOrder, setCreateOrder] = useState(true);
-  const [channel, setChannel] = useState(CHANNELS[0]?.value ?? "funeraria");
+  const [channel, setChannel] = useState(CHANNELS[0]?.value ?? "presencial");
   const [amountCents, setAmountCents] = useState<string>("");
   const [externalRef, setExternalRef] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,11 +44,13 @@ export function AdminCustomerCreator() {
         body: JSON.stringify({
           email,
           role: "owner",
+          password: password.trim() || null,
           createOrder,
           channel,
           amountCents: parsedAmount,
           currency: "CLP",
           externalRef: externalRef.trim() || null,
+          attachDemoMemorial,
         }),
       });
 
@@ -56,6 +61,7 @@ export function AdminCustomerCreator() {
 
       setCreated(payload);
       setEmail("");
+      setPassword("");
       setAmountCents("");
       setExternalRef("");
     } catch (err) {
@@ -87,6 +93,17 @@ export function AdminCustomerCreator() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="cliente@correo.com"
+            className="mt-2 w-full rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/25"
+          />
+        </label>
+
+        <label className="block text-xs uppercase tracking-[0.26em] text-[#555555]">
+          Contraseña (opcional)
+          <input
+            type="text"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Ej: Memorial2025"
             className="mt-2 w-full rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/25"
           />
         </label>
@@ -131,6 +148,16 @@ export function AdminCustomerCreator() {
           Registrar compra como pagada (sales_orders)
         </label>
 
+        <label className="flex items-center gap-3 rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333]">
+          <input
+            type="checkbox"
+            checked={attachDemoMemorial}
+            onChange={(event) => setAttachDemoMemorial(event.target.checked)}
+            className="h-4 w-4"
+          />
+          Asociar memorial “Pablo Neruda” al cliente
+        </label>
+
         <label className="block text-xs uppercase tracking-[0.26em] text-[#555555]">
           Referencia externa (opcional)
           <input
@@ -160,6 +187,11 @@ export function AdminCustomerCreator() {
             {created.order && (
               <p className="text-[#475569]">
                 Compra: <strong>{created.order.status}</strong> · canal <strong>{created.order.channel}</strong>
+              </p>
+            )}
+            {"memorialId" in created && created.memorialId && (
+              <p className="text-[#475569]">
+                Memorial: <strong>{created.memorialId}</strong>
               </p>
             )}
           </div>

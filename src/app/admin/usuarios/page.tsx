@@ -1,7 +1,4 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
-import { getServerSession } from "@/lib/serverSession";
 import { formatDate } from "@/app/memorial/[id]/components/dateUtils";
 import { AdminCustomerCreator } from "../AdminCustomerCreator";
 import { AdminUserCreator } from "../AdminUserCreator";
@@ -29,14 +26,6 @@ type SalesOrderRecord = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
-  const session = await getServerSession();
-  if (!session) {
-    redirect("/login?from=/admin/usuarios");
-  }
-  if (session.user.role !== "admin") {
-    redirect("/elige-perfil?denied=admin&from=/admin/usuarios");
-  }
-
   const supabase = createSupabaseServerClient();
 
   const [usersRes, memorialsRes, ordersRes] = await Promise.all([
@@ -72,14 +61,6 @@ export default async function AdminUsersPage() {
           <p className="text-sm text-[#4b5563]">
             Crea cuentas de clientes (owner) y staff (admin). Aquí vive el flujo operacional; el dashboard queda solo para métricas.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin"
-            className="rounded-full border border-[#e5e7eb] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#0f172a] transition hover:bg-[#f8fafc]"
-          >
-            Volver a dashboard
-          </Link>
         </div>
       </section>
 
@@ -155,4 +136,3 @@ export default async function AdminUsersPage() {
     </div>
   );
 }
-

@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
-import { getServerSession } from "@/lib/serverSession";
 import { SalesChannelPieChart } from "./SalesChannelPieChart";
 import { SalesOrdersTrendChart } from "./SalesOrdersTrendChart";
 import { SalesFunnelChart } from "./SalesFunnelChart";
@@ -46,15 +44,6 @@ type ClientStats = {
 };
 
 export default async function AdminPage() {
-  const session = await getServerSession();
-  if (!session) {
-    redirect("/login?from=/admin");
-  }
-
-  if (session.user.role !== "admin") {
-    redirect("/elige-perfil");
-  }
-
   const now = new Date();
   const ordersWindowStart = new Date(now);
   ordersWindowStart.setDate(now.getDate() - 190);
