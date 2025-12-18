@@ -9,6 +9,9 @@ export default async function CrearMemorialPage() {
   if (!session) {
     redirect("/login?from=/crear-memorial");
   }
+  if (session.user.role === "admin") {
+    redirect("/admin");
+  }
 
   return (
     <div className="relative mx-auto max-w-[1400px] space-y-8 px-4 py-10 text-[#1f1a15] sm:px-8">

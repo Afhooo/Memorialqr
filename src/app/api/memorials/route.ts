@@ -8,6 +8,9 @@ export async function GET() {
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+  if (session.user.role === "admin") {
+    return NextResponse.json({ error: "Acceso restringido" }, { status: 403 });
+  }
 
   const supabase = createSupabaseServerClient();
   const { data: memorials, error } = await supabase
@@ -51,6 +54,9 @@ export async function POST(req: Request) {
   const session = await getServerSession();
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+  if (session.user.role === "admin") {
+    return NextResponse.json({ error: "Acceso restringido" }, { status: 403 });
   }
 
   const body = (await req.json().catch(() => ({}))) as CreateMemorialBody;

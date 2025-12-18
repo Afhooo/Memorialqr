@@ -17,6 +17,9 @@ export async function POST(req: Request) {
   if (!session) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+  if (session.user.role === "admin") {
+    return NextResponse.json({ error: "Acceso restringido" }, { status: 403 });
+  }
 
   const form = await req.formData().catch(() => null);
   if (!form) {
@@ -44,7 +47,7 @@ export async function POST(req: Request) {
 
   const supabase = createSupabaseServiceClient();
 
-  if (memorialId && session.user.role !== "admin") {
+  if (memorialId) {
     const { data: memorial, error } = await supabase
       .from("memorials")
       .select("id, owner_id")
@@ -95,4 +98,3 @@ export async function POST(req: Request) {
     size: file.size,
   });
 }
-

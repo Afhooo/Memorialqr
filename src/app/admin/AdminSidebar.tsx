@@ -9,8 +9,6 @@ type Item = { href: string; label: string; description: string };
 const ITEMS: Item[] = [
   { href: "/admin", label: "Dashboard", description: "KPIs, ventas, activación" },
   { href: "/admin/usuarios", label: "Usuarios", description: "Clientes y staff" },
-  { href: "/panel", label: "Panel Cliente", description: "Vista owner (mis memoriales)" },
-  { href: "/crear-memorial", label: "Crear Memorial", description: "Flujo RRSS (owner/admin)" },
 ];
 
 export function AdminSidebar({ userEmail }: { userEmail: string }) {
@@ -53,10 +51,6 @@ export function AdminSidebar({ userEmail }: { userEmail: string }) {
       </nav>
 
       <div className="mt-auto space-y-2">
-        <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] px-4 py-3 text-xs text-[#475569]">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-[#0ea5e9]">Nota</p>
-          <p className="mt-1">Admin puede operar como empresa y también crear/editar memoriales como owner.</p>
-        </div>
         <button
           type="button"
           onClick={handleLogout}
@@ -69,4 +63,3 @@ export function AdminSidebar({ userEmail }: { userEmail: string }) {
     </aside>
   );
 }
-

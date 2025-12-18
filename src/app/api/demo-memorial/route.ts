@@ -8,6 +8,9 @@ export async function POST(req: Request) {
   if (!session) {
     return NextResponse.json({ error: "Necesitas iniciar sesión para crear un memorial" }, { status: 401 });
   }
+  if (session.user.role === "admin") {
+    return NextResponse.json({ error: "Acceso restringido" }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => ({}));
   const name =

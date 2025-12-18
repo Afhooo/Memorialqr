@@ -5,7 +5,7 @@ import { AUTH_TOKEN_COOKIE } from "./src/lib/constants";
 
 const PUBLIC_PATHS = ["/", "/beneficios", "/login", "/memorial/pablo-neruda"];
 const PUBLIC_API_PATHS = ["/api/auth/login", "/api/session", "/api/resolve-token"];
-const OWNER_PATH_PREFIXES = ["/panel", "/crear-memorial", "/memorial", "/scan", "/elige-perfil"];
+const OWNER_PATH_PREFIXES = ["/panel", "/crear-memorial", "/memorial", "/scan"];
 const ADMIN_PATH_PREFIXES = ["/admin"];
 const DEMO_MEMORIAL_PATH = "/memorial/pablo-neruda";
 
@@ -75,11 +75,13 @@ export async function middleware(request: NextRequest) {
   }
 
   const isOwnerRoute = isPathMatch(pathname, OWNER_PATH_PREFIXES) && !isAdminRoute && !isDemoMemorial;
-  if (isOwnerRoute && role !== "owner" && role !== "admin") {
+  if (isOwnerRoute && role !== "owner") {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/elige-perfil";
-    redirectUrl.searchParams.set("denied", "owner");
-    redirectUrl.searchParams.set("from", pathname);
+    redirectUrl.pathname = role === "admin" ? "/admin" : "/elige-perfil";
+    if (role !== "admin") {
+      redirectUrl.searchParams.set("denied", "owner");
+      redirectUrl.searchParams.set("from", pathname);
+    }
     return NextResponse.redirect(redirectUrl);
   }
 

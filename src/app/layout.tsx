@@ -62,17 +62,19 @@ export default async function RootLayout({
                 >
                   Principal
                 </Link>
-                <Link
-                  href={session ? "/crear-memorial" : "/login?from=/crear-memorial"}
-                  className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
-                >
-                  Crear memorial
-                </Link>
+                {session && !isAdmin && (
+                  <Link
+                    href="/crear-memorial"
+                    className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
+                  >
+                    Crear memorial
+                  </Link>
+                )}
                 <Link
                   href={exploreHref}
                   className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
                 >
-                  Explorar memoriales
+                  {isAdmin ? "Dashboard" : "Explorar memoriales"}
                 </Link>
                 <Link
                   href="/beneficios"

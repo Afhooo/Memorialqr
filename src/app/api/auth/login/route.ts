@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     expires_at: expiresAt,
   });
 
-  const redirectTo = "/elige-perfil";
+  const redirectTo = user.role === "admin" ? "/admin" : "/elige-perfil";
 
   const response = NextResponse.json({ ok: true, redirectTo });
   response.cookies.set(AUTH_TOKEN_COOKIE, token, {

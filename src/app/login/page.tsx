@@ -15,7 +15,7 @@ export default async function LoginPage({
   const session = await getServerSession();
 
   if (session?.user?.id) {
-    const redirectTo = searchParams?.from || "/elige-perfil";
+    const redirectTo = session.user.role === "admin" ? "/admin" : searchParams?.from || "/elige-perfil";
     redirect(redirectTo);
   }
 

@@ -3,14 +3,6 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 
-type MemorialRecord = {
-  id: string;
-  name: string;
-  description: string | null;
-  birth_date: string | null;
-  death_date: string | null;
-};
-
 export default async function ChooseProfilePage({
   searchParams,
 }: {
@@ -27,6 +19,9 @@ export default async function ChooseProfilePage({
 
   if (!session) {
     redirect("/login");
+  }
+  if (session.user.role === "admin") {
+    redirect("/admin");
   }
 
   const supabase = createSupabaseServerClient();

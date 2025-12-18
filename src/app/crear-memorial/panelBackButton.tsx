@@ -12,7 +12,7 @@ export function PanelBackButton() {
     setIsNavigating(true);
     try {
       router.push("/panel");
-    } catch (error) {
+    } catch {
       // Fallback duro si algo falla con el router.
       window.location.href = "/panel";
     } finally {

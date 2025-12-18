@@ -124,7 +124,7 @@ export default async function HomePage() {
   const session = await getServerSession();
 
   if (session) {
-    redirect("/elige-perfil");
+    redirect(session.user.role === "admin" ? "/admin" : "/elige-perfil");
   }
   return (
     <main className="relative mx-auto max-w-6xl space-y-16 px-4 pb-14 text-[#333333]" id="principal">

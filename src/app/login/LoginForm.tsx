@@ -38,10 +38,13 @@ export function LoginForm() {
         return;
       }
 
-      const redirectTo = searchParams.get("from") || "/elige-perfil";
+      const serverRedirect = typeof body.redirectTo === "string" ? body.redirectTo : null;
+      const requestedRedirect = searchParams.get("from");
+      const redirectTo = serverRedirect === "/admin" ? "/admin" : requestedRedirect || serverRedirect || "/elige-perfil";
+
       router.replace(redirectTo);
       router.refresh();
-    } catch (loginError) {
+    } catch {
       setError("No fue posible iniciar sesión");
       setLoading(false);
     }

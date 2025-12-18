@@ -8,6 +8,9 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
   if (!session) {
     return NextResponse.json({ error: "Inicia sesión para dejar un mensaje" }, { status: 401 });
   }
+  if (session.user.role === "admin") {
+    return NextResponse.json({ error: "Acceso restringido" }, { status: 403 });
+  }
 
   const resolvedParams = await Promise.resolve(context.params);
   const memorialId = resolvedParams?.id;
