@@ -74,10 +74,10 @@ export default async function OwnerPanelPage() {
                 Crear memorial
               </Link>
               <Link
-                href={safeMemorials[0] ? `/memorial/${safeMemorials[0].id}` : "/memorial/pablo-neruda"}
+                href={safeMemorials[0] ? `/memorial/${safeMemorials[0].id}` : "/crear-memorial"}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-white/40 bg-white/10 px-5 py-3 text-[13px] font-semibold uppercase tracking-[0.18em] text-white transition hover:-translate-y-[1px] hover:border-white hover:bg-white/15"
               >
-                Abrir memorial
+                {safeMemorials[0] ? "Abrir memorial" : "Crear memorial"}
               </Link>
             </div>
           </div>

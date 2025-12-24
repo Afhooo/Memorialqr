@@ -351,10 +351,25 @@ export default async function AdminPage() {
     ? Math.round((activationLagsDays.reduce((a, b) => a + b, 0) / activationLagsDays.length) * 10) / 10
     : 0;
 
-  const formatCLP = (amount: number) => {
+  const formatCompactNumber = (value: number) => {
+    const abs = Math.abs(value);
+    const sign = value < 0 ? "-" : "";
+    const fmt = (n: number) => n.toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+    const trim = (s: string) => s.replace(/,0$/, "");
+
+    if (abs >= 1_000_000_000_000) return `${sign}${trim(fmt(abs / 1_000_000_000_000))}T`;
+    if (abs >= 1_000_000_000) return `${sign}${trim(fmt(abs / 1_000_000_000))}B`;
+    if (abs >= 1_000_000) return `${sign}${trim(fmt(abs / 1_000_000))}M`;
+    if (abs >= 1_000) return `${sign}${trim(fmt(abs / 1_000))}k`;
+    return `${sign}${abs.toLocaleString("es-CL")}`;
+  };
+
+  const formatCLPFull = (amount: number) => {
     const value = Math.round(amount || 0);
     return value.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
   };
+
+  const formatCLP = (amount: number) => `$${formatCompactNumber(Math.round(amount || 0))}`;
 
   const pctDelta = (current: number, prev: number) => {
     if (prev <= 0) return current > 0 ? 100 : 0;
@@ -521,7 +536,7 @@ export default async function AdminPage() {
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {[
+              {([
                 {
                   kpi: "Ventas (6M)",
                   value: totalSales.toLocaleString("es-CL"),
@@ -530,11 +545,13 @@ export default async function AdminPage() {
                 {
                   kpi: "Ingresos (6M)",
                   value: formatCLP(totalRevenueCents),
+                  title: formatCLPFull(totalRevenueCents),
                   sub: `Semana: ${pctDelta(revenueThisWeekCents, revenuePrevWeekCents)}%`,
                 },
                 {
                   kpi: "Ticket promedio",
                   value: formatCLP(avgTicketCents),
+                  title: formatCLPFull(avgTicketCents),
                   sub: "Promedio por orden pagada",
                 },
                 {
@@ -552,10 +569,12 @@ export default async function AdminPage() {
                   value: uniqueBuyers.toLocaleString("es-CL"),
                   sub: `${customers.length.toLocaleString("es-CL")} clientes (no staff)`,
                 },
-              ].map((card) => (
+              ] as Array<{ kpi: string; value: string; sub: string; title?: string }>).map((card) => (
                 <div key={card.kpi} className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
                   <p className="text-[11px] uppercase tracking-[0.18em] text-white/70">{card.kpi}</p>
-                  <p className="mt-1 text-3xl font-semibold text-white">{card.value}</p>
+                  <p className="mt-1 text-3xl font-semibold text-white" title={card.title}>
+                    {card.value}
+                  </p>
                   <p className="mt-1 text-xs text-white/70">{card.sub}</p>
                 </div>
               ))}
@@ -600,8 +619,8 @@ export default async function AdminPage() {
       </section>
 
       <section className="space-y-6">
-        <section className="grid gap-6 lg:grid-cols-[1.55fr_0.85fr]">
-          <div className="rounded-[24px] border border-[#e0e0e0] bg-white/95 px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]">
+        <section className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-[24px] border border-[#e0e0e0] bg-white/95 px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)] lg:col-span-2">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Tendencia semanal</p>
@@ -613,7 +632,10 @@ export default async function AdminPage() {
                   Semana: <span className="font-semibold text-[#0f172a]">{salesThisWeek}</span> ({pctDelta(salesThisWeek, salesPrevWeek)}%)
                 </span>
                 <span className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-3 py-1">
-                  Ingresos: <span className="font-semibold text-[#0f172a]">{formatCLP(revenueThisWeekCents)}</span>
+                  Ingresos:{" "}
+                  <span className="font-semibold text-[#0f172a]" title={formatCLPFull(revenueThisWeekCents)}>
+                    {formatCLP(revenueThisWeekCents)}
+                  </span>
                 </span>
               </div>
             </div>
@@ -622,29 +644,27 @@ export default async function AdminPage() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="rounded-[24px] border border-[#e0e0e0] bg-white/95 px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Mix comercial</p>
-                  <h2 className="text-xl font-serif text-[#0f172a]">Participación por canal</h2>
-                  <p className="text-sm text-[#4b5563]">Órdenes pagadas en los últimos 6 meses.</p>
-                </div>
-              </div>
-              <div className="mt-5">
-                <SalesChannelPieChart points={channelPoints} />
+          <div className="rounded-[24px] border border-[#e0e0e0] bg-white/95 px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Mix comercial</p>
+                <h2 className="text-xl font-serif text-[#0f172a]">Participación por canal</h2>
+                <p className="text-sm text-[#4b5563]">Órdenes pagadas en los últimos 6 meses.</p>
               </div>
             </div>
+            <div className="mt-5">
+              <SalesChannelPieChart points={channelPoints} />
+            </div>
+          </div>
 
-            <div className="rounded-[24px] border border-[#e0e0e0] bg-white/95 px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Uso</p>
-                <h2 className="text-xl font-serif text-[#0f172a]">Actividad de contenido</h2>
-                <p className="text-sm text-[#4b5563]">Recuerdos publicados vs activaciones (primer recuerdo).</p>
-              </div>
-              <div className="mt-5">
-                <MemoriesTrendChart labels={weeklyLabels} memories={weeklyMemories} activations={weeklyActivations} />
-              </div>
+          <div className="rounded-[24px] border border-[#e0e0e0] bg-white/95 px-5 py-6 shadow-[0_22px_65px_rgba(0,0,0,0.06)]">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.32em] text-[#0ea5e9]">Uso</p>
+              <h2 className="text-xl font-serif text-[#0f172a]">Actividad de contenido</h2>
+              <p className="text-sm text-[#4b5563]">Recuerdos publicados vs activaciones (primer recuerdo).</p>
+            </div>
+            <div className="mt-5">
+              <MemoriesTrendChart labels={weeklyLabels} memories={weeklyMemories} activations={weeklyActivations} />
             </div>
           </div>
         </section>
@@ -661,7 +681,10 @@ export default async function AdminPage() {
                 Ventas: <span className="font-semibold text-[#0f172a]">{totalSales.toLocaleString("es-CL")}</span>
               </span>
               <span className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-3 py-1">
-                Ingresos: <span className="font-semibold text-[#0f172a]">{formatCLP(totalRevenueCents)}</span>
+                Ingresos:{" "}
+                <span className="font-semibold text-[#0f172a]" title={formatCLPFull(totalRevenueCents)}>
+                  {formatCLP(totalRevenueCents)}
+                </span>
               </span>
             </div>
           </div>
@@ -701,7 +724,9 @@ export default async function AdminPage() {
                     </div>
                     <p className="text-xs uppercase tracking-[0.2em] text-[#475569]">{buyer.primaryChannel}</p>
                     <p className="font-semibold">{buyer.orders.toLocaleString("es-CL")}</p>
-                    <p className="text-right font-semibold">{formatCLP(buyer.revenueCents)}</p>
+                    <p className="text-right font-semibold" title={formatCLPFull(buyer.revenueCents)}>
+                      {formatCLP(buyer.revenueCents)}
+                    </p>
                   </div>
                 ))}
                 {topBuyersByRevenue.length === 0 && (
@@ -733,7 +758,9 @@ export default async function AdminPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-[#0f172a]">{channel.rate}%</p>
-                      <p className="text-xs text-[#64748b]">{formatCLP(channel.revenue)}</p>
+                      <p className="text-xs text-[#64748b]" title={formatCLPFull(channel.revenue)}>
+                        {formatCLP(channel.revenue)}
+                      </p>
                     </div>
                   </div>
                   <div className="mt-3 h-2 w-full rounded-full bg-[#e5e7eb]">

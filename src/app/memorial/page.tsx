@@ -16,14 +16,11 @@ export default async function MemorialIndexPage() {
     .eq("owner_id", session.user.id)
     .order("name", { ascending: true });
 
-  const nerudaMemorial = memorials?.find(
-    (memorial) => memorial.name?.trim().toLowerCase() === "pablo neruda",
-  );
-  const firstMemorialId = nerudaMemorial?.id ?? memorials?.[0]?.id;
+  const firstMemorialId = memorials?.[0]?.id;
 
   if (firstMemorialId) {
     redirect(`/memorial/${firstMemorialId}`);
   }
 
-  redirect("/memorial/pablo-neruda");
+  redirect("/panel");
 }

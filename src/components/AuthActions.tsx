@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { logoutClient } from "@/lib/logoutClient";
 
 interface AuthActionsProps {
   userEmail: string | null;
@@ -14,27 +15,20 @@ export function AuthActions({ userEmail, userRole }: AuthActionsProps) {
   const router = useRouter();
   const isAdmin = userRole === "admin";
   const hasSession = Boolean(userEmail);
-  const panelHref = isAdmin ? "/admin" : "/panel";
-  const panelLabel = isAdmin ? "Panel admin" : "Mis memoriales";
 
   const handleLogout = async () => {
+    if (loading) return;
     setLoading(true);
-    await fetch("/api/session", { method: "DELETE" });
-    router.replace("/login");
+    await logoutClient(router);
+    setLoading(false);
   };
 
   if (hasSession) {
     return (
       <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-white/80">
         <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-white/90">
-          {isAdmin ? "Admin" : "Cliente"}
+          {isAdmin ? "Admin" : "Dueño"}
         </span>
-        <Link
-          href={panelHref}
-          className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.26em] text-white transition hover:border-[#e87422] hover:bg-[#e87422]"
-        >
-          {panelLabel}
-        </Link>
         <span className="whitespace-nowrap text-white/80">{userEmail}</span>
         <button
           type="button"
@@ -42,7 +36,7 @@ export function AuthActions({ userEmail, userRole }: AuthActionsProps) {
           disabled={loading}
           className="rounded-full border border-white/25 bg-white/5 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.26em] text-white transition hover:border-[#e87422] hover:bg-[#e87422] disabled:opacity-60"
         >
-          Cerrar sesión
+          {loading ? "Saliendo…" : "Cerrar sesión"}
         </button>
       </div>
     );

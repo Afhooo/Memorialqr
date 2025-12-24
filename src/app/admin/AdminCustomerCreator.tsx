@@ -19,7 +19,7 @@ const CHANNELS = [
 export function AdminCustomerCreator() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [attachDemoMemorial, setAttachDemoMemorial] = useState(false);
+  const [attachStarterMemorial, setAttachStarterMemorial] = useState(false);
   const [createOrder, setCreateOrder] = useState(true);
   const [channel, setChannel] = useState(CHANNELS[0]?.value ?? "presencial");
   const [amountCents, setAmountCents] = useState<string>("");
@@ -50,7 +50,7 @@ export function AdminCustomerCreator() {
           amountCents: parsedAmount,
           currency: "CLP",
           externalRef: externalRef.trim() || null,
-          attachDemoMemorial,
+          attachStarterMemorial,
         }),
       });
 
@@ -151,11 +151,11 @@ export function AdminCustomerCreator() {
         <label className="flex items-center gap-3 rounded-2xl border border-[#e0e0e0] bg-white px-4 py-3 text-sm text-[#333333]">
           <input
             type="checkbox"
-            checked={attachDemoMemorial}
-            onChange={(event) => setAttachDemoMemorial(event.target.checked)}
+            checked={attachStarterMemorial}
+            onChange={(event) => setAttachStarterMemorial(event.target.checked)}
             className="h-4 w-4"
           />
-          Asociar memorial “Pablo Neruda” al cliente
+          Crear memorial inicial para el cliente (vacío)
         </label>
 
         <label className="block text-xs uppercase tracking-[0.26em] text-[#555555]">

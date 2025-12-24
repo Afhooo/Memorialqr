@@ -28,53 +28,6 @@ type MemorialRecord = {
   template_id?: string | null;
 };
 
-const DEMO_MEMORIAL_ID = "pablo-neruda";
-
-const DEMO_MEMORIAL: MemorialRecord = {
-  id: DEMO_MEMORIAL_ID,
-  name: "Pablo Neruda",
-  description:
-    "Poeta chileno, diplomático y premio Nobel de Literatura. Este memorial muestra cómo se ve un espacio ya publicado.",
-  birth_date: "1904-07-12",
-  death_date: "1973-09-23",
-  owner_id: "demo",
-  cover_media_url: null,
-  cover_media_path: null,
-  avatar_media_url: null,
-  avatar_media_path: null,
-  template_id: null,
-};
-
-const DEMO_MEMORIES: Memory[] = [
-  {
-    id: "demo-1",
-    memorial_id: DEMO_MEMORIAL_ID,
-    title: "Residencia en la Tierra",
-    content: "Versos que marcaron una época y acompañan a quien aún busca consuelo en su voz.",
-    media_url: null,
-    media_path: null,
-    created_at: "2022-01-01T12:00:00Z",
-  },
-  {
-    id: "demo-2",
-    memorial_id: DEMO_MEMORIAL_ID,
-    title: "Canto General",
-    content: "Un poema-río que recorre América Latina y mantiene viva la memoria colectiva.",
-    media_url: null,
-    media_path: null,
-    created_at: "2022-05-15T12:00:00Z",
-  },
-  {
-    id: "demo-3",
-    memorial_id: DEMO_MEMORIAL_ID,
-    title: "Casa de Isla Negra",
-    content: "El refugio frente al mar donde cada objeto cuenta una historia.",
-    media_url: null,
-    media_path: null,
-    created_at: "2023-03-21T12:00:00Z",
-  },
-];
-
 async function signStoragePaths(paths: Array<string | null | undefined>, expiresInSeconds = 60 * 60) {
   const unique = [...new Set(paths.filter((path): path is string => Boolean(path)))];
   if (!unique.length) return new Map<string, string>();
@@ -196,14 +149,9 @@ export default async function MemorialPage({
   const resolvedParams = await Promise.resolve(params);
   const memorialId = resolvedParams.id;
 
-  // Demostración pública sin login
-  if (memorialId === DEMO_MEMORIAL_ID) {
-    return renderMemorial(DEMO_MEMORIAL, DEMO_MEMORIES, false);
-  }
-
   const session = await getServerSession();
   if (!session) {
-    redirect("/login");
+    redirect(`/login?from=/memorial/${memorialId}`);
   }
 
   const supabase = createSupabaseServerClient();

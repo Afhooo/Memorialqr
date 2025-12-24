@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./LoginForm";
 import { getServerSession } from "@/lib/serverSession";
+import { getSafeRedirectPath } from "@/lib/safeRedirect";
 
 export const metadata: Metadata = {
   title: "Iniciar sesión | Recuerdame",
@@ -15,7 +16,9 @@ export default async function LoginPage({
   const session = await getServerSession();
 
   if (session?.user?.id) {
-    const redirectTo = session.user.role === "admin" ? "/admin" : searchParams?.from || "/elige-perfil";
+    const role = session.user.role ?? null;
+    const fallback = role === "admin" ? "/admin" : "/elige-perfil";
+    const redirectTo = getSafeRedirectPath({ requested: searchParams?.from, role, fallback });
     redirect(redirectTo);
   }
 

@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSafeRedirectPath } from "@/lib/safeRedirect";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -39,8 +40,10 @@ export function LoginForm() {
       }
 
       const serverRedirect = typeof body.redirectTo === "string" ? body.redirectTo : null;
+      const role = typeof body.role === "string" ? body.role : null;
       const requestedRedirect = searchParams.get("from");
-      const redirectTo = serverRedirect === "/admin" ? "/admin" : requestedRedirect || serverRedirect || "/elige-perfil";
+      const fallback = serverRedirect || (role === "admin" ? "/admin" : "/elige-perfil");
+      const redirectTo = getSafeRedirectPath({ requested: requestedRedirect, role, fallback });
 
       router.replace(redirectTo);
       router.refresh();

@@ -1,131 +1,122 @@
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
 import { getServerSession } from "@/lib/serverSession";
 
 const memorialHighlights = [
   {
-    title: "Esquela digital lista para avisar",
-    body: "Publica la noticia del fallecimiento con horarios y ubicación completos, sin limitarte al espacio de un periódico.",
+    title: "Un espacio privado",
+    body: "Un lugar donde la familia puede volver cuando lo necesite, con acceso protegido por sesión.",
   },
   {
-    title: "Obituario que explica quién fue",
-    body: "Relata la vida con contexto, logros y anécdotas que se leen como un perfil editorial profundo.",
+    title: "Crear el memorial",
+    body: "Completa nombre, fechas, portada y relato. Guarda y continúa después, a tu ritmo.",
   },
   {
-    title: "Libro de condolencias cuidado",
-    body: "Cada mensaje se revisa antes de mostrarse para mantener la serenidad y el tono empático del homenaje.",
+    title: "Añadir recuerdos",
+    body: "Publica recuerdos y mensajes dentro del memorial para ir construyendo su historia con el tiempo.",
   },
   {
-    title: "Fotografías y videos que reviven momentos",
-    body: "Sube imágenes, clips y audios para acompañar el duelo de quienes no pueden estar presentes.",
+    title: "Fotos y videos",
+    body: "Puedes sumar imágenes o videos para acompañar cada recuerdo, si lo necesitas.",
   },
   {
-    title: "Línea de vida con hitos",
-    body: "Organiza fechas, lugares y comentarios en una sola columna clara que muestra cada capítulo con calma.",
+    title: "Compartir el enlace",
+    body: "Copia el enlace del memorial y compártelo con tu familia por chat o correo.",
   },
   {
-    title: "Detalles virtuales que acompañan",
-    body: "Activa flores, velas o una paloma ascendente; las Flaming Candles de Recuerdame permanecen encendidas treinta días.",
+    title: "Escaneo QR o NFC",
+    body: "Si tienes un QR o un token, puedes escanearlo para abrir un memorial específico.",
   },
   {
-    title: "Comparte con un enlace",
-    body: "Envía el memorial por mensaje, correo o redes sociales y todos llegarán al mismo espacio íntimo.",
-  },
-  {
-    title: "Código QR para el lugar de descanso",
-    body: "Descarga un QR listo para imprimir o grabar en una placa, la urna o la lápida, y conecta el mundo físico con el digital.",
+    title: "Volver cuando haga falta",
+    body: "El memorial queda disponible para revisar, editar y leer con calma cuando lo necesites.",
   },
 ];
 
 const serviceCommitments = [
   {
-    title: "Memorial digital gratuito durante 30 días",
-    body: "Recuerdame crea un espacio activo y accesible sin coste ni compromiso inicial; no necesitas tarjeta para comenzar.",
+    title: "Hecho para la familia",
+    body: "Un flujo simple para crear el perfil, sumar recuerdos y compartir el acceso sin enredos.",
   },
   {
-    title: "Módulo de esquela sin coste",
-    body: "Informa y convoca a la familia con un texto amplio que incluye horarios, ubicación y deseos especiales.",
+    title: "Privado por defecto",
+    body: "El acceso está protegido por sesión: ves y editas solo tus propios memoriales.",
   },
   {
-    title: "Obituario digital gratuito",
-    body: "Redacta un obituario significativo que se comparte en línea para avisar a amistades sin importar dónde estén.",
-  },
-  {
-    title: "Libro de condolencias y mensajes",
-    body: "Administra cada mensaje recibido y conserva el archivo completo para volver a leerlo cuando lo necesites.",
+    title: "Compartir y escaneo",
+    body: "Comparte por enlace y usa escaneo QR/NFC cuando tengas un código o token asociado.",
   },
 ];
 
 const howItWorks = [
   {
-    title: "Completa el memorial en minutos",
-    body: "Un asistente editorial te guía paso a paso para llenar el perfil del ser querido; puedes editar todo en cualquier momento.",
+    title: "Inicia sesión",
+    body: "Entra con tu cuenta para acceder a tu espacio.",
   },
   {
-    title: "Personaliza cada capítulo",
-    body: "Añade el texto principal, sube fotografías, videos y crea una línea de vida visual con los hitos más significativos.",
+    title: "Entra a tu panel",
+    body: "Desde ahí puedes ver tus memoriales o crear el primero.",
   },
   {
-    title: "Comparte el enlace",
-    body: "El memorial funciona como una esquela moderna sin coste; envías el enlace por mensajería, correo o redes.",
+    title: "Crea un memorial",
+    body: "Completa nombre, fechas, relato y portada. Guarda y vuelve después si lo necesitas.",
   },
   {
-    title: "Recibe condolencias",
-    body: "Familiares y amistades dejan mensajes. Tú decides cuáles se muestran públicamente y cuáles permanecen privados.",
+    title: "Abre el perfil",
+    body: "Entra al memorial para revisar el contenido y navegar los recuerdos publicados.",
   },
   {
-    title: "Conserva recuerdos y QR",
-    body: "Genera un código QR descargable para colocar en la urna, la lápida o un objeto significativo y mantén vivo el acceso.",
+    title: "Publica recuerdos",
+    body: "Añade mensajes y recuerdos dentro del memorial para ir construyendo la historia con el tiempo.",
   },
   {
-    title: "Activa recordatorios",
-    body: "Programa alertas para cada aniversario del fallecimiento y reúne a todos nuevamente en la fecha que importa.",
-  },
-  {
-    title: "Enciende su memoria con un detalle",
-    body: "Cualquier visitante puede dejar flores virtuales, una vela ardiente o un símbolo espiritual durante treinta días.",
+    title: "Comparte o escanea",
+    body: "Copia el enlace para compartir, o usa escaneo QR/NFC cuando tengas un código asociado.",
   },
 ];
 
 const differentiators = [
   {
-    title: "Facilidad de uso",
-    body: "La interfaz lineal de Recuerdame evita menús saturados y mantiene cada paso claro.",
+    title: "Un camino simple",
+    body: "Panel → memorial → recuerdos: un flujo claro para lo esencial.",
   },
   {
-    title: "Interacción viva",
-    body: "Activa velas, flores o símbolos animados para que cada gesto permanezca treinta días y pueda reactivarse.",
+    title: "Privado por sesión",
+    body: "El acceso está protegido: solo ves y editas tus propios memoriales.",
   },
   {
-    title: "Alternativa moderna",
-    body: "Sustituye la esquela u obituario tradicional y funciona como velatorio digital accesible.",
+    title: "Para volver cuando lo necesites",
+    body: "Un espacio pensado para leerse con calma, hoy o más adelante.",
   },
   {
-    title: "Foto animación opcional",
-    body: "Añade movimiento realista a la fotografía del homenajeado para crear un recuerdo vivo.",
+    title: "Compartir en segundos",
+    body: "Copia el enlace del memorial y compártelo con tu familia fácilmente.",
   },
   {
-    title: "Acceso 24/7",
-    body: "Visita el memorial en cualquier momento y desde cualquier lugar.",
+    title: "Acceso por escaneo",
+    body: "Escanea un QR o usa NFC cuando tengas un código o token asociado.",
   },
   {
-    title: "Asequible",
-    body: "Honrar su memoria no debería implicar otro gasto; mantenemos una opción gratuita y flexible.",
+    title: "Sin anuncios",
+    body: "Un espacio limpio, sin banners ni trackers publicitarios metidos en el memorial.",
   },
 ];
 
-const highlightTags = ["Esencial", "Perfil", "Cuidado", "Memoria", "Hitos", "Detalle", "Acceso", "Presencia"];
+const highlightTags = ["Privado", "Perfil", "Recuerdos", "Multimedia", "Acceso", "Compartir", "Escaneo", "Volver"];
 
 const homeHeroVideos = ["/m1.mp4", "/m2.mp4", "/a1.mp4"];
 
 export default async function HomePage() {
   const session = await getServerSession();
+  const role = session?.user?.role ?? null;
+  const isAdmin = role === "admin";
+  const hasSession = Boolean(session);
+  const primaryHref = hasSession ? (isAdmin ? "/admin" : "/panel") : "/login?from=/elige-perfil";
+  const primaryLabel = hasSession ? (isAdmin ? "Volver al panel admin" : "Ir a mi panel") : "Crear memorial";
+  const secondaryHref = hasSession ? (isAdmin ? "/" : "/memorial") : "/login?from=/panel";
+  const secondaryLabel = hasSession ? (isAdmin ? "Seguir en inicio" : "Ver mis memoriales") : "Ver mis memoriales";
 
-  if (session) {
-    redirect(session.user.role === "admin" ? "/admin" : "/elige-perfil");
-  }
   return (
     <main className="relative mx-auto max-w-6xl space-y-16 px-4 pb-14 text-[#333333]" id="principal">
       <section className="relative isolate -mx-[calc((100vw-100%)/2)] w-screen overflow-hidden bg-gradient-to-br from-[#1f1f1f] via-[#2a2a2a] to-[#1a1a1a] px-6 py-14 text-white sm:px-10">
@@ -144,39 +135,39 @@ export default async function HomePage() {
               Un memorial vivo para seguir cerca de quien amas
             </h1>
             <p className="text-base leading-relaxed text-white/85">
-              Reúne sus fotos, cartas y su historia en un espacio sereno. Sin prisa, sin publicidad, con moderación
-              cuidada para que cada palabra acompañe. Comparte con quienes no pudieron estar y regresen cuando necesiten.
+              Un espacio privado donde la familia puede crear el memorial, sumar recuerdos y compartir el acceso con quienes lo
+              necesiten. Para volver cuando haga falta, con calma.
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-[11px] uppercase tracking-[0.4em]">
             <Link
-              href="/login?from=/crear-memorial"
+              href={primaryHref}
               className="rounded-full bg-[#e87422] px-6 py-3 font-semibold text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] transition hover:translate-y-[-2px]"
             >
-              Crear memorial
+              {primaryLabel}
             </Link>
             <Link
-              href="/login?from=/panel"
+              href={secondaryHref}
               className="rounded-full border border-white/25 px-6 py-3 text-white transition hover:border-[#e87422] hover:text-[#e87422]"
             >
-              Ver mis memoriales
+              {secondaryLabel}
             </Link>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Presencias activas</p>
-              <p className="mt-2 text-2xl font-serif text-white">—</p>
-              <p className="text-sm text-white/80">Inicia sesión para ver los tuyos</p>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Privado</p>
+              <p className="mt-2 text-xl font-serif text-white">Por sesión</p>
+              <p className="text-sm text-white/80">Acceso protegido</p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
-              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">30 días sin coste</p>
-              <p className="mt-2 text-xl font-serif text-white">Sin tarjeta</p>
-              <p className="text-sm text-white/80">Empieza ahora, edita con calma y decide después</p>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Recuerdos</p>
+              <p className="mt-2 text-xl font-serif text-white">En un lugar</p>
+              <p className="text-sm text-white/80">Texto y multimedia</p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/5 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.35em] text-[#ff9800]">Un solo enlace</p>
               <p className="mt-2 text-xl font-serif text-white">Para la familia</p>
-              <p className="text-sm text-white/80">Los que están lejos también pueden dejar su cariño</p>
+              <p className="text-sm text-white/80">Copia y comparte el memorial</p>
             </div>
           </div>
         </div>
@@ -202,8 +193,7 @@ export default async function HomePage() {
             <div className="absolute bottom-6 left-6 max-w-md space-y-2 text-white drop-shadow-lg">
               <p className="text-[11px] uppercase tracking-[0.38em] text-white/80">Mantener la llama encendida</p>
               <p className="text-lg font-serif leading-snug">
-                Un memorial vivo con fotos, notas de voz y cartas moderadas para que la familia regrese cuando necesite
-                sentirse cerca.
+                Un perfil que se mantiene disponible para volver cuando la familia lo necesite: editar, leer y sumar recuerdos.
               </p>
             </div>
           </div>
@@ -237,13 +227,13 @@ export default async function HomePage() {
               <p className="text-[11px] uppercase tracking-[0.38em] text-[#2e7d32]">Del altar al QR</p>
               <h3 className="text-3xl font-serif text-[#333333]">Un relato continuo, no una colección de tarjetas</h3>
               <p className="text-[#4a4a4a]">
-                Las partes del memorial se leen como una línea de vida: obituario, condolencias moderadas, recuerdos multimedia
-                y los símbolos que siguen encendidos. Puedes recorrerlo de izquierda a derecha o simplemente bajar por la línea.
+                El memorial se recorre como un solo hilo: perfil, recuerdos y acceso rápido para compartir. Entra desde el panel,
+                abre el memorial y publica en el mismo lugar.
               </p>
               <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.32em] text-[#e87422]">
-                <span className="rounded-full bg-[#e87422]/12 px-3 py-1">Obituario</span>
-                <span className="rounded-full bg-[#4caf50]/12 px-3 py-1 text-[#2e7d32]">Condolencias moderadas</span>
-                <span className="rounded-full bg-[#e87422]/12 px-3 py-1">Velas digitales</span>
+                <span className="rounded-full bg-[#e87422]/12 px-3 py-1">Perfil</span>
+                <span className="rounded-full bg-[#4caf50]/12 px-3 py-1 text-[#2e7d32]">Recuerdos</span>
+                <span className="rounded-full bg-[#e87422]/12 px-3 py-1">Compartir</span>
               </div>
             </div>
             <ol className="relative space-y-6 border-l border-[#d8d8d8] pl-6">
@@ -271,14 +261,14 @@ export default async function HomePage() {
       <section className="animate-fade-rise rounded-[28px] border border-[#e0e0e0] bg-gradient-to-r from-white via-[#f7f7f7] to-[#eef2ef] p-7 shadow-[0_18px_60px_rgba(0,0,0,0.06)]">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
-            <p className="text-[11px] uppercase tracking-[0.4em] text-[#e87422]">Detalles y comparativa</p>
-            <p className="text-xl font-serif text-[#333333]">Ver todos los beneficios y cómo se diferencia un memorial digital.</p>
+            <p className="text-[11px] uppercase tracking-[0.4em] text-[#e87422]">Cómo funciona</p>
+            <p className="text-xl font-serif text-[#333333]">Una vista simple del flujo y la privacidad del memorial.</p>
           </div>
           <Link
             href="/beneficios"
             className="rounded-full bg-[#e87422] px-5 py-3 text-[11px] uppercase tracking-[0.35em] text-white shadow-[0_15px_40px_rgba(0,0,0,0.15)] transition hover:translate-y-[-2px]"
           >
-            Abrir detalles
+            Ver cómo funciona
           </Link>
         </div>
       </section>
@@ -293,8 +283,11 @@ export default async function HomePage() {
                 Una línea editorial que avanza paso a paso. No son tarjetas: es un carril donde ves de un vistazo qué sigue.
               </p>
             </div>
-            <Link href="/login" className="text-[11px] uppercase tracking-[0.35em] text-[#e87422] underline">
-              Empezar ahora
+            <Link
+              href={hasSession ? primaryHref : "/login"}
+              className="text-[11px] uppercase tracking-[0.35em] text-[#e87422] underline"
+            >
+              {hasSession ? primaryLabel : "Empezar ahora"}
             </Link>
           </div>
           <div className="relative overflow-x-auto pb-4">
@@ -356,17 +349,23 @@ export default async function HomePage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.45em] text-[#e87422]">Inventario</p>
-            <h2 className="text-3xl font-serif text-[#333333]">Tus memoriales activos</h2>
+            <h2 className="text-3xl font-serif text-[#333333]">
+              {hasSession ? (isAdmin ? "Acceso administrativo" : "Tus memoriales activos") : "Tus memoriales activos"}
+            </h2>
           </div>
           <Link
-            href="/login?from=/elige-perfil"
+            href={primaryHref}
             className="rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.35em] text-[#e87422]"
           >
-            Iniciar sesión
+            {primaryLabel}
           </Link>
         </div>
         <div className="rounded-3xl border border-dashed border-[#d5d5d5] bg-white/85 px-5 py-6 text-[#4a4a4a]">
-          Este espacio es privado. Inicia sesión para ver o editar los memoriales que has creado.
+          {hasSession
+            ? isAdmin
+              ? "Estás con acceso administrativo. Usa el panel admin para gestión y métricas."
+              : "Entra al panel para ver o editar los memoriales que has creado."
+            : "Este espacio es privado. Inicia sesión para ver o editar los memoriales que has creado."}
         </div>
       </section>
     </main>

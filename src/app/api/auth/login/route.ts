@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
   const redirectTo = user.role === "admin" ? "/admin" : "/elige-perfil";
 
-  const response = NextResponse.json({ ok: true, redirectTo });
+  const response = NextResponse.json({ ok: true, redirectTo, role: user.role });
   response.cookies.set(AUTH_TOKEN_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

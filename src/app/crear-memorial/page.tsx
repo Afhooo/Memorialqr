@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getServerSession } from "@/lib/serverSession";
 import { MemorialCreatorForm } from "@/app/panel/MemorialCreatorForm";
 import { PanelBackButton } from "./panelBackButton";
@@ -44,12 +43,6 @@ export default async function CrearMemorialPage() {
           </div>
 
           <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.22em] text-white/75">
-            <Link
-              href="/memorial/pablo-neruda"
-              className="rounded-full border border-[#e87422] bg-[#e87422] px-4 py-2 text-white transition hover:translate-y-[-1px]"
-            >
-              Ver demo
-            </Link>
             <PanelBackButton />
           </div>
         </div>

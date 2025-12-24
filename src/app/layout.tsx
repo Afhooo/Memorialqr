@@ -29,8 +29,17 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const session = await getServerSession();
-  const isAdmin = session?.user?.role === "admin";
-  const exploreHref = session ? (isAdmin ? "/admin" : "/panel") : "/memorial/pablo-neruda";
+  const role = session?.user?.role ?? null;
+  const isAdmin = role === "admin";
+  const hasSession = Boolean(session);
+  const navItems = [
+    { href: "/crear-memorial", label: "Crear memorial", show: hasSession && !isAdmin },
+    { href: "/panel", label: "Panel", show: hasSession && !isAdmin },
+    { href: "/memorial", label: "Memorial", show: hasSession && !isAdmin },
+    { href: "/admin", label: "Dashboard", show: hasSession && isAdmin },
+    { href: "/admin/usuarios", label: "Usuarios", show: hasSession && isAdmin },
+    { href: "/beneficios", label: "Cómo funciona", show: true },
+  ].filter((item) => item.show);
 
   return (
     <html lang="es">
@@ -56,32 +65,15 @@ export default async function RootLayout({
               </div>
 
               <nav className="flex w-full min-w-0 flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-white/80 sm:w-auto sm:flex-1 sm:justify-center sm:text-[11px] sm:tracking-[0.22em]">
-                <Link
-                  href="/#principal"
-                  className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
-                >
-                  Principal
-                </Link>
-                {session && !isAdmin && (
+                {navItems.map((item) => (
                   <Link
-                    href="/crear-memorial"
+                    key={item.href}
+                    href={item.href}
                     className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
                   >
-                    Crear memorial
+                    {item.label}
                   </Link>
-                )}
-                <Link
-                  href={exploreHref}
-                  className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
-                >
-                  {isAdmin ? "Dashboard" : "Explorar memoriales"}
-                </Link>
-                <Link
-                  href="/beneficios"
-                  className="rounded-full px-4 py-2 transition hover:bg-white/10 hover:text-white"
-                >
-                  Beneficios
-                </Link>
+                ))}
               </nav>
 
               <div className="hidden items-center gap-3 sm:flex">

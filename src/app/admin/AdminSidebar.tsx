@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { logoutClient } from "@/lib/logoutClient";
 
 type Item = { href: string; label: string; description: string };
 
@@ -17,9 +18,10 @@ export function AdminSidebar({ userEmail }: { userEmail: string }) {
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
+    if (loading) return;
     setLoading(true);
-    await fetch("/api/session", { method: "DELETE" });
-    router.replace("/login");
+    await logoutClient(router);
+    setLoading(false);
   };
 
   return (

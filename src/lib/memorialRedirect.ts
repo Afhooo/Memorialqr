@@ -2,7 +2,7 @@ import { createSupabaseServerClient } from "./supabaseClient";
 
 /**
  * Finds the best destination for a user after login.
- * Prefers a Neruda memorial when present, otherwise the first owned memorial, and finally the demo.
+ * Prefers the first owned memorial, and finally the panel.
  */
 export async function getDefaultMemorialRedirectPath(userId: string): Promise<string> {
   const supabase = createSupabaseServerClient();
@@ -13,17 +13,9 @@ export async function getDefaultMemorialRedirectPath(userId: string): Promise<st
     .eq("owner_id", userId)
     .order("name", { ascending: true });
 
-  const nerudaMemorial = memorials?.find(
-    (memorial) => memorial.name?.trim().toLowerCase() === "pablo neruda",
-  );
-
-  if (nerudaMemorial?.id) {
-    return `/memorial/${nerudaMemorial.id}`;
-  }
-
   if (memorials?.[0]?.id) {
     return `/memorial/${memorials[0].id}`;
   }
 
-  return "/memorial/pablo-neruda";
+  return "/panel";
 }

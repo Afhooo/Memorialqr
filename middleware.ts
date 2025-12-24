@@ -3,11 +3,10 @@ import type { NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { AUTH_TOKEN_COOKIE } from "./src/lib/constants";
 
-const PUBLIC_PATHS = ["/", "/beneficios", "/login", "/memorial/pablo-neruda"];
+const PUBLIC_PATHS = ["/", "/beneficios", "/login"];
 const PUBLIC_API_PATHS = ["/api/auth/login", "/api/session", "/api/resolve-token"];
 const OWNER_PATH_PREFIXES = ["/panel", "/crear-memorial", "/memorial", "/scan"];
 const ADMIN_PATH_PREFIXES = ["/admin"];
-const DEMO_MEMORIAL_PATH = "/memorial/pablo-neruda";
 
 const isPathMatch = (pathname: string, routes: string[]) =>
   routes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
@@ -35,8 +34,7 @@ export async function middleware(request: NextRequest) {
   loginUrl.pathname = "/login";
   loginUrl.searchParams.set("from", pathname);
 
-  const isDemoMemorial = pathname === DEMO_MEMORIAL_PATH || pathname.startsWith(`${DEMO_MEMORIAL_PATH}/`);
-  const isPublicRoute = isPathMatch(pathname, PUBLIC_PATHS) || isDemoMemorial;
+  const isPublicRoute = isPathMatch(pathname, PUBLIC_PATHS);
 
   if (isPublicRoute) {
     return NextResponse.next();
@@ -74,7 +72,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  const isOwnerRoute = isPathMatch(pathname, OWNER_PATH_PREFIXES) && !isAdminRoute && !isDemoMemorial;
+  const isOwnerRoute = isPathMatch(pathname, OWNER_PATH_PREFIXES) && !isAdminRoute;
   if (isOwnerRoute && role !== "owner") {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = role === "admin" ? "/admin" : "/elige-perfil";

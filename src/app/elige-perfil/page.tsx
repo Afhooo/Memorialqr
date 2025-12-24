@@ -110,25 +110,11 @@ export default async function ChooseProfilePage({
               </Link>
             </div>
           </div>
-
-          <div className="flex flex-col gap-3 rounded-[18px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.06)]">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Demo pública</p>
-            <h3 className="text-xl font-serif text-[#333333]">Ver memorial de ejemplo</h3>
-            <p className="text-sm text-[#4a4a4a]">
-              Navega el memorial demo sin necesidad de login para mostrarlo a familias o colegas.
-            </p>
-            <Link
-              href="/memorial/pablo-neruda"
-              className="rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#e87422] transition hover:bg-[#e87422] hover:text-white"
-            >
-              Abrir demo
-            </Link>
-          </div>
         </div>
 
         <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 px-4 py-3 text-sm text-[#4a4a4a] shadow-[0_14px_40px_rgba(0,0,0,0.05)]">
           <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Para mostrar a alguien más</p>
-          <p>Puedes abrir tu propio memorial o usar el ejemplo público para enseñar cómo se ve un espacio ya armado.</p>
+          <p>Puedes abrir tu propio memorial cuando quieras para compartirlo con tu familia.</p>
         </div>
       </div>
     </div>

@@ -13,6 +13,7 @@ type CreateCustomerBody = {
   amountCents?: number | null;
   currency?: string | null;
   externalRef?: string | null;
+  attachStarterMemorial?: boolean;
   attachDemoMemorial?: boolean;
 };
 
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
   const currency = typeof body.currency === "string" && body.currency.trim() ? body.currency.trim().slice(0, 8) : "CLP";
   const externalRef = typeof body.externalRef === "string" && body.externalRef.trim() ? body.externalRef.trim().slice(0, 120) : null;
   const amountCents = typeof body.amountCents === "number" && Number.isFinite(body.amountCents) ? Math.round(body.amountCents) : null;
-  const attachDemoMemorial = Boolean(body.attachDemoMemorial);
+  const attachStarterMemorial = Boolean(body.attachStarterMemorial ?? body.attachDemoMemorial);
 
   if (!email) {
     return NextResponse.json({ error: "El correo es obligatorio" }, { status: 400 });
@@ -104,12 +105,12 @@ export async function POST(req: Request) {
 
   let memorialId: string | null = null;
 
-  if (attachDemoMemorial) {
+  if (attachStarterMemorial) {
     const { data: existingMemorial, error: memorialLookupError } = await supabase
       .from("memorials")
       .select("id")
       .eq("owner_id", user.id)
-      .ilike("name", "pablo neruda")
+      .limit(1)
       .maybeSingle();
 
     if (memorialLookupError) {
@@ -123,26 +124,15 @@ export async function POST(req: Request) {
       const { error: insertMemorialError } = await supabase.from("memorials").insert({
         id: memorialId,
         owner_id: user.id,
-        name: "Pablo Neruda",
-        description: "Memorial de ejemplo asociado al cliente para demo comercial y QA.",
-        birth_date: "1904-07-12",
-        death_date: "1973-09-23",
+        name: "Memorial inicial",
+        description: "Memorial inicial asociado al cliente para comenzar la configuración.",
+        birth_date: null,
+        death_date: null,
       });
 
       if (insertMemorialError) {
         return NextResponse.json({ error: insertMemorialError.message }, { status: 500 });
       }
-
-      await supabase.from("memories").insert([
-        {
-          id: randomUUID(),
-          memorial_id: memorialId,
-          title: "Bienvenida",
-          content: "Este memorial fue creado por el equipo para que el cliente lo administre y agregue recuerdos.",
-          media_url: null,
-          created_at: new Date().toISOString(),
-        },
-      ]);
     }
   }
 
