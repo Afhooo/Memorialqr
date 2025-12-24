@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
 import { formatDate } from "./dateUtils";
+import { IconFacebook, IconInstagram } from "./Icons";
 
 interface HeroSectionProps {
   memorialName: string;
@@ -12,6 +13,8 @@ interface HeroSectionProps {
   description: string | null;
   avatarUrl?: string | null;
   coverUrl?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
   memoryCount: number;
   memoryWindow: string;
   lastUpdated: string | null;
@@ -24,6 +27,8 @@ export function HeroSection({
   description,
   avatarUrl,
   coverUrl,
+  facebookUrl,
+  instagramUrl,
   memoryCount,
   memoryWindow,
   lastUpdated,
@@ -129,14 +134,43 @@ export function HeroSection({
             >
               {memorialName}
             </h1>
+            {(facebookUrl || instagramUrl) && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] uppercase tracking-[0.26em] text-white/70">Redes</span>
+                {facebookUrl && (
+                  <a
+                    href={facebookUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/90 transition hover:bg-white/15"
+                    title="Facebook"
+                    aria-label="Facebook"
+                  >
+                    <IconFacebook className="h-5 w-5" />
+                  </a>
+                )}
+                {instagramUrl && (
+                  <a
+                    href={instagramUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/90 transition hover:bg-white/15"
+                    title="Instagram"
+                    aria-label="Instagram"
+                  >
+                    <IconInstagram className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
+            )}
 
             <p className="text-sm text-white/80">
               {formatDate(birthDate)} · {formatDate(deathDate)}
             </p>
-            <p className="max-w-3xl text-base text-white/85">
-              {description ||
-                "Un espacio para la familia y amigos: fotos del carrete, notas cortas y fechas que importan. Aquí se viene a recordar, sin ruido."}
-            </p>
+              <p className="max-w-3xl text-base text-white/85">
+                {description ||
+                "Un espacio para la familia y amigos: fotos, notas cortas y fechas que importan. Aquí se viene a recordar, sin ruido."}
+              </p>
 
             <div className="flex flex-wrap gap-2 text-xs">
               <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.2em] text-white">

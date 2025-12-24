@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import type { ReactNode, SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement> & { title?: string };
 
@@ -6,7 +6,7 @@ function IconBase({
   title,
   children,
   ...props
-}: IconProps & { children: React.ReactNode }) {
+}: IconProps & { children: ReactNode }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -165,3 +165,37 @@ export function IconRepeat(props: IconProps) {
   );
 }
 
+export function IconFacebook(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path
+        d="M14 8.2V6.6c0-.8.5-1 1-1h1.9V3H15c-2.2 0-3.6 1.5-3.6 3.7v1.5H9.5V11h1.9v10H14V11h2.6l.4-2.8H14z"
+        fill="currentColor"
+      />
+    </IconBase>
+  );
+}
+
+export function IconInstagram(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path
+        d="M7.2 3h9.6A4.2 4.2 0 0121 7.2v9.6A4.2 4.2 0 0116.8 21H7.2A4.2 4.2 0 013 16.8V7.2A4.2 4.2 0 017.2 3z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 16.1a4.1 4.1 0 110-8.2 4.1 4.1 0 010 8.2z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M17.6 6.5h.01"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </IconBase>
+  );
+}

@@ -9,7 +9,7 @@ interface MemorialNavbarProps {
 export function MemorialNavbar({ memorialName, memoryCount, lastUpdatedLabel }: MemorialNavbarProps) {
   const items = [
     { href: "#hero", label: "Portada" },
-    { href: "#carrete", label: "Carrete" },
+    { href: "#fotos", label: "Fotos" },
     { href: "#intro", label: "Presentación" },
     { href: "#muro", label: "Cinta" },
     { href: "#historia", label: "Línea de vida" },

@@ -53,8 +53,8 @@ export function MemoriesGallery({
 
   if (items.length === 0) {
     return (
-      <section id="carrete" className="rounded-[34px] bg-white/75 px-6 py-10 shadow-[0_28px_110px_rgba(0,0,0,0.12)] backdrop-blur">
-        <p className="text-[11px] uppercase tracking-[0.32em] text-[#0ea5e9]">Carrete</p>
+      <section id="fotos" className="rounded-[34px] bg-white/75 px-6 py-10 shadow-[0_28px_110px_rgba(0,0,0,0.12)] backdrop-blur">
+        <p className="text-[11px] uppercase tracking-[0.32em] text-[#0ea5e9]">Fotos</p>
         <h3 className="mt-2 text-2xl font-semibold text-[#0f172a]">Todavía no hay fotos en este memorial</h3>
         <p className="mt-2 max-w-3xl text-sm text-[#475569]">
           Cuando subas la primera, aparece aquí como en una biblioteca: ordenada, limpia y fácil de recorrer.
@@ -65,10 +65,10 @@ export function MemoriesGallery({
 
   return (
     <>
-      <section id="carrete" className="rounded-[34px] bg-white/75 px-6 py-8 shadow-[0_28px_110px_rgba(0,0,0,0.12)] backdrop-blur">
+      <section id="fotos" className="rounded-[34px] bg-white/75 px-6 py-8 shadow-[0_28px_110px_rgba(0,0,0,0.12)] backdrop-blur">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.32em] text-[#0ea5e9]">Carrete</p>
+            <p className="text-[11px] uppercase tracking-[0.32em] text-[#0ea5e9]">Fotos</p>
             <h3 className="mt-2 text-2xl font-semibold text-[#0f172a]">Fotos y videos de {memorialName}</h3>
             <p className="mt-2 max-w-3xl text-sm text-[#475569]">
               Toca una foto para verla grande. Flechas ← → para avanzar si estás en computador.

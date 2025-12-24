@@ -10,6 +10,8 @@ export interface Memorial {
   avatar_media_url?: string | null;
   avatar_media_path?: string | null;
   template_id?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
 }
 
 export interface Memory {

@@ -36,6 +36,8 @@ type CreateMemorialBody = {
   avatarMediaUrl?: string | null;
   avatarMediaPath?: string | null;
   templateId?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
   firstMemory?: {
     title?: string;
     content?: string;
@@ -71,6 +73,21 @@ export async function POST(req: Request) {
   const avatarMediaUrl = typeof body.avatarMediaUrl === "string" ? body.avatarMediaUrl.trim().slice(0, 2000) : null;
   const avatarMediaPath = typeof body.avatarMediaPath === "string" ? body.avatarMediaPath.trim().slice(0, 600) : null;
   const templateId = typeof body.templateId === "string" ? body.templateId.trim().slice(0, 64) : null;
+  const facebookUrl = typeof body.facebookUrl === "string" ? body.facebookUrl.trim().slice(0, 2000) : null;
+  const instagramUrl = typeof body.instagramUrl === "string" ? body.instagramUrl.trim().slice(0, 2000) : null;
+
+  const normalizeExternalUrl = (value: string | null) => {
+    if (!value) return null;
+    try {
+      const parsed = new URL(value);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+      return parsed.toString();
+    } catch {
+      return null;
+    }
+  };
+  const safeFacebookUrl = normalizeExternalUrl(facebookUrl);
+  const safeInstagramUrl = normalizeExternalUrl(instagramUrl);
 
   if (!name) {
     return NextResponse.json({ error: "El nombre es obligatorio" }, { status: 400 });
@@ -91,6 +108,8 @@ export async function POST(req: Request) {
     avatar_media_url: avatarMediaPath ? null : avatarMediaUrl,
     avatar_media_path: avatarMediaPath,
     template_id: templateId,
+    facebook_url: safeFacebookUrl,
+    instagram_url: safeInstagramUrl,
   });
 
   if (insertError) {

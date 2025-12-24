@@ -211,7 +211,7 @@ export default async function OwnerPanelPage() {
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[#e87422]">Nuevo memorial</p>
                 <h2 className="text-xl font-semibold text-[#0f172a]">Crear un memorial</h2>
                 <p className="text-sm text-[#475569]">
-                  Abre un espacio con fotos primero: portada, foto principal y un carrete inicial de recuerdos.
+                  Abre un espacio con fotos primero: portada, foto principal y una selección inicial de recuerdos.
                 </p>
               </div>
               <Link
@@ -222,7 +222,7 @@ export default async function OwnerPanelPage() {
               </Link>
             </div>
             <div className="rounded-3xl border border-dashed border-[#d4dae5] bg-[#f8fafc] p-6 text-sm text-[#475569]">
-              <p className="text-base font-semibold text-[#0f172a]">Experiencia estilo carrete</p>
+              <p className="text-base font-semibold text-[#0f172a]">Experiencia centrada en fotos</p>
               <p className="mt-2 max-w-2xl">
                 El creador está pensado como una biblioteca de fotos: subes varias de una, eliges la portada y dejas un par de
                 frases opcionales. Lo demás lo vas armando en el memorial, con calma.

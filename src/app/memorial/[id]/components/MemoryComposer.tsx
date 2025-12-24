@@ -33,7 +33,7 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [confetti, setConfetti] = useState<Array<{ id: number; x: number; delay: number; color: string }>>([]);
+  const [showTitle, setShowTitle] = useState(false);
 
   useEffect(() => {
     if (!file) {
@@ -119,15 +119,6 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
       setFile(null);
       setUploaded(null);
       setProgress(100);
-      setConfetti(
-        Array.from({ length: 26 }).map((_, idx) => ({
-          id: Date.now() + idx,
-          x: Math.random() * 100,
-          delay: Math.random() * 120,
-          color: ["#e87422", "#facc15", "#38bdf8", "#22c55e"][idx % 4],
-        })),
-      );
-      setTimeout(() => setConfetti([]), 1500);
       router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : "No pudimos guardar tu mensaje";
@@ -141,47 +132,33 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
 
   return (
     <form
-      className="relative space-y-4 overflow-hidden rounded-3xl border border-[#e2e8f0] bg-white/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.08)] sm:p-5"
+      className="space-y-3 rounded-3xl border border-[#e2e8f0] bg-white/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.08)]"
       onSubmit={handleSubmit}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#0f172a]">Deja un recuerdo</p>
-          <p className="text-xs text-[#64748b]">Un mensaje corto o una foto del carrete. Se guarda al instante.</p>
+          <p className="text-sm font-semibold text-[#0f172a]">Deja un recuerdo</p>
+          <p className="text-xs text-[#64748b]">Un mensaje corto, o una foto. Aquí todo queda en privado.</p>
         </div>
         <span className="rounded-full bg-[#0f172a] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
           Privado
         </span>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block text-xs uppercase tracking-[0.2em] text-[#475569]">
-          Título
-          <input
-            type="text"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="Carta, recuerdo, apodo…"
-            className="mt-2 w-full rounded-2xl border border-[#d7dee8] bg-white px-4 py-3 text-sm text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/25"
-            disabled={disabled || loading}
-          />
-        </label>
-        <label className="block text-xs uppercase tracking-[0.2em] text-[#475569]">
-          Recuerdo
-          <textarea
-            value={content}
-            onChange={(event) => setContent(event.target.value)}
-            placeholder="Una anécdota corta, una frase de cariño o el contexto de la foto."
-            rows={4}
-            className="mt-2 w-full rounded-2xl border border-[#d7dee8] bg-white px-4 py-3 text-sm text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/25"
-            disabled={disabled || loading}
-          />
-        </label>
-      </div>
+      <label className="block">
+        <span className="sr-only">Mensaje</span>
+        <textarea
+          value={content}
+          onChange={(event) => setContent(event.target.value)}
+          placeholder="Escribe aquí… una anécdota corta, una frase de cariño, o el contexto de la foto."
+          rows={4}
+          className="w-full rounded-3xl border border-[#d7dee8] bg-white px-4 py-3 text-sm leading-relaxed text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
+          disabled={disabled || loading}
+        />
+      </label>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-xs uppercase tracking-[0.2em] text-[#475569]">Adjunto</div>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input
             ref={fileInputRef}
             type="file"
@@ -197,9 +174,9 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || loading}
-            className="rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0ea5e9]/30 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0f172a]/15 hover:bg-[#f8fafc] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {file ? "Cambiar" : "Agregar foto/video"}
+            {file ? "Cambiar foto/video" : "Agregar foto/video"}
           </button>
           {file && (
             <button
@@ -211,12 +188,31 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
               Quitar
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setShowTitle((v) => !v)}
+            disabled={disabled || loading}
+            className="rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0f172a]/15 hover:bg-[#f8fafc] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {showTitle ? "Ocultar título" : "Agregar título"}
+          </button>
         </div>
       </div>
 
+      {showTitle && (
+        <input
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Título (opcional)"
+          className="w-full rounded-3xl border border-[#d7dee8] bg-white px-4 py-3 text-sm text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
+          disabled={disabled || loading}
+        />
+      )}
+
       {file && (
         <div className="overflow-hidden rounded-3xl border border-[#e2e8f0] bg-white shadow-[0_16px_44px_rgba(0,0,0,0.08)]">
-          <div className="relative aspect-[16/9] w-full bg-[#0f172a]/5">
+          <div className="relative aspect-[4/3] w-full bg-[#0f172a]/5">
             {filePreviewUrl ? (
               isVideoFile(file) ? (
                 <video src={filePreviewUrl} className="absolute inset-0 h-full w-full object-cover" controls />
@@ -237,54 +233,21 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
       {helper && <p className="text-xs text-[#475569]">{helper}</p>}
       {error && <p className="text-xs text-[#b3261e]">{error}</p>}
 
-      <div className="h-2 overflow-hidden rounded-full bg-[#f1f5f9]">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-[#0ea5e9] via-[#22c55e] to-[#eab308] transition-[width]"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      {(loading || progress > 0) && (
+        <div className="h-2 overflow-hidden rounded-full bg-[#f1f5f9]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-[#0ea5e9] via-[#22c55e] to-[#eab308] transition-[width]"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
       <button
         type="submit"
         disabled={disabled || loading}
-        className="w-full rounded-2xl bg-gradient-to-r from-[#0ea5e9] via-[#22c55e] to-[#e87422] px-4 py-3 text-sm font-semibold uppercase tracking-[0.26em] text-white shadow-[0_16px_40px_rgba(0,0,0,0.14)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+        className="w-full rounded-3xl bg-gradient-to-r from-[#0ea5e9] via-[#22c55e] to-[#e87422] px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] text-white shadow-[0_16px_40px_rgba(0,0,0,0.14)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {loading ? "Publicando…" : "Publicar mensaje"}
+        {loading ? "Publicando…" : "Publicar"}
       </button>
-
-      {confetti.length > 0 && (
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          {confetti.map((piece) => (
-            <span
-              key={piece.id}
-              className="absolute text-lg animate-[confetti_1.2s_ease-out_forwards]"
-              style={{
-                left: `${piece.x}%`,
-                top: "-8%",
-                animationDelay: `${piece.delay}ms`,
-                color: piece.color,
-              }}
-            >
-              ✦
-            </span>
-          ))}
-        </div>
-      )}
-      <style jsx>{`
-        @keyframes confetti {
-          0% {
-            opacity: 0.9;
-            transform: translateY(0) rotate(0deg);
-          }
-          50% {
-            opacity: 1;
-            transform: translateY(35vh) rotate(90deg);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(70vh) rotate(180deg);
-          }
-        }
-      `}</style>
     </form>
   );
 }

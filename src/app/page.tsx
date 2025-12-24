@@ -79,7 +79,7 @@ const howItWorks = [
 const differentiators = [
   {
     title: "Un camino simple",
-    body: "Panel → memorial → recuerdos: un flujo claro para lo esencial.",
+    body: "Panel → memorial → recuerdos: un camino claro, sin pasos raros.",
   },
   {
     title: "Privado por sesión",

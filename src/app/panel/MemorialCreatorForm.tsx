@@ -38,6 +38,8 @@ export function MemorialCreatorForm() {
   const [deathDate, setDeathDate] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [templateId, setTemplateId] = useState<string>(templates[0].id);
+  const [facebookUrl, setFacebookUrl] = useState<string>("");
+  const [instagramUrl, setInstagramUrl] = useState<string>("");
 
   const [media, setMedia] = useState<MediaDraft[]>([]);
   const [coverId, setCoverId] = useState<string | null>(null);
@@ -192,6 +194,8 @@ export function MemorialCreatorForm() {
           birthDate: birthDate || null,
           deathDate: deathDate || null,
           description: description.trim(),
+          facebookUrl: facebookUrl.trim() || null,
+          instagramUrl: instagramUrl.trim() || null,
           coverMediaPath: coverUpload?.path ?? null,
           coverMediaUrl: null,
           avatarMediaPath: avatarUpload?.path ?? null,
@@ -350,6 +354,40 @@ export function MemorialCreatorForm() {
                   />
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-[#e6e8ef] bg-white p-4 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.26em] text-[#0ea5e9]">Redes (opcional)</p>
+                <p className="text-sm text-[#475569]">Si quieren, dejen enlaces para encontrar su perfil.</p>
+              </div>
+              <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a]">
+                Opcional
+              </span>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label className="block text-xs uppercase tracking-[0.2em] text-[#475569]">
+                Facebook
+                <input
+                  type="url"
+                  value={facebookUrl}
+                  onChange={(e) => setFacebookUrl(e.target.value)}
+                  placeholder="https://facebook.com/..."
+                  className="mt-2 w-full rounded-2xl border border-[#e6e8ef] bg-white px-4 py-3 text-sm text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-[#475569]">
+                Instagram
+                <input
+                  type="url"
+                  value={instagramUrl}
+                  onChange={(e) => setInstagramUrl(e.target.value)}
+                  placeholder="https://instagram.com/..."
+                  className="mt-2 w-full rounded-2xl border border-[#e6e8ef] bg-white px-4 py-3 text-sm text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
+                />
+              </label>
             </div>
           </div>
 
@@ -556,7 +594,7 @@ export function MemorialCreatorForm() {
 
             {memoryItems.length === 0 ? (
               <div className="mt-4 rounded-3xl border border-dashed border-[#d4dae5] bg-[#f8fafc] px-4 py-10 text-center text-sm text-[#64748b]">
-                Marca alguna foto como “Recuerdo” para armar el carrete inicial.
+                Marca alguna foto como “Recuerdo” para dejar una selección inicial.
               </div>
             ) : (
               <div className="mt-4 space-y-3">
@@ -707,4 +745,3 @@ export function MemorialCreatorForm() {
     </form>
   );
 }
-

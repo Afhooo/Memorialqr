@@ -27,6 +27,8 @@ type MemorialRecord = {
   avatar_media_url?: string | null;
   avatar_media_path?: string | null;
   template_id?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
 };
 
 async function signStoragePaths(paths: Array<string | null | undefined>, expiresInSeconds = 60 * 60) {
@@ -43,6 +45,17 @@ async function signStoragePaths(paths: Array<string | null | undefined>, expires
   );
 
   return new Map<string, string>(signedPairs.filter((pair): pair is [string, string] => Boolean(pair[1])));
+}
+
+function normalizeExternalUrl(value: string | null | undefined) {
+  if (!value) return null;
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
 }
 
 function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: boolean) {
@@ -71,6 +84,8 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
             description={memorial.description}
             avatarUrl={memorial.avatar_media_url ?? null}
             coverUrl={memorial.cover_media_url ?? null}
+            facebookUrl={normalizeExternalUrl(memorial.facebook_url)}
+            instagramUrl={normalizeExternalUrl(memorial.instagram_url)}
             memoryCount={memoryList.length}
             memoryWindow={memoryWindow}
             lastUpdated={lastUpdated}
@@ -111,13 +126,13 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
           <MemorialFooter memorialName={memorial.name} />
         </div>
 
-        <aside className="sticky top-4 hidden h-[calc(100vh-120px)] flex-col gap-4 lg:flex">
+        <aside className="sticky top-6 hidden flex-col gap-6 lg:flex">
           <MemorialNavbar
             memorialName={memorial.name}
             memoryCount={memoryList.length}
             lastUpdatedLabel={formatDate(lastUpdated)}
           />
-          <div className="grow overflow-hidden rounded-[30px] bg-white/75 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.12)] backdrop-blur">
+          <div className="rounded-[30px] bg-white/75 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.12)] backdrop-blur">
             <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] text-[#0f172a]/70">
               <span>Dejar recuerdo</span>
               <span className="rounded-full bg-[#0f172a]/5 px-2 py-1 text-[10px] font-semibold text-[#0f172a]">Privado</span>

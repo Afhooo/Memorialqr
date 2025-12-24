@@ -13,7 +13,9 @@ alter table if exists public.memorials
   add column if not exists cover_media_path text,
   add column if not exists avatar_media_url text,
   add column if not exists avatar_media_path text,
-  add column if not exists template_id text;
+  add column if not exists template_id text,
+  add column if not exists facebook_url text,
+  add column if not exists instagram_url text;
 
 -- 3) Extender memories para soportar media subida a Storage (path) además de URLs externas.
 alter table if exists public.memories
