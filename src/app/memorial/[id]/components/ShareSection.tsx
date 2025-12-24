@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { IconLink, IconShare, IconX } from "./Icons";
 
 export function ShareSection() {
   const [open, setOpen] = useState(false);
@@ -44,7 +45,7 @@ export function ShareSection() {
         onClick={() => setOpen((value) => !value)}
         className="pointer-events-auto flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0f172a] to-[#0b1230] px-4 py-2 text-[12px] font-semibold text-white shadow-[0_18px_50px_rgba(0,0,0,0.28)] transition hover:-translate-y-[2px]"
       >
-        <span className="text-base">{open ? "✖️" : "📡"}</span>
+        {open ? <IconX className="h-4 w-4" /> : <IconShare className="h-4 w-4" />}
         <span>{open ? "Cerrar panel" : "Compartir"}</span>
       </button>
 
@@ -67,7 +68,7 @@ export function ShareSection() {
               onClick={copyLink}
               className="flex items-center gap-3 rounded-2xl bg-white/10 px-3 py-2 text-left text-sm transition hover:bg-white/15"
             >
-              <span>🔗</span>
+              <IconLink className="h-5 w-5 text-white/90" />
               <span>Copiar enlace</span>
             </button>
             <button
@@ -75,7 +76,7 @@ export function ShareSection() {
               onClick={shareLink}
               className="flex items-center gap-3 rounded-2xl bg-white/10 px-3 py-2 text-left text-sm transition hover:bg-white/15"
             >
-              <span>📱</span>
+              <IconShare className="h-5 w-5 text-white/90" />
               <span>Compartir por apps</span>
             </button>
           </div>

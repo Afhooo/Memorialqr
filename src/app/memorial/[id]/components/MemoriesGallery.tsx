@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Memory } from "@/lib/types";
 import { formatDate } from "./dateUtils";
+import { IconChevronLeft, IconChevronRight, IconX } from "./Icons";
 
 const isVideoUrl = (url: string) => {
   const clean = url.split("?")[0] ?? "";
@@ -18,9 +19,11 @@ export function MemoriesGallery({
   memories: Memory[];
 }) {
   const items = useMemo(() => (memories ?? []).filter((memory) => Boolean(memory.media_url)) as Memory[], [memories]);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const active = activeIndex !== null ? items[activeIndex] ?? null : null;
+  const carouselActive = items[carouselIndex] ?? null;
 
   const goNext = () => {
     setActiveIndex((prev) => {
@@ -76,6 +79,80 @@ export function MemoriesGallery({
           </span>
         </div>
 
+        {carouselActive && (
+          <div className="mt-6 overflow-hidden rounded-3xl border border-[#e6e8ef] bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <div className="relative aspect-[21/9] w-full bg-[#0f172a]/5">
+              {carouselActive.media_url ? (
+                isVideoUrl(carouselActive.media_url) ? (
+                  <video src={carouselActive.media_url} className="absolute inset-0 h-full w-full object-cover" muted loop playsInline autoPlay />
+                ) : (
+                  <img src={carouselActive.media_url} alt={carouselActive.title} className="absolute inset-0 h-full w-full object-cover" />
+                )
+              ) : null}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-3 text-white">
+                <div className="min-w-0">
+                  <p className="text-[11px] uppercase tracking-[0.26em] text-white/70">{formatDate(carouselActive.created_at)}</p>
+                  <p className="truncate text-lg font-semibold">{carouselActive.title || "Recuerdo"}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveIndex(carouselIndex)}
+                  className="rounded-full bg-white/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur transition hover:bg-white/20"
+                >
+                  Ver grande
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <button
+                type="button"
+                onClick={() => setCarouselIndex((i) => (i - 1 < 0 ? items.length - 1 : i - 1))}
+                className="inline-flex items-center gap-2 rounded-full border border-[#e6e8ef] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0f172a]/20"
+              >
+                <IconChevronLeft className="h-4 w-4" />
+                Anterior
+              </button>
+
+              <div className="flex-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex snap-x snap-mandatory gap-2">
+                  {items.slice(0, 18).map((memory, idx) => {
+                    const selected = idx === carouselIndex;
+                    const url = memory.media_url ?? "";
+                    return (
+                      <button
+                        key={memory.id}
+                        type="button"
+                        onClick={() => setCarouselIndex(idx)}
+                        className={`relative h-14 w-14 shrink-0 snap-start overflow-hidden rounded-2xl border transition ${
+                          selected ? "border-[#0f172a] ring-2 ring-[#0f172a]/10" : "border-[#e6e8ef] hover:border-[#0f172a]/20"
+                        }`}
+                        title={memory.title || "Recuerdo"}
+                      >
+                        {isVideoUrl(url) ? (
+                          <video src={url} className="absolute inset-0 h-full w-full object-cover" muted playsInline />
+                        ) : (
+                          <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCarouselIndex((i) => (i + 1) % items.length)}
+                className="inline-flex items-center gap-2 rounded-full border border-[#e6e8ef] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0f172a]/20"
+              >
+                Siguiente
+                <IconChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="mt-6 grid auto-rows-[140px] grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {items.slice(0, 12).map((memory, idx) => {
             const url = memory.media_url ?? "";
@@ -126,22 +203,25 @@ export function MemoriesGallery({
                 <button
                   type="button"
                   onClick={goPrev}
-                  className="rounded-full bg-[#f3f4f6] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a]"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#f3f4f6] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a]"
                 >
-                  Anterior
+                  <IconChevronLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Anterior</span>
                 </button>
                 <button
                   type="button"
                   onClick={goNext}
-                  className="rounded-full bg-[#0f172a] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#0f172a] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white"
                 >
-                  Siguiente
+                  <span className="hidden sm:inline">Siguiente</span>
+                  <IconChevronRight className="h-4 w-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveIndex(null)}
-                  className="rounded-full bg-[#f3f4f6] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a]"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#f3f4f6] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a]"
                 >
+                  <IconX className="h-4 w-4" />
                   Cerrar
                 </button>
               </div>
