@@ -36,6 +36,7 @@ export default async function RootLayout({
     { href: "/crear-memorial", label: "Crear memorial", show: hasSession && !isAdmin },
     { href: "/panel", label: "Panel", show: hasSession && !isAdmin },
     { href: "/memorial", label: "Memorial", show: hasSession && !isAdmin },
+    { href: "/panel/usuarios", label: "Usuarios", show: hasSession && !isAdmin },
     { href: "/admin", label: "Dashboard", show: hasSession && isAdmin },
     { href: "/admin/usuarios", label: "Usuarios", show: hasSession && isAdmin },
     { href: "/beneficios", label: "Cómo funciona", show: true },

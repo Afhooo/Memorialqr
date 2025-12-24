@@ -3,18 +3,17 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
 
-export default async function ChooseProfilePage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ denied?: string; from?: string }> | { denied?: string; from?: string };
-}) {
-  const resolvedSearch =
-    typeof searchParams === "object" && searchParams !== null && "then" in searchParams
-      ? await (searchParams as Promise<{ denied?: string; from?: string }>)
-      : (searchParams as { denied?: string; from?: string } | undefined);
-  const denied = resolvedSearch?.denied;
-  const requestedFrom = resolvedSearch?.from;
+type MemberRow = { memorial_id: string };
+type MemorialRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  birth_date: string | null;
+  death_date: string | null;
+  owner_id: string;
+};
 
+export default async function ChooseProfilePage() {
   const session = await getServerSession();
 
   if (!session) {
@@ -25,14 +24,27 @@ export default async function ChooseProfilePage({
   }
 
   const supabase = createSupabaseServerClient();
-  const { data: memorials = [] } = await supabase
+  const memberRes = await supabase
+    .from("memorial_members")
+    .select("memorial_id")
+    .eq("user_id", session.user.id);
+
+  const memberRows = (memberRes.data ?? []) as MemberRow[];
+  const memberIds = [...new Set(memberRows.map((row) => row.memorial_id).filter(Boolean))] as string[];
+
+  const memorialsQuery = supabase
     .from("memorials")
-    .select("id, name, description, birth_date, death_date")
-    .eq("owner_id", session.user.id)
+    .select("id, name, description, birth_date, death_date, owner_id")
     .order("name", { ascending: true });
 
-  const memorialCount = memorials?.length ?? 0;
-  const isAdmin = session.user.role === "admin";
+  const { data: memorials = [] } =
+    memberIds.length > 0
+      ? await memorialsQuery.or(`owner_id.eq.${session.user.id},id.in.(${memberIds.join(",")})`)
+      : await memorialsQuery.eq("owner_id", session.user.id);
+
+  const memorialRows = (memorials ?? []) as MemorialRow[];
+  const memorialCount = memorialRows.length;
+  const hasOwnedMemorial = memorialRows.some((m) => m.owner_id === session.user.id);
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-10 text-[#333333] sm:px-6">
@@ -50,45 +62,12 @@ export default async function ChooseProfilePage({
           </div>
         </div>
 
-        {denied && (
-          <div className="rounded-2xl border border-[#fecdd3] bg-[#fff1f2] px-4 py-3 text-sm text-[#7f1d1d] shadow-[0_16px_40px_rgba(185,28,28,0.1)]">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#b91c1c]">Acceso restringido</p>
-            <p className="mt-1">
-              {denied === "admin"
-                ? "El panel de administración es solo para usuarios con rol admin. Solicita acceso o cambia al panel de memoriales."
-                : "Este flujo es para quienes gestionan un memorial. Revisa tus permisos o entra al panel admin si eres staff."}
-            </p>
-            {requestedFrom && (
-              <p className="mt-1 text-xs text-[#9f1239]">Ruta solicitada: {requestedFrom}</p>
-            )}
-          </div>
-        )}
-
         <div className="grid gap-4 md:grid-cols-3" aria-label="Formas de entrar a tu espacio">
-          <div className="flex flex-col gap-3 rounded-[18px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.06)]">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Funeraria / equipo</p>
-            <h3 className="text-xl font-serif text-[#333333]">Panel de administración</h3>
-            <p className="text-sm text-[#4a4a4a]">
-              Visión general del servicio, altas de usuarios y seguimiento de memoriales activos. Solo habilitado para rol admin.
-            </p>
-            <Link
-              href="/admin"
-              className={`rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.24em] transition ${
-                isAdmin
-                  ? "border-[#e87422] text-[#e87422] hover:bg-[#e87422] hover:text-white"
-                  : "cursor-not-allowed border-[#e0e0e0] text-[#aaaaaa]"
-              }`}
-              aria-disabled={!isAdmin}
-            >
-              {isAdmin ? "Ir al panel admin" : "Requiere rol admin"}
-            </Link>
-          </div>
-
           <div className="flex flex-col gap-3 rounded-[18px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.06)]">
             <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Familia</p>
             <h3 className="text-xl font-serif text-[#333333]">Panel de memoriales</h3>
             <p className="text-sm text-[#4a4a4a]">
-              Actualiza el memorial, sube fotos, revisa condolencias y mantén vivo el espacio de quien ya partió.
+              Crea el perfil, suma recuerdos y mantén el memorial disponible para volver cuando lo necesiten.
             </p>
             <p className="text-xs text-[#6b7280]">
               {memorialCount
@@ -100,7 +79,7 @@ export default async function ChooseProfilePage({
                 href="/panel"
                 className="rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#e87422] transition hover:bg-[#e87422] hover:text-white"
               >
-                Ir a panel de dueño
+                Ir a mi panel
               </Link>
               <Link
                 href="/crear-memorial"
@@ -110,6 +89,22 @@ export default async function ChooseProfilePage({
               </Link>
             </div>
           </div>
+
+          {hasOwnedMemorial && (
+            <div className="flex flex-col gap-3 rounded-[18px] border border-[#e0e0e0] bg-white/95 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.06)]">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#e87422]">Familia</p>
+              <h3 className="text-xl font-serif text-[#333333]">Usuarios agregados</h3>
+              <p className="text-sm text-[#4a4a4a]">
+                Agrega cuentas de familiares para que también puedan entrar al memorial y publicar recuerdos.
+              </p>
+              <Link
+                href="/panel/usuarios"
+                className="rounded-full border border-[#e87422] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#e87422] transition hover:bg-[#e87422] hover:text-white"
+              >
+                Administrar usuarios
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-[#e0e0e0] bg-white/90 px-4 py-3 text-sm text-[#4a4a4a] shadow-[0_14px_40px_rgba(0,0,0,0.05)]">

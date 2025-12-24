@@ -22,6 +22,19 @@ alter table if exists public.memories
 create index if not exists memories_memorial_id_created_at_idx
   on public.memories (memorial_id, created_at desc);
 
+-- 3.1) Usuarios agregados al memorial (familiares/colaboradores).
+create table if not exists public.memorial_members (
+  id uuid primary key default gen_random_uuid(),
+  memorial_id uuid not null references public.memorials(id) on delete cascade,
+  user_id uuid not null references public.admin_users(id) on delete cascade,
+  added_by uuid null references public.admin_users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  unique (memorial_id, user_id)
+);
+
+create index if not exists memorial_members_memorial_id_idx on public.memorial_members (memorial_id);
+create index if not exists memorial_members_user_id_idx on public.memorial_members (user_id);
+
 -- 4) Tabla real de compras/ventas (para análisis por canal y “clientes que compraron”).
 create table if not exists public.sales_orders (
   id uuid primary key default gen_random_uuid(),

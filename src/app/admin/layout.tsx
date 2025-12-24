@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     redirect("/login?from=/admin");
   }
   if (session.user.role !== "admin") {
-    redirect("/elige-perfil?denied=admin&from=/admin");
+    redirect("/panel");
   }
 
   return (
@@ -23,4 +23,3 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     </div>
   );
 }
-

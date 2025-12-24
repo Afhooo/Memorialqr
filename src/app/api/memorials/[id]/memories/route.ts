@@ -37,8 +37,17 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
     return NextResponse.json({ error: "Memorial no encontrado" }, { status: 404 });
   }
 
-  if (memorial.owner_id !== session.user.id) {
-    return NextResponse.json({ error: "No tienes permisos para modificar este memorial" }, { status: 403 });
+  const isOwner = memorial.owner_id === session.user.id;
+  if (!isOwner) {
+    const { data: membership } = await supabase
+      .from("memorial_members")
+      .select("id")
+      .eq("memorial_id", memorialId)
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+    if (!membership?.id) {
+      return NextResponse.json({ error: "No tienes permisos para modificar este memorial" }, { status: 403 });
+    }
   }
 
   const payload = {

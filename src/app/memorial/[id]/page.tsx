@@ -169,7 +169,19 @@ export default async function MemorialPage({
     notFound();
   }
 
-  if (memorial.owner_id !== session.user.id) {
+  const isOwner = memorial.owner_id === session.user.id;
+  let isMember = false;
+  if (!isOwner) {
+    const { data: membership } = await supabase
+      .from("memorial_members")
+      .select("id")
+      .eq("memorial_id", memorialId)
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+    isMember = Boolean(membership?.id);
+  }
+
+  if (!isOwner && !isMember) {
     notFound();
   }
 

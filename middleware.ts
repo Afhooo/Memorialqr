@@ -66,9 +66,7 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = isPathMatch(pathname, ADMIN_PATH_PREFIXES);
   if (isAdminRoute && role !== "admin") {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/elige-perfil";
-    redirectUrl.searchParams.set("denied", "admin");
-    redirectUrl.searchParams.set("from", pathname);
+    redirectUrl.pathname = "/panel";
     return NextResponse.redirect(redirectUrl);
   }
 
