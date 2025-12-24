@@ -150,7 +150,7 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
           <p className="text-xs text-[#64748b]">Un mensaje corto o una foto del carrete. Se guarda al instante.</p>
         </div>
         <span className="rounded-full bg-[#0f172a] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
-          En vivo
+          Privado
         </span>
       </div>
 

@@ -55,7 +55,7 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
       ? `${formatDate(earliestMemoryDate)} — ${formatDate(latestMemoryDate)}`
       : memoryList.length === 1
         ? formatDate(latestMemoryDate)
-        : "Pendiente de añadir memorias";
+        : "Aún no hay recuerdos";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(145deg,#f7f8fb_0%,#eef1f6_45%,#f7f8fb_100%)] text-[#0f172a]">
@@ -119,8 +119,8 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
           />
           <div className="grow overflow-hidden rounded-[30px] bg-white/75 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.12)] backdrop-blur">
             <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] text-[#0f172a]/70">
-              <span>Composer fijo</span>
-              <span className="rounded-full bg-[#0f172a]/5 px-2 py-1 text-[10px] font-semibold text-[#0f172a]">En vivo</span>
+              <span>Dejar recuerdo</span>
+              <span className="rounded-full bg-[#0f172a]/5 px-2 py-1 text-[10px] font-semibold text-[#0f172a]">Privado</span>
             </div>
             <div className="mt-3">
               <MemoryComposer

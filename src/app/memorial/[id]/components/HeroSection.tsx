@@ -106,9 +106,9 @@ export function HeroSection({
       </div>
 
       <div className="relative flex flex-col gap-6">
-          <div className="flex items-start gap-4">
-            <div className="relative h-24 w-24 overflow-hidden rounded-[28px] bg-white/5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
-              <div className="absolute inset-0 animate-[pulse_2.8s_ease-in-out_infinite] rounded-[24px] bg-[#e87422]/10" />
+        <div className="flex items-start gap-4">
+          <div className="relative h-24 w-24 overflow-hidden rounded-[28px] bg-white/5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
+            <div className="absolute inset-0 animate-[pulse_2.8s_ease-in-out_infinite] rounded-[24px] bg-[#e87422]/10" />
             {profileSrc ? (
               <img src={profileSrc} alt={`Foto de ${memorialName}`} className="h-full w-full object-cover" />
             ) : (
@@ -117,35 +117,36 @@ export function HeroSection({
               </div>
             )}
           </div>
+
           <div className="min-w-0 flex-1 space-y-3">
             <p className="text-[11px] uppercase tracking-[0.32em] text-[#fcd34d]">Memorial privado · familia y amigos</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1
-                className="text-3xl font-semibold leading-tight sm:text-4xl"
-                style={{
-                  textShadow: `0 0 ${glow / 2}px rgba(232,116,34,0.35), 0 0 ${glow / 2.4}px rgba(255,255,255,0.35)`,
-                  filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.25))",
-                }}
-              >
-                {memorialName}
-              </h1>
-            </div>
-              <p className="text-sm text-white/80">
-                {formatDate(birthDate)} · {formatDate(deathDate)}
-              </p>
-              <p className="max-w-3xl text-base text-white/85">
-                {description ||
-                  "Un espacio para la familia y amigos: fotos del carrete, notas cortas y fechas que importan. Aquí se viene a recordar, sin ruido."}
-              </p>
-              <div className="flex flex-wrap gap-2 text-xs">
+            <h1
+              className="text-3xl font-semibold leading-tight sm:text-4xl"
+              style={{
+                textShadow: `0 0 ${glow / 2}px rgba(232,116,34,0.35), 0 0 ${glow / 2.4}px rgba(255,255,255,0.35)`,
+                filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.25))",
+              }}
+            >
+              {memorialName}
+            </h1>
+
+            <p className="text-sm text-white/80">
+              {formatDate(birthDate)} · {formatDate(deathDate)}
+            </p>
+            <p className="max-w-3xl text-base text-white/85">
+              {description ||
+                "Un espacio para la familia y amigos: fotos del carrete, notas cortas y fechas que importan. Aquí se viene a recordar, sin ruido."}
+            </p>
+
+            <div className="flex flex-wrap gap-2 text-xs">
               <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.2em] text-white">
                 Recuerdos {memoryCount}
               </span>
               <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.2em] text-white">
-                Ventana {memoryWindow}
+                Periodo {memoryWindow}
               </span>
               <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.2em] text-white">
-                Última: {formatDate(lastUpdated)}
+                Último recuerdo: {formatDate(lastUpdated)}
               </span>
             </div>
           </div>

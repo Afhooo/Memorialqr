@@ -53,7 +53,7 @@ export function MemorialNavbar({ memorialName, memoryCount, lastUpdatedLabel }: 
           <p className="text-[11px] uppercase tracking-[0.18em] text-[#94a3b8]">Actividad</p>
           <p className="font-semibold text-[#0f172a]">Familia mirando y comentando</p>
         </div>
-        <span className="rounded-full bg-[#e87422]/15 px-3 py-1 text-[11px] font-semibold text-[#e87422]">En vivo</span>
+        <span className="rounded-full bg-[#e87422]/15 px-3 py-1 text-[11px] font-semibold text-[#e87422]">Privado</span>
       </div>
     </nav>
   );

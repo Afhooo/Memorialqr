@@ -31,7 +31,7 @@ export function TributeHighlightsSection({
         {deathDate && (
           <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 font-semibold text-[#0f172a]">Lo despedimos {formatDate(deathDate)}</span>
         )}
-        <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 font-semibold text-[#0f172a]">Ventana {memoryWindow}</span>
+        <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 font-semibold text-[#0f172a]">Periodo {memoryWindow}</span>
         <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 font-semibold text-[#0f172a]">Familia y amigos</span>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
@@ -41,7 +41,7 @@ export function TributeHighlightsSection({
         </div>
         <div className="flex items-start gap-3 text-sm text-[#334155]">
           <span className="mt-1 h-9 w-[3px] rounded-full bg-gradient-to-b from-[#22d3ee] via-[#60a5fa] to-transparent" />
-          <p>Relato corrido que se mezcla con el muro, como un feed que se sigue escribiendo.</p>
+          <p>Un relato corrido que se mezcla con la cinta, como un hilo que se sigue escribiendo con cariño.</p>
         </div>
         <div className="flex items-start gap-3 text-sm text-[#334155]">
           <span className="mt-1 h-9 w-[3px] rounded-full bg-gradient-to-b from-[#10b981] via-[#34d399] to-transparent" />
