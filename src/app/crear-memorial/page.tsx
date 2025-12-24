@@ -24,7 +24,7 @@ export default async function CrearMemorialPage() {
         <div className="relative flex flex-col gap-6">
           <div className="space-y-4">
             <p className="text-[10px] uppercase tracking-[0.32em] text-white/70">Crear memorial</p>
-            <h1 className="text-3xl font-semibold leading-[1.15]">Un espacio bonito para recordar, sin pelear con formularios.</h1>
+            <h1 className="text-3xl font-semibold leading-[1.15]">Un espacio bonito y respetuoso para recordar.</h1>
             <p className="text-sm text-white/80">
               Sube fotos como en tu carrete, elige portada y foto principal, y deja unas líneas que acompañen a la familia cuando entren.
             </p>
