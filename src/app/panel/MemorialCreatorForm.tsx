@@ -1,102 +1,128 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
-import { useState } from "react";
-
-type DraftMemory = {
-  title: string;
-  content: string;
-  mediaUrl: string;
-  mediaPath: string | null;
-};
-
-const initialDraftMemory: DraftMemory = {
-  title: "",
-  content: "",
-  mediaUrl: "",
-  mediaPath: null,
-};
-
-type GalleryItem = {
-  title: string;
-  content: string;
-  mediaUrl: string;
-  mediaPath: string | null;
-};
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const templates = [
   { id: "ambar", name: "Ámbar vivo", accent: "#e87422", background: "from-[#2a1409] via-[#3c2416] to-[#e6b07c]" },
   { id: "bruma", name: "Bruma azul", accent: "#2b9fb8", background: "from-[#0b1b24] via-[#123445] to-[#7bd3e3]" },
   { id: "bosque", name: "Bosque profundo", accent: "#3f7f52", background: "from-[#0f1a11] via-[#1e3522] to-[#9ad2a3]" },
-];
+] as const;
+
+type UploadResult = { path: string; signedUrl: string };
+
+type MediaDraft = {
+  id: string;
+  file: File;
+  localUrl: string;
+  uploaded: UploadResult | null;
+  title: string;
+  content: string;
+  includeAsMemory: boolean;
+};
+
+const isPreviewableFile = (file: File) => file.type.startsWith("image/") || file.type.startsWith("video/");
+const isVideoUrl = (url: string) => {
+  const clean = url.split("?")[0] ?? "";
+  return /\.(mp4|mov|webm|ogg)$/i.test(clean);
+};
 
 export function MemorialCreatorForm() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [deathDate, setDeathDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [coverUrl, setCoverUrl] = useState("");
-  const [coverPath, setCoverPath] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [avatarPath, setAvatarPath] = useState<string | null>(null);
-  const [draftMemory, setDraftMemory] = useState<DraftMemory>(initialDraftMemory);
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
-  const [template, setTemplate] = useState(templates[0]);
-  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [name, setName] = useState<string>("");
+  const [birthDate, setBirthDate] = useState<string>("");
+  const [deathDate, setDeathDate] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [templateId, setTemplateId] = useState<string>(templates[0].id);
+
+  const [media, setMedia] = useState<MediaDraft[]>([]);
+  const [coverId, setCoverId] = useState<string | null>(null);
+  const [avatarId, setAvatarId] = useState<string | null>(null);
+
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
-  const completionBase = [name, birthDate, deathDate, description, coverUrl, avatarUrl].filter(Boolean).length;
-  const completionExtras =
-    (draftMemory.title || draftMemory.content || draftMemory.mediaUrl ? 1 : 0) + (gallery.length > 0 ? 1 : 0);
-  const completion = Math.min(100, Math.round(((completionBase + completionExtras) / 8) * 100));
+  const template = useMemo(() => templates.find((item) => item.id === templateId) ?? templates[0], [templateId]);
+  const active = useMemo(() => (activeId ? media.find((m) => m.id === activeId) ?? null : null), [activeId, media]);
 
-  const stepData = [
-    { key: "identidad", label: "Identidad", done: Boolean(name && description) },
-    { key: "portada", label: "Portada/Avatar", done: Boolean(coverUrl && avatarUrl) },
-    { key: "tema", label: "Tema", done: Boolean(template) },
-    { key: "primer", label: "Primer recuerdo", done: Boolean(draftMemory.title || draftMemory.mediaUrl || draftMemory.content) },
-    { key: "galeria", label: "Galería", done: gallery.length > 0 },
-    { key: "publicar", label: "Publicar", done: completion >= 80 },
-  ];
+  const coverItem = useMemo(() => (coverId ? media.find((m) => m.id === coverId) ?? null : null), [coverId, media]);
+  const avatarItem = useMemo(() => (avatarId ? media.find((m) => m.id === avatarId) ?? null : null), [avatarId, media]);
+  const memoryItems = useMemo(() => media.filter((item) => item.includeAsMemory), [media]);
 
-  const carouselItems =
-    (draftMemory.mediaUrl
-      ? [
-          {
-            title: draftMemory.title || "Primer recuerdo",
-            mediaUrl: draftMemory.mediaUrl,
-            content: draftMemory.content,
-          },
-        ]
-      : []) as Array<{ title: string; mediaUrl: string; content?: string }>;
+  const previewCoverUrl = coverItem?.uploaded?.signedUrl || coverItem?.localUrl || "";
+  const previewAvatarUrl = avatarItem?.uploaded?.signedUrl || avatarItem?.localUrl || "";
 
-  gallery.forEach((item, index) => {
-    if (item.mediaUrl) {
-      carouselItems.push({
-        title: item.title || `Galería ${index + 1}`,
-        mediaUrl: item.mediaUrl,
-        content: item.content,
-      });
+  useEffect(() => {
+    return () => {
+      media.forEach((item) => URL.revokeObjectURL(item.localUrl));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const addFiles = (files: File[]) => {
+    setError(null);
+    if (!files.length) return;
+
+    const rejected = files.filter((file) => !isPreviewableFile(file));
+    if (rejected.length) {
+      setError("Algunos archivos no se pudieron agregar (solo fotos o videos).");
     }
-  });
 
-  const addGalleryItem = () => {
-    setGallery((prev) => [...prev, { title: "", content: "", mediaUrl: "", mediaPath: null }]);
+    const next: MediaDraft[] = files
+      .filter(isPreviewableFile)
+      .map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        localUrl: URL.createObjectURL(file),
+        uploaded: null,
+        title: "",
+        content: "",
+        includeAsMemory: true,
+      }));
+
+    if (!next.length) return;
+
+    setMedia((prev) => [...next, ...prev]);
+    setCoverId((prev) => prev ?? next[0]?.id ?? null);
+    setAvatarId((prev) => prev ?? next[0]?.id ?? null);
   };
 
-  const updateGalleryItem = <Key extends keyof GalleryItem>(index: number, field: Key, value: GalleryItem[Key]) => {
-    setGallery((prev) => prev.map((item, idx) => (idx === index ? { ...item, [field]: value } : item)));
+  const removeMedia = (id: string) => {
+    setMedia((prev) => {
+      const found = prev.find((item) => item.id === id);
+      if (found) URL.revokeObjectURL(found.localUrl);
+      return prev.filter((item) => item.id !== id);
+    });
+    setCoverId((prev) => (prev === id ? null : prev));
+    setAvatarId((prev) => (prev === id ? null : prev));
+    setActiveId((prev) => (prev === id ? null : prev));
   };
 
-  const removeGalleryItem = (index: number) => {
-    setGallery((prev) => prev.filter((_, idx) => idx !== index));
+  const updateMedia = (id: string, patch: Partial<Pick<MediaDraft, "title" | "content" | "includeAsMemory">>) => {
+    setMedia((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
-  const uploadMedia = async (params: { kind: string; file: File; key: string; memorialId?: string }) => {
+  const moveMedia = (id: string, direction: -1 | 1) => {
+    setMedia((prev) => {
+      const idx = prev.findIndex((item) => item.id === id);
+      if (idx < 0) return prev;
+      const nextIndex = idx + direction;
+      if (nextIndex < 0 || nextIndex >= prev.length) return prev;
+      const copy = [...prev];
+      const [picked] = copy.splice(idx, 1);
+      copy.splice(nextIndex, 0, picked);
+      return copy;
+    });
+  };
+
+  const uploadMediaFile = async (params: { kind: string; file: File; key: string; memorialId?: string }) => {
     setUploading((prev) => ({ ...prev, [params.key]: true }));
     setError(null);
 
@@ -114,47 +140,77 @@ export function MemorialCreatorForm() {
         throw new Error(payload.error || "No pudimos subir el archivo");
       }
 
-      return payload as { path: string; signedUrl: string };
+      return payload as UploadResult;
     } finally {
       setUploading((prev) => ({ ...prev, [params.key]: false }));
     }
   };
 
+  const ensureUploaded = async (id: string) => {
+    const item = media.find((m) => m.id === id);
+    if (!item) throw new Error("Archivo no encontrado");
+    if (item.uploaded) return item.uploaded;
+    const uploaded = await uploadMediaFile({ kind: "media", file: item.file, key: id });
+    setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, uploaded } : m)));
+    return uploaded;
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (loading) return;
+    if (submitting) return;
 
-    setLoading(true);
+    setSubmitting(true);
     setError(null);
     setSuccess(null);
 
     try {
+      const trimmedName = name.trim();
+      if (!trimmedName) {
+        throw new Error("Ponle un nombre al memorial.");
+      }
+
+      const idsToUpload = new Set<string>();
+      if (coverId) idsToUpload.add(coverId);
+      if (avatarId) idsToUpload.add(avatarId);
+      media.filter((item) => item.includeAsMemory).forEach((item) => idsToUpload.add(item.id));
+
+      const uploadedMap = new Map<string, UploadResult>();
+      for (const id of idsToUpload) {
+        const uploaded = await ensureUploaded(id);
+        uploadedMap.set(id, uploaded);
+      }
+
+      const coverUpload = coverId ? uploadedMap.get(coverId) ?? null : null;
+      const avatarUpload = avatarId ? uploadedMap.get(avatarId) ?? null : null;
+      const selectedMemories = media.filter((item) => item.includeAsMemory);
+
       const response = await fetch("/api/memorials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
+          name: trimmedName,
           birthDate: birthDate || null,
           deathDate: deathDate || null,
-          description,
-          coverMediaPath: coverPath,
-          coverMediaUrl: coverPath ? null : (coverUrl || null),
-          avatarMediaPath: avatarPath,
-          avatarMediaUrl: avatarPath ? null : (avatarUrl || null),
+          description: description.trim(),
+          coverMediaPath: coverUpload?.path ?? null,
+          coverMediaUrl: null,
+          avatarMediaPath: avatarUpload?.path ?? null,
+          avatarMediaUrl: null,
           templateId: template.id,
-          firstMemory:
-            draftMemory.mediaUrl || draftMemory.mediaPath || draftMemory.content || draftMemory.title
-              ? {
-                  ...draftMemory,
-                  mediaUrl: draftMemory.mediaPath ? null : (draftMemory.mediaUrl || null),
-                }
-              : undefined,
-          gallery: gallery
-            .filter((item) => item.mediaUrl || item.mediaPath || item.content || item.title)
-            .map((item) => ({
-              ...item,
-              mediaUrl: item.mediaPath ? null : (item.mediaUrl || null),
-            })),
+          firstMemory: selectedMemories[0]
+            ? {
+                title: selectedMemories[0].title.trim() || "Recuerdo",
+                content: selectedMemories[0].content.trim() || "",
+                mediaUrl: null,
+                mediaPath: uploadedMap.get(selectedMemories[0].id)?.path ?? null,
+              }
+            : undefined,
+          gallery: selectedMemories.slice(1).map((item) => ({
+            title: item.title.trim() || "Recuerdo",
+            content: item.content.trim() || "",
+            mediaUrl: null,
+            mediaPath: uploadedMap.get(item.id)?.path ?? null,
+          })),
         }),
       });
 
@@ -163,654 +219,492 @@ export function MemorialCreatorForm() {
         throw new Error(payload.error || "No pudimos crear el memorial");
       }
 
-      setSuccess("Memorial creado. Abriendo lista actualizada…");
-      setName("");
-      setBirthDate("");
-      setDeathDate("");
-      setDescription("");
-      setCoverUrl("");
-      setCoverPath(null);
-      setAvatarUrl("");
-      setAvatarPath(null);
-      setDraftMemory(initialDraftMemory);
-      setGallery([]);
+      const memorialId = typeof payload.memorialId === "string" ? payload.memorialId : null;
+      setSuccess("Listo. Te llevo al memorial para que sigas subiendo recuerdos.");
+      if (memorialId) {
+        router.push(`/memorial/${memorialId}`);
+        return;
+      }
       router.refresh();
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "No pudimos crear el memorial";
       setError(message);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
-      <div className="rounded-[20px] border border-[#e5e7eb] bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[#6b7280]">Modo social</p>
-            <h3 className="text-2xl font-semibold leading-tight text-[#0f172a]">Arma el memorial como si fuera un post largo</h3>
-            <p className="text-sm text-[#6b7280]">Nombre, foto de portada, historia y galería en un flujo sencillo, al estilo de una red social.</p>
-            <div className="flex flex-wrap gap-2 text-xs">
-              {["Nombre", "Foto", "Historia", "Galería", "Publicar"].map((chip) => (
-                <span
-                  key={chip}
-                  className="rounded-full bg-[#f3f4f6] px-3 py-1 font-semibold uppercase tracking-[0.2em] text-[#0f172a]"
+    <form className="space-y-5" onSubmit={handleSubmit}>
+      <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+        <section className="space-y-5">
+          <div className="overflow-hidden rounded-[28px] border border-[#e6e8ef] bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <div className={`relative overflow-hidden bg-gradient-to-br ${template.background}`}>
+              <div className="absolute inset-0 opacity-70 [background:radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.20),transparent_40%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.12),transparent_40%)]" />
+              <div className="relative">
+                <div
+                  className="relative aspect-[21/9] w-full overflow-hidden bg-black/15"
+                  onClick={() => coverId && setActiveId(coverId)}
                 >
-                  {chip}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center gap-3 rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-sm text-[#0f172a]">
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#0f172a]">
-              Avance
-            </span>
-            <span className="text-xl font-semibold text-[#0f172a]">{completion}%</span>
-          </div>
-        </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {stepData.map((step, index) => (
-            <div
-              key={step.key}
-              className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs ${
-                step.done ? "border-[#22c55e]/40 bg-[#dcfce7] text-[#065f46]" : "border-[#e5e7eb] bg-[#f8fafc] text-[#6b7280]"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold ${
-                    step.done ? "bg-white text-[#065f46]" : "bg-white text-[#6b7280]"
-                  }`}
-                >
-                  {step.done ? "✓" : index + 1}
-                </span>
-                <span className="leading-tight">{step.label}</span>
+                  {previewCoverUrl ? (
+                    isVideoUrl(previewCoverUrl) ? (
+                      <video
+                        src={previewCoverUrl}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                      />
+                    ) : (
+                      <img
+                        src={previewCoverUrl}
+                        alt="Portada"
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    )
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-white/85">
+                      <div className="space-y-2">
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-white/70">Portada</p>
+                        <p className="text-base font-semibold">Suelta una foto aquí (o elige una de tu biblioteca).</p>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="inline-flex items-center justify-center rounded-full bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#0f172a]"
+                        >
+                          Agregar fotos
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
+                    <div className="flex items-end gap-3">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (avatarId) setActiveId(avatarId);
+                        }}
+                        className="relative h-14 w-14 overflow-hidden rounded-full border-2 border-white/70 bg-white/15 shadow-[0_18px_48px_rgba(0,0,0,0.35)]"
+                        title="Ver foto principal"
+                      >
+                        {previewAvatarUrl ? (
+                          <img
+                            src={previewAvatarUrl}
+                            alt="Foto principal"
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80">
+                            Foto
+                          </div>
+                        )}
+                      </button>
+                      <div className="min-w-0 text-white">
+                        <input
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="Nombre (como lo dicen en la casa)"
+                          className="w-full max-w-[520px] bg-transparent text-2xl font-semibold leading-tight placeholder:text-white/60 outline-none"
+                          required
+                        />
+                        <div className="mt-2 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em] text-white/75">
+                          <label className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">
+                            <span>Nació</span>
+                            <input
+                              type="date"
+                              value={birthDate}
+                              onChange={(e) => setBirthDate(e.target.value)}
+                              className="bg-transparent text-[11px] outline-none [color-scheme:dark]"
+                            />
+                          </label>
+                          <label className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">
+                            <span>Partió</span>
+                            <input
+                              type="date"
+                              value={deathDate}
+                              onChange={(e) => setDeathDate(e.target.value)}
+                              className="bg-transparent text-[11px] outline-none [color-scheme:dark]"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/75">
+                      <span className="rounded-full bg-white/10 px-3 py-1">Fotos {media.length}</span>
+                      <span className="rounded-full bg-white/10 px-3 py-1">Recuerdos {memoryItems.length}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative p-4">
+                  <p className="text-[11px] uppercase tracking-[0.26em] text-white/70">Unas líneas para la familia</p>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                    placeholder="Escribe algo sencillo: quién fue, cómo lo recuerdan, qué te gustaría que se sienta al entrar."
+                    className="mt-2 w-full resize-none rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/55 outline-none backdrop-blur focus:border-white/35"
+                  />
+                </div>
               </div>
-              <span className="text-[11px] uppercase tracking-[0.12em]">{step.done ? "Listo" : "Pend."}</span>
             </div>
-          ))}
-        </div>
-        <div className="mt-4 h-2 rounded-full bg-[#f1f5f9]">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-[#22c55e] via-[#e87422] to-[#3b82f6]"
-            style={{ width: `${completion}%` }}
-          />
-        </div>
-      </div>
+          </div>
 
-      <div className="relative overflow-hidden rounded-[22px] border border-[#e6e8ef] bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-        <div id="identidad" className="absolute -top-24 left-0 h-1 w-1 opacity-0" />
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Perfil rápido</p>
-            <p className="text-sm text-[#475569]">Completa como si crearas un perfil social: nombre, fechas y bio breve.</p>
-            <div className="mt-2 flex flex-wrap gap-2 text-xs">
-              <span className="rounded-full bg-[#f8fafc] px-3 py-1 text-[#0f172a]">Nombre + apodo</span>
-              <span className="rounded-full bg-[#f8fafc] px-3 py-1 text-[#0f172a]">Fechas</span>
-              <span className="rounded-full bg-[#f8fafc] px-3 py-1 text-[#0f172a]">Bio / obituario</span>
-            </div>
-          </div>
-          <div className="w-full max-w-[220px]">
-            <div className="flex items-center justify-between text-xs text-[#475569]">
-              <span>Progreso</span>
-              <span className="font-semibold text-[#e87422]">{completion}%</span>
-            </div>
-            <div className="mt-2 h-2 rounded-full bg-[#f1f5f9]">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#e87422] via-[#f3b172] to-[#33c2b3]"
-                style={{ width: `${completion}%` }}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <label className="md:col-span-2 text-sm font-semibold text-[#0f172a]">
-            Nombre del memorial
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Nombre, apodo familiar o ambos"
-              className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-            />
-          </label>
-          <label className="text-sm font-semibold text-[#0f172a]">
-            Fecha de nacimiento
-            <input
-              type="date"
-              value={birthDate}
-              onChange={(event) => setBirthDate(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-            />
-          </label>
-          <label className="text-sm font-semibold text-[#0f172a]">
-            Fecha de fallecimiento
-            <input
-              type="date"
-              value={deathDate}
-              onChange={(event) => setDeathDate(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-            />
-          </label>
-        </div>
-        <label className="mt-3 block text-sm font-semibold text-[#0f172a]">
-          Descripción / obituario
-          <textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows={4}
-            placeholder="Cuenta quién fue, cómo lo recuerdan, como si fuera un post largo para la familia."
-            className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-          />
-        </label>
-      </div>
-
-      <div className="relative overflow-hidden rounded-[22px] border border-[#e6e8ef] bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-        <div id="multimedia" className="absolute -top-24 left-0 h-1 w-1 opacity-0" />
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Portada y avatar</p>
-            <p className="text-sm text-[#475569]">Pega links de tus fotos (Drive, iCloud, Instagram) mientras habilitamos la subida directa.</p>
-          </div>
-          <div className="hidden items-center gap-2 rounded-full border border-[#e6e8ef] bg-[#f8fafc] px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#0f172a] sm:flex">
-            <span className="h-2 w-2 rounded-full bg-gradient-to-br from-[#e87422] to-[#33c2b3]" />
-            En línea
-          </div>
-        </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-[1.05fr,0.95fr]">
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold text-[#0f172a]">
-              URL portada (imagen o video)
-              <input
-                type="url"
-                value={coverUrl}
-                onChange={(event) => {
-                  setCoverUrl(event.target.value);
-                  setCoverPath(null);
-                }}
-                placeholder="https://..."
-                className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-              />
-            </label>
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#0f172a]/10 bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px]">
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  className="hidden"
-                  onChange={async (event) => {
-                    const file = event.target.files?.[0];
-                    event.currentTarget.value = "";
-                    if (!file) return;
-                    try {
-                      const uploaded = await uploadMedia({ kind: "cover", file, key: "cover" });
-                      setCoverUrl(uploaded.signedUrl);
-                      setCoverPath(uploaded.path);
-                    } catch (err) {
-                      const message = err instanceof Error ? err.message : "No pudimos subir la portada";
-                      setError(message);
-                    }
-                  }}
-                />
-                {uploading.cover ? "Subiendo…" : "Subir portada"}
-              </label>
-              {coverPath && (
+          <div className="rounded-[28px] border border-[#e6e8ef] bg-white p-4 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.26em] text-[#e87422]">Biblioteca</p>
+                <p className="text-sm text-[#475569]">Arrastra fotos/videos, marca portada, foto principal y qué entra como recuerdo.</p>
+              </div>
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    setCoverPath(null);
-                    setCoverUrl("");
-                  }}
-                  className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#475569] transition hover:bg-white"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-full bg-[#0f172a] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_14px_40px_rgba(15,23,42,0.18)]"
                 >
-                  Quitar subida
+                  Agregar
                 </button>
-              )}
-            </div>
-            <label className="block text-sm font-semibold text-[#0f172a]">
-              URL avatar (foto)
+              </div>
               <input
-                type="url"
-                value={avatarUrl}
-                onChange={(event) => {
-                  setAvatarUrl(event.target.value);
-                  setAvatarPath(null);
-                }}
-                placeholder="https://..."
-                className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                className="hidden"
+                onChange={(e) => addFiles(Array.from(e.target.files ?? []))}
               />
-            </label>
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#0f172a]/10 bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px]">
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (event) => {
-                    const file = event.target.files?.[0];
-                    event.currentTarget.value = "";
-                    if (!file) return;
-                    try {
-                      const uploaded = await uploadMedia({ kind: "avatar", file, key: "avatar" });
-                      setAvatarUrl(uploaded.signedUrl);
-                      setAvatarPath(uploaded.path);
-                    } catch (err) {
-                      const message = err instanceof Error ? err.message : "No pudimos subir el avatar";
-                      setError(message);
-                    }
-                  }}
-                />
-                {uploading.avatar ? "Subiendo…" : "Subir avatar"}
-              </label>
-              {avatarPath && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAvatarPath(null);
-                    setAvatarUrl("");
-                  }}
-                  className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#475569] transition hover:bg-white"
-                >
-                  Quitar subida
-                </button>
-              )}
             </div>
-            <div className="rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a]">
-              <p className="font-semibold text-[#e87422]">Tip editorial</p>
-              <p className="text-[#475569]">Usa fotos horizontales para la portada y un retrato cercano para el avatar, como lo harías en tu perfil social.</p>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] text-[#0f172a] shadow-[0_16px_45px_rgba(0,0,0,0.08)]">
-            <div className="relative h-44 w-full overflow-hidden bg-white">
-              {coverUrl ? (
-                coverUrl.match(/\.mp4|\.mov|\.webm/i) ? (
-                  <video src={coverUrl} autoPlay loop muted className="h-full w-full object-cover" />
-                ) : (
-                  <img src={coverUrl} alt="Portada mini" className="h-full w-full object-cover" />
-                )
+
+            <div
+              className="mt-4 rounded-3xl border border-dashed border-[#d4dae5] bg-[#f8fafc] p-4"
+              onDragOver={(e) => {
+                e.preventDefault();
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                addFiles(Array.from(e.dataTransfer.files ?? []));
+              }}
+            >
+              {media.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-2 py-10 text-center text-[#64748b]">
+                  <p className="text-base font-semibold text-[#0f172a]">Agrega las fotos de siempre</p>
+                  <p className="max-w-md text-sm">
+                    Puedes subir varias de una. Después eliges cuál es portada y cuál queda como foto principal.
+                  </p>
+                </div>
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-[0.14em] text-[#6b7280]">
-                  Portada estilo post
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {media.map((item) => {
+                    const url = item.uploaded?.signedUrl || item.localUrl;
+                    const isCover = item.id === coverId;
+                    const isAvatar = item.id === avatarId;
+                    const isUploading = Boolean(uploading[item.id]);
+                    return (
+                      <div
+                        key={item.id}
+                        className={`group relative overflow-hidden rounded-3xl border bg-white shadow-[0_14px_40px_rgba(0,0,0,0.08)] transition ${
+                          isCover ? "border-[#e87422]" : "border-[#e6e8ef]"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          className="relative block aspect-square w-full overflow-hidden bg-[#0f172a]/5"
+                          onClick={() => setActiveId(item.id)}
+                        >
+                          {isVideoUrl(url) ? (
+                            <video src={url} className="absolute inset-0 h-full w-full object-cover" muted playsInline />
+                          ) : (
+                            <img
+                              src={url}
+                              alt={item.file.name}
+                              className="absolute inset-0 h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent opacity-0 transition group-hover:opacity-100" />
+                          {(isCover || isAvatar) && (
+                            <div className="absolute left-2 top-2 flex flex-wrap gap-1">
+                              {isCover && (
+                                <span className="rounded-full bg-[#e87422] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
+                                  Portada
+                                </span>
+                              )}
+                              {isAvatar && (
+                                <span className="rounded-full bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#0f172a]">
+                                  Foto
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {isUploading && (
+                            <div className="absolute inset-x-2 bottom-2 rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur">
+                              Subiendo…
+                            </div>
+                          )}
+                        </button>
+                        <div className="p-3">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setCoverId(item.id)}
+                              className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] transition ${
+                                isCover
+                                  ? "border-[#e87422] bg-[#fff7ed] text-[#9a3412]"
+                                  : "border-[#e6e8ef] bg-white text-[#334155] hover:border-[#e87422]/40"
+                              }`}
+                            >
+                              Portada
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setAvatarId(item.id)}
+                              className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] transition ${
+                                isAvatar
+                                  ? "border-[#0f172a] bg-[#0f172a] text-white"
+                                  : "border-[#e6e8ef] bg-white text-[#334155] hover:border-[#0f172a]/30"
+                              }`}
+                            >
+                              Foto
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateMedia(item.id, { includeAsMemory: !item.includeAsMemory })}
+                              className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] transition ${
+                                item.includeAsMemory
+                                  ? "border-[#22c55e] bg-[#f0fdf4] text-[#166534]"
+                                  : "border-[#e6e8ef] bg-white text-[#334155] hover:border-[#22c55e]/40"
+                              }`}
+                            >
+                              {item.includeAsMemory ? "Recuerdo" : "Sin recuerdo"}
+                            </button>
+                          </div>
+                          <div className="mt-3 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => moveMedia(item.id, -1)}
+                                className="rounded-full border border-[#e6e8ef] bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#334155] hover:border-[#0f172a]/25"
+                              >
+                                ↑
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveMedia(item.id, 1)}
+                                className="rounded-full border border-[#e6e8ef] bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#334155] hover:border-[#0f172a]/25"
+                              >
+                                ↓
+                              </button>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeMedia(item.id)}
+                              className="rounded-full border border-[#fee2e2] bg-[#fef2f2] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#b91c1c]"
+                            >
+                              Quitar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/10 to-transparent" />
-            </div>
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="h-12 w-12 overflow-hidden rounded-full border border-[#e5e7eb] bg-white">
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar mini" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-[11px] uppercase tracking-[0.16em] text-[#6b7280]">
-                    Avatar
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-[#0f172a]">{name || "Nombre del memorial"}</p>
-                <p className="text-xs text-[#6b7280]">
-                  {birthDate || "Nacimiento"} · {deathDate || "Fallecimiento"}
-                </p>
-              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div
-        id="tema"
-        className="relative overflow-hidden rounded-[24px] border border-[#e5e7eb] bg-white text-[#0f172a] shadow-[0_18px_60px_rgba(0,0,0,0.08)]"
-      >
-        <div className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(circle_at_18%_12%,rgba(232,116,34,0.16),transparent_36%),radial-gradient(circle_at_80%_0%,rgba(41,181,165,0.14),transparent_36%)]" />
-        <div className="relative grid gap-5 p-5 lg:grid-cols-[1fr,1.1fr]">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="rounded-[28px] border border-[#e6e8ef] bg-white p-4 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[12px] uppercase tracking-[0.14em] text-[#6b7280]">Plantilla y atmósfera</p>
-                <p className="text-sm text-[#475569]">Elige un tono visual como si escogieras fondo de historia.</p>
+                <p className="text-[11px] uppercase tracking-[0.26em] text-[#0ea5e9]">Tono</p>
+                <p className="text-sm text-[#475569]">Elige una atmósfera. Puedes cambiarla después.</p>
               </div>
-              <span className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#0f172a]">
+              <span className="rounded-full border border-[#e6e8ef] bg-[#f8fafc] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0f172a]">
                 {template.name}
               </span>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {templates.map((tpl) => (
                 <button
                   key={tpl.id}
                   type="button"
-                  onClick={() => setTemplate(tpl)}
-                  className={`relative overflow-hidden rounded-2xl border-2 px-3 py-3 text-left text-sm transition ${
-                    template.id === tpl.id
-                      ? "border-[#0f172a] shadow-[0_18px_48px_rgba(0,0,0,0.12)]"
-                      : "border-[#e5e7eb] hover:border-[#0f172a]/30"
+                  onClick={() => setTemplateId(tpl.id)}
+                  className={`relative overflow-hidden rounded-3xl border-2 px-4 py-4 text-left transition ${
+                    templateId === tpl.id ? "border-[#0f172a]" : "border-[#e6e8ef] hover:border-[#0f172a]/25"
                   } bg-gradient-to-br ${tpl.background}`}
                 >
-                  <span className="absolute inset-0 bg-black/5" />
-                  <div className="relative space-y-1 text-white drop-shadow">
-                    <span className="block text-[11px] uppercase tracking-[0.18em]">Tema</span>
-                    <span className="text-base font-semibold">{tpl.name}</span>
-                    <span className="mt-1 block h-2 w-full rounded-full" style={{ backgroundColor: tpl.accent }} />
+                  <span className="absolute inset-0 bg-black/10" />
+                  <div className="relative text-white">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/80">Tema</p>
+                    <p className="mt-1 text-base font-semibold">{tpl.name}</p>
+                    <span className="mt-2 block h-2 w-full rounded-full" style={{ backgroundColor: tpl.accent }} />
                   </div>
                 </button>
               ))}
             </div>
           </div>
+        </section>
 
-          <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] p-3">
-            <div className="relative overflow-hidden rounded-xl border border-[#e5e7eb] bg-white">
-              <div className="relative h-56 w-full overflow-hidden">
-                {coverUrl ? (
-                  coverUrl.match(/\.mp4|\.mov|\.webm/i) ? (
-                    <video src={coverUrl} autoPlay loop muted className="h-full w-full object-cover" />
-                  ) : (
-                    <img src={coverUrl} alt="Portada" className="h-full w-full object-cover" />
-                  )
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-[0.16em] text-[#6b7280]">
-                    Portada
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
-                <div className="absolute bottom-3 left-3 flex items-center gap-3 text-white drop-shadow">
-                  <div className="h-12 w-12 overflow-hidden rounded-full border-2 border-white/80 bg-white/30">
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[11px] uppercase tracking-[0.16em]">
-                        Foto
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-[12px] uppercase tracking-[0.2em]">{name || "Nombre del memorial"}</p>
-                    <p className="text-xs text-white/80">
-                      {birthDate || "Nacimiento"} · {deathDate || "Fallecimiento"}
-                    </p>
-                  </div>
-                </div>
+        <aside className="space-y-5">
+          <div className="rounded-[28px] border border-[#e6e8ef] bg-white p-4 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <p className="text-[11px] uppercase tracking-[0.26em] text-[#e87422]">Recuerdos</p>
+            <p className="mt-1 text-sm text-[#475569]">
+              Agrega una frase por foto si te nace. Si lo dejas vacío, igual se ve bonito.
+            </p>
+
+            {memoryItems.length === 0 ? (
+              <div className="mt-4 rounded-3xl border border-dashed border-[#d4dae5] bg-[#f8fafc] px-4 py-10 text-center text-sm text-[#64748b]">
+                Marca alguna foto como “Recuerdo” para armar el carrete inicial.
               </div>
-
-              <div className="space-y-3 px-3 pb-3 pt-3">
-                <div className="rounded-xl border border-[#e5e7eb] bg-white p-3 text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.08)]">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-[#64748b]">Obituario</p>
-                  <p className="text-sm leading-relaxed">
-                    {description || "Aquí verás el obituario o resumen editorial del memorial."}
-                  </p>
-                </div>
-
-                {(draftMemory.mediaUrl || draftMemory.content) && (
-                  <div className="rounded-xl border border-[#e5e7eb] bg-white p-3 text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.08)]">
-                    <p className="text-[11px] uppercase tracking-[0.14em]" style={{ color: template.accent }}>
-                      {draftMemory.title || "Primer recuerdo"}
-                    </p>
-                    {draftMemory.mediaUrl && (
-                      <div className="mt-2 overflow-hidden rounded-lg border border-[#e6e8ef] bg-black/5">
-                        {draftMemory.mediaUrl.match(/\.mp4|\.mov|\.webm/i) ? (
-                          <video src={draftMemory.mediaUrl} controls className="h-44 w-full object-cover" />
+            ) : (
+              <div className="mt-4 space-y-3">
+                {memoryItems.slice(0, 6).map((item) => {
+                  const url = item.uploaded?.signedUrl || item.localUrl;
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex gap-3 rounded-3xl border border-[#e6e8ef] bg-[#fbfcff] p-3"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setActiveId(item.id)}
+                        className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[#0f172a]/5"
+                      >
+                        {isVideoUrl(url) ? (
+                          <video src={url} className="absolute inset-0 h-full w-full object-cover" muted playsInline />
                         ) : (
-                          <img src={draftMemory.mediaUrl} alt="Vista previa" className="h-44 w-full object-cover" />
+                          <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                         )}
-                      </div>
-                    )}
-                    {draftMemory.content && <p className="mt-2 text-sm text-[#0f172a]">{draftMemory.content}</p>}
-                  </div>
-                )}
-
-                {carouselItems.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-[#6b7280]">Carrusel multimedia</p>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#f8fafc] via-[#f8fafc]/70 to-transparent pointer-events-none" />
-                      <div className="absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#f8fafc] via-[#f8fafc]/70 to-transparent pointer-events-none" />
-                      <div className="flex gap-3 overflow-x-auto pb-3 pr-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        {carouselItems.map((item, index) => (
-                          <div
-                            key={`${item.title}-${index}`}
-                            className="snap-start min-w-[230px] max-w-[260px] rounded-xl border border-[#e5e7eb] bg-white p-3 text-[#0f172a] shadow-[0_12px_30px_rgba(15,23,42,0.12)]"
-                          >
-                            <p className="text-[11px] uppercase tracking-[0.14em]" style={{ color: template.accent }}>
-                              {item.title}
-                            </p>
-                            {item.mediaUrl && (
-                              <div className="mt-2 overflow-hidden rounded-lg border border-[#e6e8ef] bg-black/5">
-                                {item.mediaUrl.match(/\.mp4|\.mov|\.webm/i) ? (
-                                  <video src={item.mediaUrl} controls className="h-36 w-full object-cover" />
-                                ) : (
-                                  <img src={item.mediaUrl} alt="Vista previa" className="h-36 w-full object-cover" />
-                                )}
-                              </div>
-                            )}
-                            {item.content && <p className="mt-2 text-xs text-[#0f172a]">{item.content}</p>}
-                          </div>
-                        ))}
+                      </button>
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <input
+                          value={item.title}
+                          onChange={(e) => updateMedia(item.id, { title: e.target.value })}
+                          placeholder="Título (opcional)"
+                          className="w-full rounded-2xl border border-[#e6e8ef] bg-white px-3 py-2 text-sm text-[#0f172a] outline-none focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
+                        />
+                        <textarea
+                          value={item.content}
+                          onChange={(e) => updateMedia(item.id, { content: e.target.value })}
+                          placeholder="Una línea que acompañe esta foto…"
+                          rows={2}
+                          className="w-full resize-none rounded-2xl border border-[#e6e8ef] bg-white px-3 py-2 text-sm text-[#0f172a] outline-none focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
+                        />
                       </div>
                     </div>
-                  </div>
+                  );
+                })}
+                {memoryItems.length > 6 && (
+                  <p className="text-xs text-[#64748b]">
+                    Se guardarán {memoryItems.length} recuerdos. Aquí ves los primeros 6.
+                  </p>
                 )}
               </div>
-            </div>
-            <p className="text-[12px] uppercase tracking-[0.14em] text-white/70">
-              Vista previa editable; cambia datos y mira el resultado al instante.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-[22px] border border-[#e6e8ef] bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Primer recuerdo</p>
-            <p className="text-sm text-[#475569]">Acompaña el obituario con un recuerdo visual.</p>
-          </div>
-          <span className="rounded-full border border-[#e6e8ef] bg-[#f8fafc] px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0f172a]">
-            Opcional
-          </span>
-        </div>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          <label className="block text-sm font-semibold text-[#0f172a]">
-            Título
-            <input
-              type="text"
-              value={draftMemory.title}
-              onChange={(event) => setDraftMemory((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Carta, foto, video…"
-              className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-            />
-          </label>
-          <label className="block text-sm font-semibold text-[#0f172a]">
-            URL de imagen o video
-            <input
-              type="url"
-              value={draftMemory.mediaUrl}
-              onChange={(event) =>
-                setDraftMemory((prev) => ({ ...prev, mediaUrl: event.target.value, mediaPath: null }))
-              }
-              placeholder="https://..."
-              className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-            />
-          </label>
-          <div className="flex flex-wrap items-center gap-2 md:col-span-2">
-            <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#0f172a]/10 bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px]">
-              <input
-                type="file"
-                accept="image/*,video/*,audio/*"
-                className="hidden"
-                onChange={async (event) => {
-                  const file = event.target.files?.[0];
-                  event.currentTarget.value = "";
-                  if (!file) return;
-                  try {
-                    const uploaded = await uploadMedia({ kind: "first-memory", file, key: "first-memory" });
-                    setDraftMemory((prev) => ({ ...prev, mediaUrl: uploaded.signedUrl, mediaPath: uploaded.path }));
-                  } catch (err) {
-                    const message = err instanceof Error ? err.message : "No pudimos subir el archivo";
-                    setError(message);
-                  }
-                }}
-              />
-              {uploading["first-memory"] ? "Subiendo…" : "Subir archivo"}
-            </label>
-            {draftMemory.mediaPath && (
-              <button
-                type="button"
-                onClick={() => setDraftMemory((prev) => ({ ...prev, mediaPath: null, mediaUrl: "" }))}
-                className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#475569] transition hover:bg-white"
-              >
-                Quitar subida
-              </button>
             )}
           </div>
-        </div>
-        <label className="mt-3 block text-sm font-semibold text-[#0f172a]">
-          Texto del recuerdo
-          <textarea
-            value={draftMemory.content}
-            onChange={(event) => setDraftMemory((prev) => ({ ...prev, content: event.target.value }))}
-            rows={3}
-            placeholder="Palabras que acompañan el material."
-            className="mt-2 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-          />
-        </label>
-      </div>
 
-      <div className="rounded-[22px] border border-[#e6e8ef] bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Mantenedor multimedia</p>
-            <p className="text-sm text-[#475569]">Prepara el carrusel: cada item entra a la vista previa.</p>
-          </div>
-          <button
-            type="button"
-            onClick={addGalleryItem}
-            className="rounded-full border border-[#e87422] bg-[#e87422] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_12px_32px_rgba(232,116,34,0.35)] transition hover:-translate-y-[1px]"
-          >
-            Añadir
-          </button>
-        </div>
-        <div className="mt-3 space-y-3">
-          {gallery.length === 0 && (
-            <p className="rounded-xl border border-dashed border-[#e6e8ef] bg-[#f8fafc] px-4 py-3 text-sm text-[#475569]">
-              Aún no hay elementos en la galería. Pega URLs de fotos, cartas o videos (próximo: subida directa).
-            </p>
-          )}
-          {gallery.map((item, index) => (
-            <div
-              key={index}
-              className="space-y-2 rounded-2xl border border-[#e6e8ef] bg-gradient-to-br from-white via-[#fbfcff] to-[#f6f8fb] p-3 shadow-[0_12px_32px_rgba(15,23,42,0.08)]"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-[12px] uppercase tracking-[0.14em] text-[#e87422]">Secuencia {index + 1}</p>
-                <button
-                  type="button"
-                  onClick={() => removeGalleryItem(index)}
-                  className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#b3261e]"
-                >
-                  Quitar
-                </button>
+          <div className="rounded-[28px] border border-[#e6e8ef] bg-white p-4 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.26em] text-[#22c55e]">Crear</p>
+                <p className="text-sm text-[#475569]">Si falta algo, lo puedes ajustar después. Lo importante es empezar.</p>
               </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <label className="block text-sm font-semibold text-[#0f172a]">
-                  Título
-                  <input
-                    type="text"
-                    value={item.title}
-                    onChange={(event) => updateGalleryItem(index, "title", event.target.value)}
-                    className="mt-1 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-3 py-2.5 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-                  />
-                </label>
-                <label className="block text-sm font-semibold text-[#0f172a]">
-                  URL imagen o video
-                  <input
-                    type="url"
-                    value={item.mediaUrl}
-                    onChange={(event) => {
-                      updateGalleryItem(index, "mediaUrl", event.target.value);
-                      updateGalleryItem(index, "mediaPath", null);
-                    }}
-                    placeholder="https://..."
-                    className="mt-1 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-3 py-2.5 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-                  />
-                </label>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-[#0f172a]/10 bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.06)] transition hover:-translate-y-[1px]">
-                  <input
-                    type="file"
-                    accept="image/*,video/*,audio/*"
-                    className="hidden"
-                    onChange={async (event) => {
-                      const file = event.target.files?.[0];
-                      event.currentTarget.value = "";
-                      if (!file) return;
-                      try {
-                        const uploaded = await uploadMedia({ kind: "gallery", file, key: `gallery-${index}` });
-                        updateGalleryItem(index, "mediaUrl", uploaded.signedUrl);
-                        updateGalleryItem(index, "mediaPath", uploaded.path);
-                      } catch (err) {
-                        const message = err instanceof Error ? err.message : "No pudimos subir el archivo";
-                        setError(message);
-                      }
-                    }}
-                  />
-                  {uploading[`gallery-${index}`] ? "Subiendo…" : "Subir archivo"}
-                </label>
-                {item.mediaPath && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      updateGalleryItem(index, "mediaPath", null);
-                      updateGalleryItem(index, "mediaUrl", "");
-                    }}
-                    className="rounded-full border border-[#e5e7eb] bg-[#f8fafc] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#475569] transition hover:bg-white"
-                  >
-                    Quitar subida
-                  </button>
-                )}
-              </div>
-              <label className="block text-sm font-semibold text-[#0f172a]">
-                Texto / pie
-                <textarea
-                  value={item.content}
-                  onChange={(event) => updateGalleryItem(index, "content", event.target.value)}
-                  rows={2}
-                  className="mt-1 w-full rounded-xl border border-[#e6e8ef] bg-[#f8fafc] px-3 py-2.5 text-sm text-[#0f172a] shadow-[0_10px_26px_rgba(15,23,42,0.05)] outline-none transition focus:border-[#e87422] focus:ring-2 focus:ring-[#e87422]/20"
-                />
-              </label>
-              {item.mediaUrl && (
-                <div className="overflow-hidden rounded-lg border border-[#e6e8ef] bg-black/5">
-                  {item.mediaUrl.match(/\.mp4|\.mov|\.webm/i) ? (
-                    <video src={item.mediaUrl} controls className="h-48 w-full object-cover" />
-                  ) : (
-                    <img src={item.mediaUrl} alt="Vista previa galería" className="h-48 w-full object-cover" />
-                  )}
-                </div>
-              )}
+              <button
+                type="submit"
+                disabled={submitting}
+                className="rounded-full bg-gradient-to-r from-[#22c55e] via-[#e87422] to-[#0ea5e9] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_18px_48px_rgba(0,0,0,0.18)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {submitting ? "Creando…" : "Crear memorial"}
+              </button>
             </div>
-          ))}
-        </div>
+
+            {error && (
+              <div className="mt-4 rounded-2xl border border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm text-[#b91c1c]">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mt-4 rounded-2xl border border-[#bbf7d0] bg-[#f0fdf4] px-4 py-3 text-sm text-[#166534]">
+                {success}
+              </div>
+            )}
+          </div>
+        </aside>
       </div>
 
-      <div
-        id="publicar"
-        className="relative overflow-hidden rounded-[24px] border border-[#e5e7eb] bg-white p-5 text-[#0f172a] shadow-[0_18px_60px_rgba(0,0,0,0.08)]"
-      >
-        <div className="pointer-events-none absolute inset-0 opacity-80 [background:radial-gradient(circle_at_20%_10%,rgba(232,116,34,0.16),transparent_36%),radial-gradient(circle_at_80%_-10%,rgba(41,181,165,0.12),transparent_36%)]" />
-        <div className="relative space-y-3">
-          {error && <p className="text-xs text-[#b3261e]">{error}</p>}
-          {success && <p className="text-xs text-[#166534]">{success}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-2xl bg-[#e87422] px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_45px_rgba(232,116,34,0.35)] transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70"
+      {active && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur"
+          onMouseDown={() => setActiveId(null)}
+        >
+          <div
+            className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/15 bg-white shadow-[0_40px_140px_rgba(0,0,0,0.45)]"
+            onMouseDown={(e) => e.stopPropagation()}
           >
-            {loading ? "Creando…" : "Publicar memorial"}
-          </button>
-          <p className="text-[12px] uppercase tracking-[0.14em] text-[#6b7280]">
-            Revisa datos y tono antes de publicar; se abrirá en tu muro privado.
-          </p>
+            <div className="flex items-center justify-between gap-3 border-b border-[#e6e8ef] px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-[0.26em] text-[#6b7280]">Previsualización</p>
+                <p className="truncate text-sm font-semibold text-[#0f172a]">{active.file.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveId(null)}
+                className="rounded-full bg-[#f3f4f6] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a]"
+              >
+                Cerrar
+              </button>
+            </div>
+            <div className="relative aspect-[16/9] w-full bg-[#0f172a]/5">
+              {(() => {
+                const url = active.uploaded?.signedUrl || active.localUrl;
+                return isVideoUrl(url) ? (
+                  <video src={url} className="absolute inset-0 h-full w-full object-cover" controls autoPlay />
+                ) : (
+                  <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                );
+              })()}
+            </div>
+            <div className="grid gap-2 p-4 sm:grid-cols-3">
+              <button
+                type="button"
+                onClick={() => setCoverId(active.id)}
+                className={`rounded-2xl border px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition ${
+                  active.id === coverId
+                    ? "border-[#e87422] bg-[#fff7ed] text-[#9a3412]"
+                    : "border-[#e6e8ef] bg-white text-[#0f172a] hover:border-[#e87422]/40"
+                }`}
+              >
+                Usar como portada
+              </button>
+              <button
+                type="button"
+                onClick={() => setAvatarId(active.id)}
+                className={`rounded-2xl border px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition ${
+                  active.id === avatarId
+                    ? "border-[#0f172a] bg-[#0f172a] text-white"
+                    : "border-[#e6e8ef] bg-white text-[#0f172a] hover:border-[#0f172a]/25"
+                }`}
+              >
+                Usar como foto
+              </button>
+              <button
+                type="button"
+                onClick={() => updateMedia(active.id, { includeAsMemory: !active.includeAsMemory })}
+                className={`rounded-2xl border px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition ${
+                  active.includeAsMemory
+                    ? "border-[#22c55e] bg-[#f0fdf4] text-[#166534]"
+                    : "border-[#e6e8ef] bg-white text-[#0f172a] hover:border-[#22c55e]/40"
+                }`}
+              >
+                {active.includeAsMemory ? "Quitar de recuerdos" : "Agregar a recuerdos"}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </form>
   );
 }
+

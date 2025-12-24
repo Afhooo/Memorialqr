@@ -23,15 +23,13 @@ export default async function CrearMemorialPage() {
         <div className="absolute bottom-0 left-1/2 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
         <div className="relative flex flex-col gap-6">
           <div className="space-y-4">
-            <p className="text-[10px] uppercase tracking-[0.32em] text-white/70">Atelier memorial</p>
-            <h1 className="text-3xl font-semibold leading-[1.15]">
-              Un lienzo completo para crear un memorial editorial, sin columnas partidas.
-            </h1>
+            <p className="text-[10px] uppercase tracking-[0.32em] text-white/70">Crear memorial</p>
+            <h1 className="text-3xl font-semibold leading-[1.15]">Un espacio bonito para recordar, sin pelear con formularios.</h1>
             <p className="text-sm text-white/80">
-              Recorrido vertical guiado: identidad, narrativa, multimedia y previsualización cinematográfica en un solo hilo continuo.
+              Sube fotos como en tu carrete, elige portada y foto principal, y deja unas líneas que acompañen a la familia cuando entren.
             </p>
             <div className="flex flex-wrap gap-2">
-              {["Identidad + relato", "Portada y avatar", "Tema del memorial", "Preview viva"].map((pill) => (
+              {["Fotos primero", "Portada + foto principal", "Recuerdos iniciales", "Tema"].map((pill) => (
                 <span
                   key={pill}
                   className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/80"

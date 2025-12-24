@@ -11,6 +11,7 @@ import { ReflectionSection } from "./components/ReflectionSection";
 import { TributeHighlightsSection } from "./components/TributeHighlightsSection";
 import { MemoryComposer } from "./components/MemoryComposer";
 import { formatDate } from "./components/dateUtils";
+import { MemoriesGallery } from "./components/MemoriesGallery";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +76,8 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
             lastUpdated={lastUpdated}
           />
 
+          <MemoriesGallery memorialName={memorial.name} memories={memoryList} />
+
           <TributeHighlightsSection
             memorialName={memorial.name}
             description={memorial.description}
@@ -84,25 +87,23 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
           />
 
           <ReflectionSection
-            memorialId={memorial.id}
             memorialName={memorial.name}
             birthDate={memorial.birth_date}
             deathDate={memorial.death_date}
             memories={memoryList}
-            canPost={canPost}
             memoryWindow={memoryWindow}
             lastUpdated={lastUpdated}
           />
 
           <div className="lg:hidden rounded-3xl bg-white/75 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.12)] backdrop-blur">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#0f172a]/70">Publica sin salir de la cinta</p>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[#0f172a]/70">Deja un recuerdo aquí mismo</p>
             <MemoryComposer
               memorialId={memorial.id}
               disabled={!canPost}
               helper={
                 canPost
-                  ? "El mensaje aparece de inmediato en la cinta; puedes editarlo luego."
-                  : "Inicia sesión con la cuenta de la familia para escribir."
+                  ? "Tu mensaje o foto aparece al tiro en la cinta."
+                  : "Inicia sesión con la cuenta de la familia para escribir o subir una foto."
               }
             />
           </div>
@@ -127,7 +128,7 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
                 disabled={!canPost}
                 helper={
                   canPost
-                    ? "Escribe mientras lees la cinta. El muro se actualiza al instante."
+                    ? "Escribe o sube una foto mientras recorres el memorial. Se actualiza al instante."
                     : "Necesitas iniciar sesión para publicar."
                 }
               />

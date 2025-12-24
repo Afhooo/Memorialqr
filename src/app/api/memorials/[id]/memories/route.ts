@@ -20,9 +20,11 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
   const body = await req.json().catch(() => ({}));
   const title = typeof body.title === "string" ? body.title.trim() : "";
   const content = typeof body.content === "string" ? body.content.trim() : "";
+  const mediaPath = typeof body.mediaPath === "string" ? body.mediaPath.trim().slice(0, 600) : null;
+  const mediaUrl = typeof body.mediaUrl === "string" ? body.mediaUrl.trim().slice(0, 2000) : null;
 
-  if (!content) {
-    return NextResponse.json({ error: "El mensaje no puede estar vacío" }, { status: 400 });
+  if (!content && !mediaPath && !mediaUrl) {
+    return NextResponse.json({ error: "Escribe un mensaje o adjunta una foto/video" }, { status: 400 });
   }
 
   const supabase = createSupabaseServerClient();
@@ -50,12 +52,17 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
     }
   }
 
+  if (mediaPath && !mediaPath.startsWith(`memorials/${memorialId}/`)) {
+    return NextResponse.json({ error: "Archivo adjunto inválido" }, { status: 400 });
+  }
+
   const payload = {
     id: randomUUID(),
     memorial_id: memorialId,
     title: title || "Mensaje",
     content,
-    media_url: null,
+    media_url: mediaPath ? null : mediaUrl,
+    media_path: mediaPath,
     created_at: new Date().toISOString(),
   };
 

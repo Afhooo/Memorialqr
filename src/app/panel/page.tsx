@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
-import { MemorialCreatorForm } from "./MemorialCreatorForm";
 import { SidebarNav } from "@/components/SidebarNav";
 
 type MemorialRecord = {
@@ -69,14 +68,13 @@ export default async function OwnerPanelPage() {
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[12px] uppercase tracking-[0.22em] text-white/80">
               <span className="h-2 w-2 rounded-full bg-gradient-to-br from-[#e87422] to-[#f0b46d]" />
-              Panel del dueño
+              Tu panel
             </div>
             <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
-              Cuidar los memoriales de quienes ya partieron
+              Cuidar los memoriales de tu gente
             </h1>
             <p className="max-w-2xl text-sm text-white/75 sm:text-base">
-              Administra tus espacios, revisa el avance y abre nuevos perfiles con una guía visual paso a paso. Todo queda
-              bajo tu sesión segura.
+              Crea memoriales, abre los existentes y sigue sumando recuerdos cuando te nazca. Todo queda privado y bajo tu cuenta.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -211,17 +209,25 @@ export default async function OwnerPanelPage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[#e87422]">Nuevo memorial</p>
-                <h2 className="text-xl font-semibold text-[#0f172a]">Crear un perfil completo</h2>
+                <h2 className="text-xl font-semibold text-[#0f172a]">Crear un memorial</h2>
                 <p className="text-sm text-[#475569]">
-                  Añade datos biográficos, un relato editorial y el primer recuerdo con imagen o video opcional.
+                  Abre un espacio con fotos primero: portada, foto principal y un carrete inicial de recuerdos.
                 </p>
               </div>
-              <div className="rounded-xl bg-[#0f172a] px-4 py-3 text-xs text-white shadow-[0_12px_36px_rgba(15,23,42,0.25)]">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-white/70">Tip UX</p>
-                <p className="text-sm text-white">Guarda o pega URLs limpias; la subida directa llegará pronto.</p>
-              </div>
+              <Link
+                href="/crear-memorial"
+                className="rounded-full bg-[#0f172a] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_12px_36px_rgba(15,23,42,0.25)] transition hover:-translate-y-[1px]"
+              >
+                Abrir creador
+              </Link>
             </div>
-            <MemorialCreatorForm />
+            <div className="rounded-3xl border border-dashed border-[#d4dae5] bg-[#f8fafc] p-6 text-sm text-[#475569]">
+              <p className="text-base font-semibold text-[#0f172a]">Experiencia estilo carrete</p>
+              <p className="mt-2 max-w-2xl">
+                El creador está pensado como una biblioteca de fotos: subes varias de una, eliges la portada y dejas un par de
+                frases opcionales. Lo demás lo vas armando en el memorial, con calma.
+              </p>
+            </div>
           </section>
         </div>
       </div>
