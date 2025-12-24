@@ -4,9 +4,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
 import { formatDate } from "./dateUtils";
-import { IconFacebook, IconInstagram } from "./Icons";
+import { SocialLinksEditor } from "./SocialLinksEditor";
 
 interface HeroSectionProps {
+  memorialId: string;
   memorialName: string;
   birthDate: string | null;
   deathDate: string | null;
@@ -15,12 +16,14 @@ interface HeroSectionProps {
   coverUrl?: string | null;
   facebookUrl?: string | null;
   instagramUrl?: string | null;
+  canEditSocial?: boolean;
   memoryCount: number;
   memoryWindow: string;
   lastUpdated: string | null;
 }
 
 export function HeroSection({
+  memorialId,
   memorialName,
   birthDate,
   deathDate,
@@ -29,6 +32,7 @@ export function HeroSection({
   coverUrl,
   facebookUrl,
   instagramUrl,
+  canEditSocial = false,
   memoryCount,
   memoryWindow,
   lastUpdated,
@@ -134,35 +138,13 @@ export function HeroSection({
             >
               {memorialName}
             </h1>
-            {(facebookUrl || instagramUrl) && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] uppercase tracking-[0.26em] text-white/70">Redes</span>
-                {facebookUrl && (
-                  <a
-                    href={facebookUrl}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/90 transition hover:bg-white/15"
-                    title="Facebook"
-                    aria-label="Facebook"
-                  >
-                    <IconFacebook className="h-5 w-5" />
-                  </a>
-                )}
-                {instagramUrl && (
-                  <a
-                    href={instagramUrl}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/90 transition hover:bg-white/15"
-                    title="Instagram"
-                    aria-label="Instagram"
-                  >
-                    <IconInstagram className="h-5 w-5" />
-                  </a>
-                )}
-              </div>
-            )}
+            <SocialLinksEditor
+              memorialId={memorialId}
+              memorialName={memorialName}
+              facebookUrl={facebookUrl ?? null}
+              instagramUrl={instagramUrl ?? null}
+              canEdit={canEditSocial}
+            />
 
             <p className="text-sm text-white/80">
               {formatDate(birthDate)} · {formatDate(deathDate)}

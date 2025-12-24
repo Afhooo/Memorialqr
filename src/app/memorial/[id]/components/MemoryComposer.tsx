@@ -151,7 +151,7 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="Escribe aquí… una anécdota corta, una frase de cariño, o el contexto de la foto."
-          rows={4}
+          rows={3}
           className="w-full rounded-3xl border border-[#d7dee8] bg-white px-4 py-3 text-sm leading-relaxed text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
           disabled={disabled || loading}
         />

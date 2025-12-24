@@ -58,7 +58,7 @@ function normalizeExternalUrl(value: string | null | undefined) {
   }
 }
 
-function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: boolean) {
+function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: boolean, canEditSocial: boolean) {
   const memoryList: Memory[] = memories ?? [];
   const latestMemoryDate = memoryList[0]?.created_at ?? null;
   const earliestMemoryDate = memoryList[memoryList.length - 1]?.created_at ?? null;
@@ -78,6 +78,7 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
       <div className="relative mx-auto grid w-full max-w-[1800px] gap-10 px-2 pb-14 pt-6 sm:px-4 lg:grid-cols-[minmax(0,1.25fr)_320px] xl:grid-cols-[minmax(0,1.35fr)_360px] lg:gap-14 xl:gap-16">
         <div className="space-y-10">
           <HeroSection
+            memorialId={memorial.id}
             memorialName={memorial.name}
             birthDate={memorial.birth_date}
             deathDate={memorial.death_date}
@@ -86,6 +87,7 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
             coverUrl={memorial.cover_media_url ?? null}
             facebookUrl={normalizeExternalUrl(memorial.facebook_url)}
             instagramUrl={normalizeExternalUrl(memorial.instagram_url)}
+            canEditSocial={canEditSocial}
             memoryCount={memoryList.length}
             memoryWindow={memoryWindow}
             lastUpdated={lastUpdated}
@@ -236,5 +238,5 @@ export default async function MemorialPage({
     return { ...memory, media_url: memory.media_url || signed || null };
   });
 
-  return renderMemorial(withSignedMemorial, withSignedMemories, true);
+  return renderMemorial(withSignedMemorial, withSignedMemories, true, isOwner);
 }
