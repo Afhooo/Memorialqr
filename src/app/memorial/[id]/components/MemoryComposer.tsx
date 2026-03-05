@@ -5,6 +5,8 @@
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ImagePlus, X, UploadCloud, FileText, Send } from "lucide-react";
 
 interface MemoryComposerProps {
   memorialId: string;
@@ -33,7 +35,9 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [showTitle, setShowTitle] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (!file) {
@@ -49,7 +53,6 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
     });
     setUploaded(null);
     return () => URL.revokeObjectURL(nextUrl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file]);
 
   const uploadSelectedFile = async (): Promise<UploadResult | null> => {
@@ -90,11 +93,11 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
     }, 180);
 
     try {
-      const trimmedTitle = title.trim() || "Mensaje";
+      const trimmedTitle = title.trim();
       const trimmedContent = content.trim();
       const hasAttachment = Boolean(file);
       if (!trimmedContent && !hasAttachment) {
-        throw new Error("Escribe algo o adjunta una foto/video.");
+        throw new Error("Agrega una foto o escribe algún recuerdo.");
       }
 
       const upload = hasAttachment ? await uploadSelectedFile() : null;
@@ -103,15 +106,15 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: trimmedTitle,
-          content: trimmedContent,
+          title: trimmedTitle || null,
+          content: trimmedContent || null,
           mediaPath: upload?.path ?? null,
         }),
       });
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload.error || "No pudimos guardar tu mensaje");
+        throw new Error(payload.error || "Error al publicar tu recuerdo");
       }
 
       setTitle("");
@@ -119,135 +122,188 @@ export function MemoryComposer({ memorialId, disabled = false, helper }: MemoryC
       setFile(null);
       setUploaded(null);
       setProgress(100);
+      setIsExpanded(false); // Collapse on success
       router.refresh();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "No pudimos guardar tu mensaje";
+      const message = err instanceof Error ? err.message : "Error inesperado al publicar";
       setError(message);
     } finally {
-      setLoading(false);
       clearInterval(timer);
-      setTimeout(() => setProgress(0), 400);
+      setTimeout(() => {
+        setLoading(false);
+        setProgress(0);
+      }, 400);
+    }
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!isExpanded) setIsExpanded(true);
+    setIsDragging(true);
+  };
+  const onDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (disabled || loading) return;
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile && (droppedFile.type.startsWith("image/") || droppedFile.type.startsWith("video/"))) {
+      setFile(droppedFile);
+      setIsExpanded(true);
     }
   };
 
   return (
-    <form
-      className="space-y-3 rounded-3xl border border-[#e2e8f0] bg-white/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.08)]"
+    <motion.form
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative flex flex-col gap-4 overflow-hidden"
       onSubmit={handleSubmit}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-[#0f172a]">Deja un recuerdo</p>
-          <p className="text-xs text-[#64748b]">Un mensaje corto, o una foto. Aquí todo queda en privado.</p>
-        </div>
-        <span className="rounded-full bg-[#0f172a] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
-          Privado
-        </span>
-      </div>
-
-      <label className="block">
-        <span className="sr-only">Mensaje</span>
-        <textarea
-          value={content}
-          onChange={(event) => setContent(event.target.value)}
-          placeholder="Escribe aquí… una anécdota corta, una frase de cariño, o el contexto de la foto."
-          rows={3}
-          className="w-full rounded-3xl border border-[#d7dee8] bg-white px-4 py-3 text-sm leading-relaxed text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
-          disabled={disabled || loading}
-        />
-      </label>
-
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,video/*"
-            className="hidden"
-            onChange={(e) => {
-              const picked = e.target.files?.[0] ?? null;
-              setFile(picked);
-            }}
-            disabled={disabled || loading}
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={disabled || loading}
-            className="rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0f172a]/15 hover:bg-[#f8fafc] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {file ? "Cambiar foto/video" : "Agregar foto/video"}
-          </button>
-          {file && (
-            <button
-              type="button"
-              onClick={() => setFile(null)}
-              disabled={disabled || loading}
-              className="rounded-full border border-[#fee2e2] bg-[#fef2f2] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#b91c1c] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Quitar
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setShowTitle((v) => !v)}
-            disabled={disabled || loading}
-            className="rounded-full border border-[#e2e8f0] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0f172a]/15 hover:bg-[#f8fafc] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {showTitle ? "Ocultar título" : "Agregar título"}
-          </button>
-        </div>
-      </div>
-
-      {showTitle && (
-        <input
-          type="text"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="Título (opcional)"
-          className="w-full rounded-3xl border border-[#d7dee8] bg-white px-4 py-3 text-sm text-[#0f172a] outline-none transition focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/20"
-          disabled={disabled || loading}
-        />
-      )}
-
-      {file && (
-        <div className="overflow-hidden rounded-3xl border border-[#e2e8f0] bg-white shadow-[0_16px_44px_rgba(0,0,0,0.08)]">
-          <div className="relative aspect-[4/3] w-full bg-[#0f172a]/5">
-            {filePreviewUrl ? (
-              isVideoFile(file) ? (
-                <video src={filePreviewUrl} className="absolute inset-0 h-full w-full object-cover" controls />
-              ) : (
-                <img src={filePreviewUrl} alt="Previsualización" className="absolute inset-0 h-full w-full object-cover" />
-              )
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-[#64748b]">Preparando vista previa…</div>
-            )}
-          </div>
-          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs text-[#475569]">
-            <span className="truncate">{file.name}</span>
-            <span>{uploadingFile ? "Subiendo…" : uploaded ? "Listo" : "Se sube al publicar"}</span>
-          </div>
-        </div>
-      )}
-
-      {helper && <p className="text-xs text-[#475569]">{helper}</p>}
-      {error && <p className="text-xs text-[#b3261e]">{error}</p>}
-
-      {(loading || progress > 0) && (
-        <div className="h-2 overflow-hidden rounded-full bg-[#f1f5f9]">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-[#0ea5e9] via-[#22c55e] to-[#eab308] transition-[width]"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
-      <button
-        type="submit"
-        disabled={disabled || loading}
-        className="w-full rounded-3xl bg-gradient-to-r from-[#0ea5e9] via-[#22c55e] to-[#e87422] px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] text-white shadow-[0_16px_40px_rgba(0,0,0,0.14)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+      <div
+        className="relative group cursor-text"
+        onClick={() => !disabled && setIsExpanded(true)}
       >
-        {loading ? "Publicando…" : "Publicar"}
-      </button>
-    </form>
+        {!isExpanded ? (
+          <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/50 text-slate-400 group-hover:bg-slate-100/80 transition-colors">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-slate-200/50 flex items-center justify-center">
+              <FileText className="h-5 w-5 text-slate-400" />
+            </div>
+            <p className="font-medium text-sm">{helper || "Escribe un recuerdo o comparte una foto..."}</p>
+            <div className="ml-auto flex items-center gap-3 px-2">
+              <ImagePlus className="h-5 w-5 text-slate-400 group-hover:text-amber-500 transition-colors" />
+            </div>
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="flex flex-col gap-4"
+          >
+            <div className="relative">
+              <FileText className="absolute left-4 top-3.5 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                autoFocus
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Título del documento o anécdota (opcional)"
+                className="w-full rounded-xl border border-slate-200/60 bg-white pl-11 pr-4 py-3 text-sm font-medium text-slate-900 placeholder-slate-400 transition-colors focus:border-amber-400/50 focus:outline-none focus:ring-4 focus:ring-amber-400/10 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.03)]"
+                disabled={disabled || loading}
+              />
+            </div>
+
+            <div className="relative">
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Añade la historia o descripción correspondiente al registro..."
+                rows={4}
+                className="w-full rounded-xl border border-slate-200/60 bg-white p-4 text-sm font-light leading-relaxed text-slate-900 placeholder-slate-400 transition-colors focus:border-amber-400/50 focus:outline-none focus:ring-4 focus:ring-amber-400/10 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.03)] resize-none min-h-[120px]"
+                disabled={disabled || loading}
+              />
+            </div>
+
+            <AnimatePresence mode="popLayout">
+              {!filePreviewUrl ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
+                  onDrop={onDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`relative cursor-pointer flex flex-col items-center justify-center rounded-2xl border border-dashed py-8 px-4 transition-all ${isDragging
+                    ? "border-amber-400 bg-amber-50"
+                    : "border-slate-300 bg-slate-50/50 hover:border-amber-400/50 hover:bg-slate-50"
+                    }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    disabled={disabled || loading}
+                  />
+                  <UploadCloud className={`mb-3 h-8 w-8 transition-colors ${isDragging ? "text-amber-500" : "text-slate-300"}`} />
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Adjuntar Documento Visual</p>
+                  <p className="mt-1 text-xs text-slate-400 font-light hidden sm:block">Arrastra un archivo o haz clic aquí</p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-900 group shadow-inner"
+                >
+                  <div className="relative aspect-video w-full">
+                    {file && isVideoFile(file) ? (
+                      <video src={filePreviewUrl} className="h-full w-full object-contain" controls />
+                    ) : (
+                      <img src={filePreviewUrl} alt="Vista previa" className="h-full w-full object-contain" />
+                    )}
+                    <div className="absolute top-4 right-4 z-10">
+                      <button
+                        type="button"
+                        onClick={() => setFile(null)}
+                        className="flex items-center justify-center h-8 w-8 rounded-full bg-slate-900/40 text-white backdrop-blur-md hover:bg-red-500 transition duration-300"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="flex flex-col gap-3 mt-2">
+              {error && <p className="text-[10px] font-semibold tracking-widest uppercase text-red-600 bg-red-50 border border-red-200/60 px-4 py-3 rounded-lg">{error}</p>}
+
+              {loading && progress > 0 && (
+                <div className="h-1 w-full overflow-hidden rounded-full bg-slate-100">
+                  <motion.div
+                    className="h-full bg-amber-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(false)}
+                  disabled={loading}
+                  className="px-6 py-3.5 rounded-xl border border-slate-200/60 bg-white text-[11px] font-semibold uppercase tracking-widest text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={disabled || loading || (!content.trim() && !file)}
+                  className="flex flex-1 items-center justify-center gap-3 rounded-xl bg-slate-900 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-widest text-white transition-all hover:bg-slate-800 hover:shadow-md hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                >
+                  {loading ? (
+                    <span className="animate-pulse">Procesando...</span>
+                  ) : (
+                    <>
+                      <Send size={16} />
+                      Publicar
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </motion.form>
   );
 }

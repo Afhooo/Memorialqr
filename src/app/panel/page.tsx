@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseClient";
 import { getServerSession } from "@/lib/serverSession";
-import { SidebarNav } from "@/components/SidebarNav";
+import { CopyPlus, Clock, Heart, Plus, ArrowRight, CalendarDays } from "lucide-react";
 
 type MemorialRecord = {
   id: string;
@@ -55,180 +55,128 @@ export default async function OwnerPanelPage() {
     totalMemories = count ?? 0;
   }
 
-  const lastCreatedLabel = "—";
-
   return (
-    <div className="space-y-8 py-6 lg:py-8">
-      <section
-        id="resumen"
-        className="relative overflow-hidden rounded-[30px] border border-[#121826] bg-gradient-to-br from-[#0f172a] via-[#0b1220] to-[#111827] px-6 py-8 text-white shadow-[0_26px_80px_rgba(0,0,0,0.35)]"
-      >
-        <div className="pointer-events-none absolute inset-0 opacity-90 [background:radial-gradient(circle_at_18%_12%,rgba(232,116,34,0.28),transparent_32%),radial-gradient(circle_at_78%_0%,rgba(41,181,165,0.18),transparent_34%),radial-gradient(circle_at_12%_80%,rgba(88,111,255,0.12),transparent_30%)]" />
-        <div className="relative grid gap-6 lg:grid-cols-[1.3fr,1fr] lg:items-center">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[12px] uppercase tracking-[0.22em] text-white/80">
-              <span className="h-2 w-2 rounded-full bg-gradient-to-br from-[#e87422] to-[#f0b46d]" />
-              Tu panel
-            </div>
-            <h1 className="text-3xl font-semibold leading-tight sm:text-4xl">
-              Cuidar los memoriales de tu gente
-            </h1>
-            <p className="max-w-2xl text-sm text-white/75 sm:text-base">
-              Crea memoriales, abre los existentes y sigue sumando recuerdos cuando te nazca. Todo queda privado y bajo tu cuenta.
+    <div className="flex flex-col flex-1 w-full bg-[#fdfdfd]">
+      {/* Hero Header */}
+      <div className="border-b border-slate-200/60 bg-gradient-to-b from-white to-slate-50/50 px-6 py-16 sm:px-12 relative overflow-hidden">
+        {/* Subtle Ambient Glow */}
+        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-amber-50 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] bg-slate-100 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="mx-auto max-w-7xl relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl sm:text-5xl font-serif text-slate-900 mb-4 tracking-tight">Panel de Control</h1>
+            <p className="text-sm text-slate-500 font-light leading-relaxed">
+              Supervisa y gestiona los espacios conmemorativos. Un entorno diseñado para la preservación, con el más alto estándar de privacidad y respeto.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/crear-memorial"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-[13px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] shadow-[0_16px_38px_rgba(255,255,255,0.12)] transition hover:-translate-y-[1px] hover:shadow-[0_24px_50px_rgba(0,0,0,0.35)]"
-              >
-                Crear memorial
-              </Link>
-              <Link
-                href={safeMemorials[0] ? `/memorial/${safeMemorials[0].id}` : "/crear-memorial"}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/40 bg-white/10 px-5 py-3 text-[13px] font-semibold uppercase tracking-[0.18em] text-white transition hover:-translate-y-[1px] hover:border-white hover:bg-white/15"
-              >
-                {safeMemorials[0] ? "Abrir memorial" : "Crear memorial"}
-              </Link>
-            </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-white/70">Memoriales</p>
-              <p className="text-3xl font-semibold text-white">{safeMemorials.length}</p>
-              <p className="text-xs text-white/70">Activos en tu cuenta</p>
+          <Link
+            href="/crear-memorial"
+            className="shrink-0 flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-[11px] font-semibold uppercase tracking-widest text-white transition-all hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <Plus size={16} /> Crear Memorial
+          </Link>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl w-full px-6 py-12 sm:px-12 relative z-10">
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <div className="group rounded-2xl border border-slate-200/60 bg-white p-8 shadow-sm relative overflow-hidden transition-all hover:border-slate-300 hover:shadow-md">
+            <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
+              <CopyPlus size={80} className="text-slate-900" />
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-white/70">Recuerdos</p>
-              <p className="text-3xl font-semibold text-white">{totalMemories}</p>
-              <p className="text-xs text-white/70">Publicados en tus espacios</p>
+            <div className="flex items-center gap-3 text-slate-500 mb-4">
+              <CopyPlus size={16} className="text-amber-600" />
+              <h3 className="text-[10px] font-semibold uppercase tracking-widest">Memoriales Activos</h3>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur sm:col-span-2 sm:flex sm:items-center sm:justify-between sm:gap-3 sm:p-4 lg:col-span-1">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.16em] text-white/70">Última creación</p>
-                <p className="text-lg font-semibold text-white">{lastCreatedLabel}</p>
+            <p className="text-5xl font-light text-slate-900 font-serif tracking-tight">
+              {safeMemorials.length < 10 && safeMemorials.length > 0 ? `0${safeMemorials.length}` : safeMemorials.length}
+            </p>
+          </div>
+
+          <div className="group rounded-2xl border border-slate-200/60 bg-white p-8 shadow-sm relative overflow-hidden transition-all hover:border-slate-300 hover:shadow-md">
+            <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
+              <Heart size={80} className="text-slate-900" />
+            </div>
+            <div className="flex items-center gap-3 text-slate-500 mb-4">
+              <Heart size={16} className="text-rose-600" />
+              <h3 className="text-[10px] font-semibold uppercase tracking-widest">Total Recuerdos</h3>
+            </div>
+            <p className="text-5xl font-light text-slate-900 font-serif tracking-tight">
+              {totalMemories < 10 && totalMemories > 0 ? `0${totalMemories}` : totalMemories}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200/60 bg-white p-8 shadow-sm flex flex-col transition-all hover:border-slate-300 hover:shadow-md">
+            <div className="flex items-center gap-3 text-slate-500 mb-4">
+              <Clock size={16} className="text-blue-600" />
+              <h3 className="text-[10px] font-semibold uppercase tracking-widest">Estado del Sistema</h3>
+            </div>
+            <div className="flex flex-col gap-1 mt-auto pb-2">
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <p className="text-sm font-medium text-slate-700 tracking-wide">En Línea & Seguro</p>
               </div>
-              <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-white/70">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[#e87422]" />
-                En línea
-              </div>
+              <p className="text-xs text-slate-400 font-light pl-5">Red de distribución global activa.</p>
             </div>
           </div>
         </div>
-      </section>
 
-      <div className="grid gap-6 lg:grid-cols-[300px,1fr]">
-        <aside className="sticky top-6 flex h-fit flex-col gap-4 rounded-[22px] border border-[#e6e8ef] bg-white px-5 py-5 shadow-[0_16px_50px_rgba(15,23,42,0.08)]">
-          <div className="space-y-1">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[#e87422]">Navegación rápida</p>
-            <h2 className="text-lg font-semibold text-[#0f172a]">Tu consola privada</h2>
+        {/* Memorials Grid */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-200/60 pb-4">
+            <h2 className="text-xl font-serif text-slate-900">Tus Espacios Creados</h2>
           </div>
-          <SidebarNav
-            items={[
-              { label: "Resumen", targetId: "resumen" },
-              { label: "Memoriales", targetId: "memoriales" },
-              { label: "Crear nuevo", targetId: "crear-memorial" },
-            ]}
-          />
-          <div className="rounded-xl border border-[#f0f1f5] bg-gradient-to-r from-[#fff4eb] to-[#f8fbff] px-4 py-3 text-[13px] text-[#0f172a] shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-            <p className="text-[12px] font-semibold text-[#e87422]">Sesión activa</p>
-            <p className="truncate text-sm text-[#334155]">{session.user.email}</p>
-            <p className="mt-2 text-xs text-[#475569]">
-              Todo lo que publiques quedará vinculado a esta cuenta.
-            </p>
-          </div>
-        </aside>
 
-        <div className="flex-1 space-y-6">
-          <section id="memoriales" className="space-y-4 rounded-[22px] border border-[#e6e8ef] bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-[#e87422]">Tus espacios</p>
-                <h2 className="text-xl font-semibold text-[#0f172a]">Memoriales activos</h2>
-                <p className="text-sm text-[#475569]">Abre, revisa o edita cada perfil creado.</p>
+          {safeMemorials.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-16 text-center flex flex-col items-center">
+              <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-slate-200/60">
+                <Plus size={24} className="text-slate-400" />
               </div>
+              <h3 className="text-xl font-serif text-slate-900 mb-2">Aún no tienes memoriales</h3>
+              <p className="text-sm text-slate-500 max-w-sm mx-auto mb-8 font-light leading-relaxed">
+                Crea un espacio intemporal para honrar la memoria y compartir recuerdos invaluables.
+              </p>
               <Link
                 href="/crear-memorial"
-                className="rounded-full border border-[#e87422] bg-[#e87422] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_12px_32px_rgba(232,116,34,0.35)] transition hover:-translate-y-[1px]"
+                className="flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-[11px] font-semibold uppercase tracking-widest text-white transition hover:bg-slate-800 shadow-sm hover:shadow"
               >
-                Nuevo memorial
+                Comenzar ahora
               </Link>
             </div>
-            {safeMemorials.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[#d4dae5] bg-[#f8fafc] px-4 py-10 text-center text-[#475569]">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#e87422] shadow-[0_10px_26px_rgba(232,116,34,0.14)]">
-                  +
-                </div>
-                <div className="space-y-1">
-                  <p className="text-base font-semibold text-[#0f172a]">Sin memoriales aún</p>
-                  <p className="text-sm text-[#64748b]">
-                    Completa el formulario inferior para abrir tu primer espacio con portada, obituario y recuerdos.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {safeMemorials.map((memorial: MemorialRecord) => (
-                  <div
-                    key={memorial.id}
-                    className="group relative overflow-hidden rounded-2xl border border-[#e6e8ef] bg-gradient-to-br from-white via-[#fbfcff] to-[#f6f8fb] p-4 shadow-[0_16px_46px_rgba(15,23,42,0.08)] transition hover:-translate-y-[2px] hover:border-[#e87422]/60"
-                  >
-                    <div className="absolute inset-0 opacity-0 transition group-hover:opacity-100 [background:radial-gradient(circle_at_20%_20%,rgba(232,116,34,0.12),transparent_35%)]" />
-                    <div className="relative flex items-start justify-between gap-3">
-                      <div className="min-w-0 space-y-1">
-                        <p className="text-[11px] uppercase tracking-[0.16em] text-[#e87422]">Memorial</p>
-                        <h3 className="text-lg font-semibold text-[#0f172a]">{memorial.name}</h3>
-                      </div>
-                      <Link
-                        href={`/memorial/${memorial.id}`}
-                        className="rounded-full border border-[#e87422] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#e87422] transition hover:bg-[#e87422] hover:text-white"
-                      >
-                        Abrir
-                      </Link>
-                    </div>
-                    <p className="relative mt-2 line-clamp-3 text-sm text-[#475569]">
-                      {memorial.description || "Sin descripción. Añade contexto para la familia y amigos."}
-                    </p>
-                    <div className="relative mt-3 flex flex-wrap gap-2 text-[12px] text-[#334155]">
-                      <span className="rounded-full border border-[#e6e8ef] bg-white px-3 py-1">
-                        {memorial.birth_date || "Sin fecha de nacimiento"}
-                      </span>
-                      <span className="rounded-full border border-[#e6e8ef] bg-white px-3 py-1">
-                        {memorial.death_date || "Sin fecha de fallecimiento"}
-                      </span>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {safeMemorials.map((memorial: MemorialRecord) => (
+                <Link
+                  href={`/memorial/${memorial.id}`}
+                  key={memorial.id}
+                  className="group rounded-2xl border border-slate-200/60 bg-white p-6 lg:p-8 transition-all hover:border-slate-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-0.5 flex flex-col"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-2xl font-serif text-slate-900 group-hover:text-amber-700 transition-colors line-clamp-1">{memorial.name}</h3>
+                    <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 group-hover:bg-amber-50 group-hover:border-amber-200 transition-all">
+                      <ArrowRight size={14} className="text-slate-400 group-hover:text-amber-600 transition-all" />
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section
-            id="crear-memorial"
-            className="space-y-4 rounded-[24px] border border-[#e6e8ef] bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-[#e87422]">Nuevo memorial</p>
-                <h2 className="text-xl font-semibold text-[#0f172a]">Crear un memorial</h2>
-                <p className="text-sm text-[#475569]">
-                  Abre un espacio con fotos primero: portada, foto principal y una selección inicial de recuerdos.
-                </p>
-              </div>
-              <Link
-                href="/crear-memorial"
-                className="rounded-full bg-[#0f172a] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_12px_36px_rgba(15,23,42,0.25)] transition hover:-translate-y-[1px]"
-              >
-                Abrir creador
-              </Link>
+                  <p className="text-sm text-slate-500 font-light leading-relaxed line-clamp-2 mb-8 flex-1">
+                    {memorial.description || "Espacio dedicado a preservar su legado fotográfico y memoria con el más alto respeto."}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-between text-[10px] font-semibold tracking-widest uppercase text-slate-400 border-t border-slate-100 pt-5 mt-auto gap-4">
+                    <span className="flex items-center gap-2 text-slate-500">
+                      <CalendarDays size={14} className="text-slate-400" />
+                      {(memorial.birth_date || memorial.death_date) ? `${memorial.birth_date?.split('-')[0] || '?'} — ${memorial.death_date?.split('-')[0] || '?'}` : 'Fechas no definidas'}
+                    </span>
+                    <span className="text-slate-400 group-hover:text-slate-900 transition-colors">Abrir Archivo</span>
+                  </div>
+                </Link>
+              ))}
             </div>
-            <div className="rounded-3xl border border-dashed border-[#d4dae5] bg-[#f8fafc] p-6 text-sm text-[#475569]">
-              <p className="text-base font-semibold text-[#0f172a]">Experiencia centrada en fotos</p>
-              <p className="mt-2 max-w-2xl">
-                El creador está pensado como una biblioteca de fotos: subes varias de una, eliges la portada y dejas un par de
-                frases opcionales. Lo demás lo vas armando en el memorial, con calma.
-              </p>
-            </div>
-          </section>
+          )}
         </div>
       </div>
     </div>

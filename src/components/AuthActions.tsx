@@ -25,16 +25,14 @@ export function AuthActions({ userEmail, userRole }: AuthActionsProps) {
 
   if (hasSession) {
     return (
-      <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-white/80">
-        <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-white/90">
-          {isAdmin ? "Admin" : "Dueño"}
-        </span>
-        <span className="whitespace-nowrap text-white/80">{userEmail}</span>
+      <div className="flex flex-wrap items-center gap-4 text-[10px] uppercase tracking-widest font-semibold text-slate-500">
+        <span className="text-slate-800 hidden md:inline-block">{userEmail}</span>
+        {isAdmin && <span className="rounded-md bg-amber-50 border border-amber-200/50 text-amber-600 px-2 py-1 text-[9px]">ADMIN</span>}
         <button
           type="button"
           onClick={handleLogout}
           disabled={loading}
-          className="rounded-full border border-white/25 bg-white/5 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.26em] text-white transition hover:border-[#e87422] hover:bg-[#e87422] disabled:opacity-60"
+          className="transition hover:text-red-600 disabled:opacity-50"
         >
           {loading ? "Saliendo…" : "Cerrar sesión"}
         </button>
@@ -45,10 +43,9 @@ export function AuthActions({ userEmail, userRole }: AuthActionsProps) {
   return (
     <Link
       href="/login"
-      className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white transition hover:text-[#e87422]"
+      className="rounded-lg bg-slate-900 px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-white transition hover:bg-slate-800 shadow-sm"
     >
       <span>Iniciar sesión</span>
-      <span className="text-xs">→</span>
     </Link>
   );
 }

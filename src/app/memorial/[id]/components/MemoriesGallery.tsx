@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { Memory } from "@/lib/types";
 import { formatDate } from "./dateUtils";
 import { IconChevronLeft, IconChevronRight, IconX } from "./Icons";
+import { motion, AnimatePresence } from "framer-motion";
+import { ImageIcon } from "lucide-react";
 
 const isVideoUrl = (url: string) => {
   const clean = url.split("?")[0] ?? "";
@@ -19,11 +21,9 @@ export function MemoriesGallery({
   memories: Memory[];
 }) {
   const items = useMemo(() => (memories ?? []).filter((memory) => Boolean(memory.media_url)) as Memory[], [memories]);
-  const [carouselIndex, setCarouselIndex] = useState(0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const active = activeIndex !== null ? items[activeIndex] ?? null : null;
-  const carouselActive = items[carouselIndex] ?? null;
 
   const goNext = () => {
     setActiveIndex((prev) => {
@@ -48,198 +48,121 @@ export function MemoriesGallery({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, items.length]);
 
   if (items.length === 0) {
     return (
-      <section id="fotos" className="rounded-[34px] bg-white/75 px-6 py-10 shadow-[0_28px_110px_rgba(0,0,0,0.12)] backdrop-blur">
-        <p className="text-[11px] uppercase tracking-[0.32em] text-[#0ea5e9]">Fotos</p>
-        <h3 className="mt-2 text-2xl font-semibold text-[#0f172a]">Todavía no hay fotos en este memorial</h3>
-        <p className="mt-2 max-w-3xl text-sm text-[#475569]">
-          Cuando subas la primera, aparece aquí como en una biblioteca: ordenada, limpia y fácil de recorrer.
+      <section id="fotos" className="rounded-2xl border border-slate-200/60 bg-white text-center p-16 flex flex-col items-center shadow-sm">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200/60 bg-slate-50 mb-6 text-slate-400">
+          <ImageIcon size={24} />
+        </div>
+        <p className="text-[10px] uppercase tracking-[0.25em] text-amber-600 font-semibold mb-3">Archivo Visual</p>
+        <h3 className="text-2xl font-light text-slate-900 font-serif">Lienzo Inmaculado</h3>
+        <p className="mt-4 text-sm text-slate-500 max-w-md mx-auto font-light leading-relaxed">
+          Sube el primer documento o fotografía para comenzar a construir el archivo permanente de {memorialName}.
         </p>
       </section>
     );
   }
 
+  // Masonry layout arrays
+  const columns = [[], [], []] as Memory[][];
+  items.slice(0, 15).forEach((item, i) => columns[i % 3].push(item));
+
   return (
     <>
-      <section id="fotos" className="rounded-[34px] bg-white/75 px-6 py-8 shadow-[0_28px_110px_rgba(0,0,0,0.12)] backdrop-blur">
-        <div className="flex flex-wrap items-end justify-between gap-3">
+      <section id="fotos" className="space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/60">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.32em] text-[#0ea5e9]">Fotos</p>
-            <h3 className="mt-2 text-2xl font-semibold text-[#0f172a]">Fotos y videos de {memorialName}</h3>
-            <p className="mt-2 max-w-3xl text-sm text-[#475569]">
-              Toca una foto para verla grande. Flechas ← → para avanzar si estás en computador.
-            </p>
+            <p className="text-[10px] uppercase tracking-widest text-amber-600 font-semibold mb-3">Archivo Visual</p>
+            <h3 className="text-3xl font-light text-slate-900 font-serif">Registros Fotográficos</h3>
           </div>
-          <span className="rounded-full bg-[#0f172a]/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#0f172a]">
-            {items.length} elementos
+          <span className="rounded-lg bg-white border border-slate-200/60 shadow-sm px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            {items.length} Entradas
           </span>
         </div>
 
-        {carouselActive && (
-          <div className="mt-6 overflow-hidden rounded-3xl border border-[#e6e8ef] bg-white shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
-            <div className="relative aspect-[21/9] w-full bg-[#0f172a]/5">
-              {carouselActive.media_url ? (
-                isVideoUrl(carouselActive.media_url) ? (
-                  <video src={carouselActive.media_url} className="absolute inset-0 h-full w-full object-cover" muted loop playsInline autoPlay />
-                ) : (
-                  <img src={carouselActive.media_url} alt={carouselActive.title} className="absolute inset-0 h-full w-full object-cover" />
-                )
-              ) : null}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-3 text-white">
-                <div className="min-w-0">
-                  <p className="text-[11px] uppercase tracking-[0.26em] text-white/70">{formatDate(carouselActive.created_at)}</p>
-                  <p className="truncate text-lg font-semibold">{carouselActive.title || "Recuerdo"}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveIndex(carouselIndex)}
-                  className="rounded-full bg-white/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur transition hover:bg-white/20"
-                >
-                  Ver grande
-                </button>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {columns.map((col, colIndex) => (
+            <div key={colIndex} className="flex flex-col gap-6">
+              {col.map((memory) => {
+                const url = memory.media_url ?? "";
+                const originalIndex = items.findIndex((i) => i.id === memory.id);
+                return (
+                  <motion.div
+                    key={memory.id}
+                    layoutId={`media-${memory.id}`}
+                    className="relative overflow-hidden cursor-pointer rounded-2xl border border-slate-200/60 bg-white group hover:border-slate-300 hover:shadow-lg transition-all"
+                    onClick={() => setActiveIndex(originalIndex)}
+                  >
+                    {isVideoUrl(url) ? (
+                      <video src={url} className="w-full h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity" muted playsInline />
+                    ) : (
+                      <img src={url} alt={memory.title} className="w-full h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity" loading="lazy" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                      <p className="text-white font-serif text-lg leading-tight mb-2 tracking-wide text-shadow-sm">{memory.title || "Documento Sin Título"}</p>
+                      <p className="text-slate-200 text-[10px] font-semibold tracking-widest uppercase text-shadow-sm">{formatDate(memory.created_at)}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
-
-            <div className="flex items-center justify-between gap-3 px-4 py-3">
-              <button
-                type="button"
-                onClick={() => setCarouselIndex((i) => (i - 1 < 0 ? items.length - 1 : i - 1))}
-                className="inline-flex items-center gap-2 rounded-full border border-[#e6e8ef] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0f172a]/20"
-              >
-                <IconChevronLeft className="h-4 w-4" />
-                Anterior
-              </button>
-
-              <div className="flex-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <div className="flex snap-x snap-mandatory gap-2">
-                  {items.slice(0, 18).map((memory, idx) => {
-                    const selected = idx === carouselIndex;
-                    const url = memory.media_url ?? "";
-                    return (
-                      <button
-                        key={memory.id}
-                        type="button"
-                        onClick={() => setCarouselIndex(idx)}
-                        className={`relative h-14 w-14 shrink-0 snap-start overflow-hidden rounded-2xl border transition ${
-                          selected ? "border-[#0f172a] ring-2 ring-[#0f172a]/10" : "border-[#e6e8ef] hover:border-[#0f172a]/20"
-                        }`}
-                        title={memory.title || "Recuerdo"}
-                      >
-                        {isVideoUrl(url) ? (
-                          <video src={url} className="absolute inset-0 h-full w-full object-cover" muted playsInline />
-                        ) : (
-                          <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setCarouselIndex((i) => (i + 1) % items.length)}
-                className="inline-flex items-center gap-2 rounded-full border border-[#e6e8ef] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] transition hover:border-[#0f172a]/20"
-              >
-                Siguiente
-                <IconChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-6 grid auto-rows-[140px] grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {items.slice(0, 12).map((memory, idx) => {
-            const url = memory.media_url ?? "";
-            const isHero = idx === 0;
-            return (
-              <button
-                key={memory.id}
-                type="button"
-                onClick={() => setActiveIndex(idx)}
-                className={`group relative overflow-hidden rounded-3xl bg-[#0f172a]/5 shadow-[0_18px_50px_rgba(0,0,0,0.12)] transition hover:-translate-y-[1px] ${
-                  isHero ? "col-span-2 row-span-2" : ""
-                }`}
-              >
-                {isVideoUrl(url) ? (
-                  <video src={url} className="absolute inset-0 h-full w-full object-cover" muted playsInline />
-                ) : (
-                  <img src={url} alt={memory.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 transition group-hover:opacity-100" />
-                <div className="absolute inset-x-0 bottom-0 px-3 pb-3 pt-10 text-left text-white opacity-0 transition group-hover:opacity-100">
-                  <p className="text-sm font-semibold">{memory.title || "Recuerdo"}</p>
-                  <p className="text-xs text-white/80">{formatDate(memory.created_at)}</p>
-                </div>
-              </button>
-            );
-          })}
+          ))}
         </div>
-
-        {items.length > 12 && (
-          <p className="mt-4 text-xs text-[#64748b]">
-            Se muestran 12 para mantener la página liviana. El resto aparece igual en la cinta de recuerdos.
-          </p>
-        )}
       </section>
 
-      {active && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur" onMouseDown={() => setActiveIndex(null)}>
-          <div
-            className="relative w-full max-w-4xl overflow-hidden rounded-3xl border border-white/15 bg-white shadow-[0_40px_140px_rgba(0,0,0,0.45)]"
-            onMouseDown={(e) => e.stopPropagation()}
+      {/* Lightbox is intentionally kept dark-themed for cinematic media viewing */}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-4 backdrop-blur-2xl"
+            onMouseDown={() => setActiveIndex(null)}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e6e8ef] px-4 py-3">
-              <div className="min-w-0">
-                <p className="text-[11px] uppercase tracking-[0.26em] text-[#6b7280]">{formatDate(active.created_at)}</p>
-                <p className="truncate text-sm font-semibold text-[#0f172a]">{active.title || "Recuerdo"}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={goPrev}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#f3f4f6] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a]"
-                >
-                  <IconChevronLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline">Anterior</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#0f172a] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white"
-                >
-                  <span className="hidden sm:inline">Siguiente</span>
-                  <IconChevronRight className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveIndex(null)}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#f3f4f6] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a]"
-                >
-                  <IconX className="h-4 w-4" />
-                  Cerrar
+            <motion.div
+              layoutId={`media-${active.id}`}
+              className="relative w-full max-w-6xl max-h-[90vh] flex flex-col items-center justify-center"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div className="absolute top-6 right-6 z-10 flex gap-4">
+                <button onClick={() => setActiveIndex(null)} className="h-12 w-12 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center text-zinc-300 hover:bg-white hover:text-black hover:border-white transition-all duration-300 backdrop-blur-md">
+                  <IconX className="h-5 w-5" />
                 </button>
               </div>
-            </div>
 
-            <div className="relative max-h-[70vh] min-h-[320px] bg-[#0f172a]/5">
-              {active.media_url && isVideoUrl(active.media_url) ? (
-                <video src={active.media_url} className="h-full w-full object-contain" controls autoPlay />
-              ) : (
-                <img src={active.media_url ?? ""} alt="" className="h-full w-full object-contain" />
-              )}
-            </div>
-            {active.content && (
-              <div className="border-t border-[#e6e8ef] px-4 py-3 text-sm text-[#334155]">{active.content}</div>
-            )}
-          </div>
-        </div>
-      )}
+              <button onClick={goPrev} className="absolute left-6 top-1/2 -translate-y-1/2 h-14 w-14 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center text-zinc-300 hover:bg-white hover:text-black hover:border-white transition-all duration-300 backdrop-blur-md hidden sm:flex">
+                <IconChevronLeft className="h-6 w-6" />
+              </button>
+
+              <button onClick={goNext} className="absolute right-6 top-1/2 -translate-y-1/2 h-14 w-14 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center text-zinc-300 hover:bg-white hover:text-black hover:border-white transition-all duration-300 backdrop-blur-md hidden sm:flex">
+                <IconChevronRight className="h-6 w-6" />
+              </button>
+
+              <div className="object-contain max-h-[75vh] max-w-[90vw] overflow-hidden rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-white/[0.04]">
+                {active.media_url && isVideoUrl(active.media_url) ? (
+                  <video src={active.media_url} className="h-full w-full object-contain" controls autoPlay />
+                ) : (
+                  <img src={active.media_url ?? ""} alt="" className="h-full w-full object-contain" />
+                )}
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-8 text-center max-w-2xl px-6"
+              >
+                <h3 className="text-2xl font-light text-white mb-2 font-serif">{active.title || "Documento Visual"}</h3>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-500 mb-4">{formatDate(active.created_at)}</p>
+                {active.content && <p className="text-zinc-300 text-sm font-light leading-relaxed">{active.content}</p>}
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

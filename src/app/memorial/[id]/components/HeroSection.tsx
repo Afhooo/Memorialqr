@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { HeroBackgroundVideo } from "@/components/HeroBackgroundVideo";
 import { formatDate } from "./dateUtils";
 import { SocialLinksEditor } from "./SocialLinksEditor";
@@ -18,7 +18,7 @@ interface HeroSectionProps {
   instagramUrl?: string | null;
   canEditSocial?: boolean;
   memoryCount: number;
-  memoryWindow: string;
+  memoryWindow: string; // no longer needed directly but kept for prop matching
   lastUpdated: string | null;
 }
 
@@ -34,16 +34,10 @@ export function HeroSection({
   instagramUrl,
   canEditSocial = false,
   memoryCount,
-  memoryWindow,
   lastUpdated,
 }: HeroSectionProps) {
   const profileSrc = avatarUrl || null;
   const initials = memorialName.slice(0, 2).toUpperCase();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [parallax, setParallax] = useState({ x: 0, y: 0 });
-  const [blur, setBlur] = useState(4);
-  const [glow, setGlow] = useState(18);
-
   const heroSources = useMemo(() => ["/m1.mp4", "/m2.mp4"], []);
 
   const coverIsVideo = useMemo(() => {
@@ -52,118 +46,100 @@ export function HeroSection({
     return /\.(mp4|mov|webm|ogg)$/i.test(clean);
   }, [coverUrl]);
 
-  const orbStyle = (dx: number, dy: number) => ({
-    transform: `translate3d(${parallax.x + dx}px, ${parallax.y + dy}px, 0) scale(1)`,
-  });
-
-  useEffect(() => {
-    const handleMove = (event: MouseEvent) => {
-      const { innerWidth, innerHeight } = window;
-      const x = (event.clientX / innerWidth - 0.5) * 18;
-      const y = (event.clientY / innerHeight - 0.5) * 14;
-      setParallax({ x, y });
-      setGlow(16 + Math.abs(x) * 0.6 + Math.abs(y) * 0.4);
-    };
-
-    const handleScroll = () => {
-      const top = heroRef.current?.getBoundingClientRect().top ?? 0;
-      const depth = Math.max(0, Math.min(1, 1 - top / 360));
-      setBlur(4 + depth * 10);
-      setGlow(18 + depth * 12);
-    };
-
-    window.addEventListener("mousemove", handleMove);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   return (
-    <section
-      id="hero"
-      ref={heroRef}
-      className="relative overflow-hidden rounded-[34px] bg-gradient-to-br from-[#0c1224] via-[#10192e] to-[#0b172d] px-4 pb-10 pt-8 text-white shadow-[0_28px_110px_rgba(0,0,0,0.32)] sm:px-8"
-    >
-      <div className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(circle_at_16%_22%,rgba(255,173,107,0.22),transparent_30%),radial-gradient(circle_at_80%_12%,rgba(99,179,255,0.28),transparent_32%),radial-gradient(circle_at_16%_86%,rgba(125,211,179,0.16),transparent_36%)]" />
-      <div className="absolute inset-0 mix-blend-screen" style={{ filter: `blur(${blur}px)` }}>
+    <section className="relative overflow-hidden rounded-[32px] bg-white/40 ring-1 ring-slate-900/5 shadow-[0_8px_40px_rgba(0,0,0,0.04)] backdrop-blur-2xl mb-8">
+      {/* Immersive Cover Area */}
+      <div className="relative w-full h-[24vh] min-h-[160px] md:min-h-[220px] md:h-[28vh] bg-gradient-to-r from-amber-900/80 via-slate-900 to-sky-900/80 overflow-hidden group">
         {coverUrl ? (
           coverIsVideo ? (
-            <video src={coverUrl} className="h-full w-full object-cover object-center" muted loop playsInline autoPlay />
+            <video
+              src={coverUrl ?? undefined}
+              className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:opacity-100 group-hover:scale-105"
+              muted
+              loop
+              playsInline
+              autoPlay
+            />
           ) : (
-            <img src={coverUrl} alt="" className="h-full w-full object-cover object-center" />
+            <img
+              src={coverUrl ?? undefined}
+              alt="Portada del memorial"
+              className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:opacity-100 group-hover:scale-105"
+            />
           )
         ) : (
           <HeroBackgroundVideo sources={heroSources} roundedClass="" />
         )}
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-br from-black/55 via-black/45 to-[#0b1324]/65 backdrop-blur-[2px]" />
-      <div className="absolute inset-0">
-        <span
-          className="pointer-events-none absolute top-[18%] left-[8%] h-[180px] w-[180px] rounded-full bg-[#f59e0b] opacity-40 blur-[70px] mix-blend-screen transition-transform duration-300 ease-out"
-          style={orbStyle(0, 0)}
-        />
-        <span
-          className="pointer-events-none absolute top-[72%] left-[18%] h-[180px] w-[180px] rounded-full bg-[#10b981] opacity-40 blur-[70px] mix-blend-screen transition-transform duration-300 ease-out"
-          style={orbStyle(6, -4)}
-        />
-        <span
-          className="pointer-events-none absolute top-[40%] right-[12%] h-[180px] w-[180px] rounded-full bg-[#60a5fa] opacity-40 blur-[70px] mix-blend-screen transition-transform duration-300 ease-out"
-          style={orbStyle(-6, 6)}
-        />
+
+        {/* Sophisticated gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-white/90 pointer-events-none" />
+
+        {/* Private label */}
+        <div className="absolute top-4 right-5 md:top-6 md:right-8 z-10">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-white backdrop-blur-md shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Archivo Documental
+          </span>
+        </div>
       </div>
 
-      <div className="relative flex flex-col gap-6">
-        <div className="flex items-start gap-4">
-          <div className="relative h-24 w-24 overflow-hidden rounded-[28px] bg-white/5 shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur">
-            <div className="absolute inset-0 animate-[pulse_2.8s_ease-in-out_infinite] rounded-[24px] bg-[#e87422]/10" />
+      {/* Floating Content Area */}
+      <div className="relative px-6 sm:px-12 pb-10">
+        {/* Avatar Setup (overlapping the cover cleanly without huge borders) */}
+        <div className="absolute -top-12 md:-top-16 flex left-6 sm:left-12">
+          <div className="relative h-24 w-24 md:h-32 md:w-32 shrink-0 overflow-hidden rounded-full border-[3px] border-white/90 bg-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md transition-transform duration-500 hover:scale-105 hover:rotate-2">
             {profileSrc ? (
-              <img src={profileSrc} alt={`Foto de ${memorialName}`} className="h-full w-full object-cover" />
+              <img
+                src={profileSrc ?? undefined}
+                alt={`Foto de ${memorialName}`}
+                className="h-full w-full object-cover"
+              />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-white">
+              <div className="flex h-full w-full items-center justify-center text-3xl font-light text-slate-800 font-serif bg-gradient-to-br from-slate-100 to-slate-200">
                 {initials}
               </div>
             )}
           </div>
+        </div>
 
-          <div className="min-w-0 flex-1 space-y-3">
-            <p className="text-[11px] uppercase tracking-[0.32em] text-[#fcd34d]">Memorial privado · familia y amigos</p>
-            <h1
-              className="text-3xl font-semibold leading-tight sm:text-4xl"
-              style={{
-                textShadow: `0 0 ${glow / 2}px rgba(232,116,34,0.35), 0 0 ${glow / 2.4}px rgba(255,255,255,0.35)`,
-                filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.25))",
-              }}
-            >
-              {memorialName}
-            </h1>
-            <SocialLinksEditor
-              memorialId={memorialId}
-              memorialName={memorialName}
-              facebookUrl={facebookUrl ?? null}
-              instagramUrl={instagramUrl ?? null}
-              canEdit={canEditSocial}
-            />
-
-            <p className="text-sm text-white/80">
-              {formatDate(birthDate)} · {formatDate(deathDate)}
-            </p>
-              <p className="max-w-3xl text-base text-white/85">
-                {description ||
-                "Un espacio para la familia y amigos: fotos, notas cortas y fechas que importan. Aquí se viene a recordar, sin ruido."}
+        {/* Top spacing to account for absolute avatar */}
+        <div className="pt-16 md:pt-20 flex flex-col md:flex-row md:items-start justify-between gap-8">
+          {/* Main Info */}
+          <div className="flex-1 space-y-4 pt-2">
+            <div className="space-y-1 relative">
+              <h1 className="text-3xl lg:text-5xl font-serif text-slate-900 leading-tight tracking-tight">
+                {memorialName}
+              </h1>
+              <p className="text-[10px] md:text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase mt-2">
+                {formatDate(birthDate)} <span className="mx-2 text-amber-500">•</span> {formatDate(deathDate)}
               </p>
+            </div>
 
-            <div className="flex flex-wrap gap-2 text-xs">
-              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.2em] text-white">
-                Recuerdos {memoryCount}
-              </span>
-              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.2em] text-white">
-                Periodo {memoryWindow}
-              </span>
-              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.2em] text-white">
-                Último recuerdo: {formatDate(lastUpdated)}
-              </span>
+            <p className="max-w-2xl text-sm md:text-base text-slate-600 leading-relaxed font-light mt-4">
+              {description || "Un espacio preservado con el más alto estándar de respeto y privacidad. Aquí se rinde homenaje y se protege la memoria."}
+            </p>
+
+            <div className="pt-4">
+              <SocialLinksEditor
+                memorialId={memorialId}
+                memorialName={memorialName}
+                facebookUrl={facebookUrl ?? null}
+                instagramUrl={instagramUrl ?? null}
+                canEdit={canEditSocial}
+              />
+            </div>
+          </div>
+
+          {/* Stats / Quick Info Block */}
+          <div className="shrink-0 flex gap-6 mt-4 md:mt-0 pt-4 md:pt-2 items-center md:items-start border-t md:border-t-0 border-slate-200/50">
+            <div className="flex flex-col gap-1 items-start">
+              <span className="text-[9px] uppercase font-bold text-slate-400 tracking-[0.2em]">Registros</span>
+              <span className="text-2xl font-serif text-slate-900">{memoryCount}</span>
+            </div>
+            <div className="w-px h-8 bg-slate-200/60 hidden md:block mt-2" />
+            <div className="flex flex-col gap-1 items-start">
+              <span className="text-[9px] uppercase font-bold text-slate-400 tracking-[0.2em]">Actividad</span>
+              <span className="text-sm text-slate-700 font-medium">{formatDate(lastUpdated)}</span>
             </div>
           </div>
         </div>

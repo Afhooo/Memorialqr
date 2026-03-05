@@ -17,43 +17,42 @@ export function MemorialNavbar({ memorialName, memoryCount, lastUpdatedLabel }: 
   ];
 
   return (
-    <nav className="relative flex h-fit flex-col gap-4 overflow-hidden rounded-[22px] border border-white/50 bg-white/85 px-4 py-4 text-[#0f172a] shadow-[0_16px_50px_rgba(0,0,0,0.14)] backdrop-blur-xl">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(255,168,125,0.12),transparent_36%),radial-gradient(circle_at_78%_0%,rgba(90,178,255,0.12),transparent_32%)]" />
-      <div className="relative flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold text-[#e87422]">Memorial</p>
-          <p className="text-base font-semibold text-[#0f172a] leading-tight">{memorialName}</p>
-          <p className="text-xs text-[#64748b]">{memoryCount} entradas · Último: {lastUpdatedLabel}</p>
-        </div>
-        <Link
-          href="/"
-          className="rounded-full bg-[#0f172a] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_10px_30px_rgba(0,0,0,0.24)] transition hover:-translate-y-[1px]"
-        >
-          Inicio
-        </Link>
+    <nav className="relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-white/60 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 backdrop-blur-2xl transition-all hover:shadow-[0_8px_40px_rgb(0,0,0,0.06)]">
+      <div className="absolute inset-0 bg-gradient-to-b from-white/80 to-transparent pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col gap-1">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-amber-600">Espacio Preservado</span>
+        <h3 className="text-2xl font-serif text-slate-900 leading-none">{memorialName}</h3>
+        <p className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-wider">{memoryCount} Registros</p>
       </div>
 
-      <div className="relative grid gap-1.5 rounded-2xl border border-[#e2e8f0] bg-white/80 p-2 shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+      <div className="relative z-10 flex flex-col gap-1">
         {items.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="group flex items-center justify-between rounded-xl px-3 py-2 transition hover:-translate-y-[1px] hover:bg-[#f8fafc]"
+            className="group flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-300 hover:bg-slate-900/5 hover:scale-[1.02]"
           >
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-[#0f172a]">{item.label}</span>
-            </div>
-            <span className="text-[11px] uppercase tracking-[0.12em] text-[#94a3b8] group-hover:text-[#e87422]">Ir</span>
+            <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-900 transition-colors uppercase tracking-widest">{item.label}</span>
+            <span className="text-[10px] uppercase tracking-widest text-slate-400 group-hover:text-amber-600 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+              Navegar
+            </span>
           </Link>
         ))}
       </div>
 
-      <div className="relative flex items-center gap-2 rounded-2xl border border-[#e2e8f0] bg-white/80 px-3 py-2 text-sm text-[#0f172a] shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
-        <div className="flex-1">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-[#94a3b8]">Actividad</p>
-          <p className="font-semibold text-[#0f172a]">Familia mirando y comentando</p>
-        </div>
-        <span className="rounded-full bg-[#e87422]/15 px-3 py-1 text-[11px] font-semibold text-[#e87422]">Privado</span>
+      <div className="relative z-10 mt-2 rounded-2xl bg-amber-50/50 border border-amber-100/50 p-4">
+        <p className="text-[10px] uppercase tracking-widest text-amber-600/70 font-semibold mb-1">Actividad Reciente</p>
+        <p className="text-xs font-medium text-slate-700 leading-relaxed">Última actualización: {lastUpdatedLabel}</p>
+      </div>
+
+      <div className="relative z-10 flex items-center justify-between border-t border-slate-200/60 pt-6 mt-2">
+        <Link
+          href="/"
+          className="text-xs font-semibold text-slate-500 hover:text-amber-600 transition-colors uppercase tracking-widest"
+        >
+          ← Volver al inicio
+        </Link>
       </div>
     </nav>
   );

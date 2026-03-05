@@ -71,90 +71,102 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
         : "Aún no hay recuerdos";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(145deg,#f7f8fb_0%,#eef1f6_45%,#f7f8fb_100%)] text-[#0f172a]">
-      <div className="pointer-events-none absolute inset-0 opacity-80 [background:radial-gradient(circle_at_18%_18%,rgba(255,140,66,0.08),transparent_34%),radial-gradient(circle_at_82%_10%,rgba(46,153,255,0.1),transparent_32%),radial-gradient(circle_at_26%_84%,rgba(16,185,129,0.08),transparent_38%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_at_32%_0%,rgba(255,255,255,0.75),transparent),radial-gradient(800px_at_78%_10%,rgba(255,255,255,0.6),transparent)]" />
+    <div className="min-h-screen bg-[#fafafa] text-slate-900 font-sans selection:bg-amber-100 selection:text-amber-900">
+      {/* Immersive Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(251,191,36,0.05),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(99,102,241,0.03),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] mix-blend-overlay" />
+      </div>
 
-      <div className="relative mx-auto grid w-full max-w-[1800px] gap-10 px-2 pb-14 pt-6 sm:px-4 lg:grid-cols-[minmax(0,1.25fr)_320px] xl:grid-cols-[minmax(0,1.35fr)_360px] lg:gap-14 xl:gap-16">
-        <div className="space-y-10">
-          <HeroSection
-            memorialId={memorial.id}
-            memorialName={memorial.name}
-            birthDate={memorial.birth_date}
-            deathDate={memorial.death_date}
-            description={memorial.description}
-            avatarUrl={memorial.avatar_media_url ?? null}
-            coverUrl={memorial.cover_media_url ?? null}
-            facebookUrl={normalizeExternalUrl(memorial.facebook_url)}
-            instagramUrl={normalizeExternalUrl(memorial.instagram_url)}
-            canEditSocial={canEditSocial}
-            memoryCount={memoryList.length}
-            memoryWindow={memoryWindow}
-            lastUpdated={lastUpdated}
-          />
+      <div className="relative z-10 mx-auto w-full max-w-[1400px] px-4 sm:px-8 pt-6 pb-24">
 
-          <MemoriesGallery memorialName={memorial.name} memories={memoryList} />
+        {/* Cinematic Header (Hero) */}
+        <HeroSection
+          memorialId={memorial.id}
+          memorialName={memorial.name}
+          birthDate={memorial.birth_date}
+          deathDate={memorial.death_date}
+          description={memorial.description}
+          avatarUrl={memorial.avatar_media_url ?? null}
+          coverUrl={memorial.cover_media_url ?? null}
+          facebookUrl={normalizeExternalUrl(memorial.facebook_url)}
+          instagramUrl={normalizeExternalUrl(memorial.instagram_url)}
+          canEditSocial={canEditSocial}
+          memoryCount={memoryList.length}
+          memoryWindow={memoryWindow}
+          lastUpdated={lastUpdated}
+        />
 
-          <TributeHighlightsSection
-            memorialName={memorial.name}
-            description={memorial.description}
-            birthDate={memorial.birth_date}
-            deathDate={memorial.death_date}
-            memoryWindow={memoryWindow}
-          />
+        {/* Premium Bento Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 mt-8">
 
-          <ReflectionSection
-            memorialName={memorial.name}
-            birthDate={memorial.birth_date}
-            deathDate={memorial.death_date}
-            memories={memoryList}
-            memoryWindow={memoryWindow}
-            lastUpdated={lastUpdated}
-          />
+          {/* Main Feed Column */}
+          <div className="space-y-8">
 
-          <div className="lg:hidden rounded-3xl bg-white/75 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.12)] backdrop-blur">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#0f172a]/70">Deja un recuerdo aquí mismo</p>
-            <MemoryComposer
-              memorialId={memorial.id}
-              disabled={!canPost}
-              helper={
-                canPost
-                  ? "Tu mensaje o foto aparece al tiro en la cinta."
-                  : "Inicia sesión con la cuenta de la familia para escribir o subir una foto."
-              }
-            />
-          </div>
-
-          <MemorialFooter memorialName={memorial.name} />
-        </div>
-
-        <aside className="sticky top-6 hidden flex-col gap-6 lg:flex">
-          <MemorialNavbar
-            memorialName={memorial.name}
-            memoryCount={memoryList.length}
-            lastUpdatedLabel={formatDate(lastUpdated)}
-          />
-          <div className="rounded-[30px] bg-white/75 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.12)] backdrop-blur">
-            <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] text-[#0f172a]/70">
-              <span>Dejar recuerdo</span>
-              <span className="rounded-full bg-[#0f172a]/5 px-2 py-1 text-[10px] font-semibold text-[#0f172a]">Privado</span>
-            </div>
-            <div className="mt-3">
+            {/* Elegant Composer */}
+            <div className="relative rounded-3xl bg-white/60 backdrop-blur-2xl border border-white p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 transition-all duration-500 hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] hover:bg-white/80">
               <MemoryComposer
                 memorialId={memorial.id}
                 disabled={!canPost}
                 helper={
                   canPost
-                    ? "Escribe o sube una foto mientras recorres el memorial. Se actualiza al instante."
-                    : "Necesitas iniciar sesión para publicar."
+                    ? "Inmortaliza un nuevo recuerdo fotográfico o escrito."
+                    : "Inicia sesión con la cuenta familiar para publicar."
                 }
               />
             </div>
+
+            {/* Visual Memories Gallery */}
+            <div className="rounded-3xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] ring-1 ring-slate-900/5 p-6 sm:p-10">
+              <MemoriesGallery memorialName={memorial.name} memories={memoryList} />
+            </div>
+
+            {/* Bento Highlights */}
+            <div className="flex flex-col gap-6">
+              <div className="rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <TributeHighlightsSection
+                  memorialName={memorial.name}
+                  description={memorial.description}
+                  birthDate={memorial.birth_date}
+                  deathDate={memorial.death_date}
+                  memoryWindow={memoryWindow}
+                />
+              </div>
+              <div className="rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-64 h-64 bg-sky-400/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+                <ReflectionSection
+                  memorialName={memorial.name}
+                  birthDate={memorial.birth_date}
+                  deathDate={memorial.death_date}
+                  memories={memoryList}
+                  memoryWindow={memoryWindow}
+                  lastUpdated={lastUpdated}
+                />
+              </div>
+            </div>
+
+            <MemorialFooter memorialName={memorial.name} />
           </div>
-        </aside>
+
+          {/* Right Sticky Column */}
+          <aside className="hidden lg:flex flex-col gap-6 sticky top-24 h-max">
+            <MemorialNavbar
+              memorialName={memorial.name}
+              memoryCount={memoryList.length}
+              lastUpdatedLabel={formatDate(lastUpdated)}
+            />
+
+            <ShareSection />
+          </aside>
+
+        </div>
       </div>
 
-      <ShareSection />
+      {/* Mobile Share Section */}
+      <div className="lg:hidden mt-12 px-4 relative z-10 pb-8">
+        <ShareSection />
+      </div>
     </div>
   );
 }
