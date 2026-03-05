@@ -123,7 +123,7 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
 
             {/* Bento Highlights */}
             <div className="flex flex-col gap-6">
-              <div className="rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-8 relative overflow-hidden">
+              <div className="rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-6 sm:p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <TributeHighlightsSection
                   memorialName={memorial.name}
@@ -133,7 +133,7 @@ function renderMemorial(memorial: MemorialRecord, memories: Memory[], canPost: b
                   memoryWindow={memoryWindow}
                 />
               </div>
-              <div className="rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] relative overflow-hidden">
+              <div className="rounded-3xl bg-white/60 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-6 sm:p-8 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-64 h-64 bg-sky-400/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
                 <ReflectionSection
                   memorialName={memorial.name}
