@@ -39,19 +39,19 @@ export function SocialLinksEditor({
     () => [
       facebookUrl
         ? {
-            key: "facebook",
-            href: facebookUrl,
-            label: `Ver a ${memorialName} en Facebook`,
-            icon: IconFacebook,
-          }
+          key: "facebook",
+          href: facebookUrl,
+          label: `Ver a ${memorialName} en Facebook`,
+          icon: IconFacebook,
+        }
         : null,
       instagramUrl
         ? {
-            key: "instagram",
-            href: instagramUrl,
-            label: `Ver a ${memorialName} en Instagram`,
-            icon: IconInstagram,
-          }
+          key: "instagram",
+          href: instagramUrl,
+          label: `Ver a ${memorialName} en Instagram`,
+          icon: IconInstagram,
+        }
         : null,
     ].filter(Boolean) as Array<{ key: string; href: string; label: string; icon: typeof IconFacebook }>,
     [facebookUrl, instagramUrl, memorialName],
@@ -86,7 +86,6 @@ export function SocialLinksEditor({
     <div className="flex flex-wrap items-center gap-2">
       {links.length > 0 && (
         <>
-          <span className="text-[11px] uppercase tracking-[0.26em] text-white/70">Redes</span>
           {links.map((link) => {
             const Icon = link.icon;
             return (
@@ -95,11 +94,11 @@ export function SocialLinksEditor({
                 href={link.href}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/90 transition hover:bg-white/15"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/60 bg-white text-slate-400 shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:bg-slate-50 hover:text-amber-600 hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
                 title={link.label}
                 aria-label={link.label}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-4 w-4" />
               </a>
             );
           })}
@@ -110,9 +109,9 @@ export function SocialLinksEditor({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="ml-1 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90 transition hover:bg-white/15"
+          className="ml-2 rounded-full border border-slate-200/60 bg-white px-4 py-2.5 text-[9px] font-bold leading-normal uppercase tracking-[0.2em] text-slate-500 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:text-slate-900"
         >
-          {hasLinks ? "Editar redes" : "Agregar redes"}
+          {hasLinks ? "Editar enlaces" : "Vicular redes"}
         </button>
       )}
 

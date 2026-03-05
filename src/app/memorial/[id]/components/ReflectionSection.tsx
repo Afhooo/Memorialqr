@@ -88,7 +88,7 @@ export function ReflectionSection({
   return (
     <section id="muro" className="relative text-slate-900 pb-4">
       <header className="space-y-4 mb-8">
-        <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-sky-600">Cinta de Recuerdos</p>
+        <p className="text-[10px] leading-relaxed uppercase tracking-[0.3em] font-bold text-sky-600 pb-1">Cinta de Recuerdos</p>
         <h3 className="text-3xl lg:text-4xl font-serif leading-tight">Mensajes y registros de {memorialName}</h3>
         <p className="max-w-3xl text-sm leading-relaxed text-slate-600 font-light">
           El historial de momentos compartidos. A veces una sola foto dice más de lo imaginable.
@@ -112,7 +112,7 @@ export function ReflectionSection({
                     {renderMedia(memory.media_url)}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="absolute bottom-4 left-4 flex gap-2">
-                      <span className="rounded-full bg-black/30 backdrop-blur-md px-3 py-1 text-[9px] uppercase tracking-[0.2em] text-white font-medium border border-white/20">
+                      <span className="rounded-full bg-black/30 backdrop-blur-md px-3 py-1 text-[9px] leading-normal uppercase tracking-[0.2em] text-white font-medium border border-white/20">
                         {formatDate(memory.created_at)}
                       </span>
                     </div>
@@ -122,14 +122,14 @@ export function ReflectionSection({
                 <div className="space-y-4 p-6">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-[9px] uppercase tracking-[0.2em] text-slate-500 font-semibold mb-1">
+                      <p className="text-[9px] leading-normal uppercase tracking-[0.2em] text-slate-500 font-semibold mb-1 pb-1">
                         {memory.media_url ? "Documento visual" : "Anotación escrita"}
                         {idx === 0 ? " · Más reciente" : ""}
                       </p>
                       <h4 className="text-lg font-serif text-slate-900">{memory.title || "Recuerdo"}</h4>
                     </div>
                     {!memory.media_url && (
-                      <span className="shrink-0 text-[10px] font-medium text-slate-400">
+                      <span className="shrink-0 text-[10px] leading-normal font-medium text-slate-400">
                         {formatDate(memory.created_at)}
                       </span>
                     )}
@@ -149,16 +149,16 @@ export function ReflectionSection({
 
       <article id="historia" className="mt-12 pt-12 border-t border-slate-200/60">
         <div className="space-y-4 mb-8">
-          <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-sky-600">Fechas que enmarcan</p>
+          <p className="text-[10px] leading-relaxed uppercase tracking-[0.3em] font-bold text-sky-600 pb-1">Fechas que enmarcan</p>
           <h3 className="text-2xl font-serif text-slate-900">Una breve línea de vida</h3>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-2">
             <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1">Periodo Documentado</span>
+              <span className="text-[9px] leading-normal uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1 pb-0.5">Periodo Documentado</span>
               <span className="text-sm font-medium text-slate-800">{memoryWindow}</span>
             </div>
             <div className="h-8 w-px bg-slate-200/60 hidden sm:block" />
             <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1">Última actualización</span>
+              <span className="text-[9px] leading-normal uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1 pb-0.5">Última actualización</span>
               <span className="text-sm font-medium text-slate-800">{formatDate(lastUpdated)}</span>
             </div>
           </div>
@@ -179,13 +179,13 @@ export function ReflectionSection({
                       <img src={node.media} alt={node.title} className="h-full w-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" loading="lazy" />
                     )
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                    <div className="flex h-full w-full items-center justify-center text-[10px] leading-normal font-semibold uppercase tracking-[0.2em] text-slate-300">
                       —
                     </div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-semibold mb-1">{formatDate(node.date)}</p>
+                  <p className="text-[9px] leading-normal uppercase tracking-[0.2em] text-slate-400 font-semibold mb-1 pb-0.5">{formatDate(node.date)}</p>
                   <p className="font-serif text-slate-900">{node.title}</p>
                 </div>
               </div>

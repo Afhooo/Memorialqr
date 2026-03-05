@@ -18,7 +18,7 @@ export function TributeHighlightsSection({
   return (
     <section id="intro" className="relative space-y-8 text-slate-900">
       <div className="space-y-4">
-        <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-amber-600">Para quienes lo quisieron</p>
+        <p className="text-[10px] leading-relaxed uppercase tracking-[0.3em] font-bold text-amber-600 pb-1">Para quienes lo quisieron</p>
         <h2 className="text-3xl lg:text-4xl font-serif leading-tight">Quién fue {memorialName} para su gente</h2>
         <p className="max-w-4xl text-base leading-relaxed text-slate-600 font-light">
           {description ||
@@ -29,25 +29,25 @@ export function TributeHighlightsSection({
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-6 border-t border-slate-200/50">
         {birthDate && (
           <div className="flex flex-col">
-            <span className="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1">Nació</span>
+            <span className="text-[9px] leading-normal uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1 pb-0.5">Nació</span>
             <span className="text-sm font-medium text-slate-800">{formatDate(birthDate)}</span>
           </div>
         )}
         {(birthDate || deathDate) && <div className="h-8 w-px bg-slate-200/60 hidden sm:block" />}
         {deathDate && (
           <div className="flex flex-col">
-            <span className="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1">Despedida</span>
+            <span className="text-[9px] leading-normal uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1 pb-0.5">Despedida</span>
             <span className="text-sm font-medium text-slate-800">{formatDate(deathDate)}</span>
           </div>
         )}
         <div className="h-8 w-px bg-slate-200/60 hidden sm:block" />
         <div className="flex flex-col">
-          <span className="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1">Periodo</span>
+          <span className="text-[9px] leading-normal uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1 pb-0.5">Periodo</span>
           <span className="text-sm font-medium text-slate-800">{memoryWindow}</span>
         </div>
         <div className="h-8 w-px bg-slate-200/60 hidden sm:block" />
         <div className="flex flex-col">
-          <span className="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1">Acceso</span>
+          <span className="text-[9px] leading-normal uppercase tracking-[0.2em] font-semibold text-slate-400 mb-1 pb-0.5">Acceso</span>
           <span className="text-sm font-medium text-slate-800">Familia y amigos</span>
         </div>
       </div>
